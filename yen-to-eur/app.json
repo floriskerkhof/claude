@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "Yen → EUR",
+    "slug": "yen-to-eur",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.yentoeur.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Camera is used to detect ¥ prices and convert them to €."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      },
+      "package": "com.yentoeur.app",
+      "permissions": ["android.permission.CAMERA"],
+      "edgeToEdgeEnabled": true
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Camera is used to detect ¥ prices and convert them to €."
+        }
+      ],
+      "react-native-mlkit-ocr"
+    ],
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
