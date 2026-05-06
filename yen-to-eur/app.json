@@ -34,8 +34,7 @@
         {
           "cameraPermission": "Camera is used to detect ¥ prices and convert them to €."
         }
-      ],
-      "react-native-mlkit-ocr"
+      ]
     ],
     "web": {
       "favicon": "./assets/favicon.png"
