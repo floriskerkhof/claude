@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Yen → EUR",
-    "slug": "yen-to-eur",
+    "slug": "yen-converter",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
