@@ -10,43 +10,44 @@
   #camera { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   #ui { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: space-between; }
 
-  /* top bar */
   #topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; padding-top: max(12px, env(safe-area-inset-top)); }
   #rate-pill { background: rgba(0,0,0,.65); border-radius: 20px; padding: 6px 14px; cursor: pointer; }
   #rate-pill span { color: #FFD700; font-size: 13px; font-weight: 600; }
-  .icon-btn { background: rgba(0,0,0,.55); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .icon-btn { background: rgba(0,0,0,.55); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; }
   #rate-input-row { background: rgba(0,0,0,.8); margin: 0 12px; border-radius: 12px; padding: 8px 14px; display: none; align-items: center; gap: 10px; }
   #rate-input-row.show { display: flex; }
   #rate-input { background: none; border: none; color: #fff; font-size: 15px; flex: 1; outline: none; }
-  #rate-reset { color: #ff6b6b; font-size: 13px; font-weight: 600; cursor: pointer; background: none; border: none; }
+  #rate-reset { color: #ff6b6b; font-size: 13px; font-weight: 600; cursor: pointer; background: none; border: none; color: #ff6b6b; }
 
-  /* cards */
   #cards { position: fixed; top: 90px; right: 12px; width: 150px; max-height: 55vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-  .card { background: rgba(5,10,40,.88); border: 1px solid rgba(80,140,255,.45); border-radius: 14px; padding: 10px 12px; text-align: center; cursor: pointer; transition: border-color .2s; }
-  .card.copied { border-color: #3DFFA0; background: rgba(5,40,20,.9); }
+  .card { background: rgba(5,10,40,.88); border: 1px solid rgba(80,140,255,.45); border-radius: 14px; padding: 10px 12px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; }
+  .card:active, .card.copied { border-color: #3DFFA0; background: rgba(5,40,20,.9); }
   .card .eur { color: #3DFFA0; font-size: 21px; font-weight: 800; }
   .card .jpy { color: #888; font-size: 12px; margin-top: 3px; }
-  .card .copied-lbl { color: #3DFFA0; font-size: 10px; margin-top: 3px; font-weight: 600; display: none; }
+  .card .copied-lbl { color: #3DFFA0; font-size: 10px; margin-top: 3px; display: none; }
   .card.copied .copied-lbl { display: block; }
 
-  /* bottom */
-  #bottom { padding: 0 0 max(40px, env(safe-area-inset-bottom)) 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  #status { color: rgba(255,255,255,.6); font-size: 12px; min-height: 18px; }
+  #bottom { padding: 0 0 max(40px, env(safe-area-inset-bottom)) 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  #status { color: rgba(255,255,255,.7); font-size: 12px; min-height: 18px; text-align: center; padding: 0 20px; }
   #btns { display: flex; gap: 12px; align-items: center; }
   #snap-btn { background: rgba(60,60,60,.9); border: 1.5px solid rgba(255,255,255,.2); border-radius: 50%; width: 54px; height: 54px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   #scan-btn { background: rgba(20,100,220,.9); border: 1.5px solid rgba(100,160,255,.55); border-radius: 32px; padding: 14px 28px; font-size: 16px; font-weight: 700; color: #fff; cursor: pointer; }
   #scan-btn.stop { background: rgba(180,30,30,.9); border-color: rgba(255,100,100,.55); }
-  #clear-btn { color: #fff; opacity: 0.4; font-size: 18px; cursor: pointer; background: rgba(0,0,0,.55); border: none; border-radius: 50%; width: 40px; height: 40px; }
+
+  #debug-box { position: fixed; bottom: 130px; left: 10px; right: 10px; background: rgba(0,0,0,.85); border-radius: 10px; padding: 10px; font-size: 11px; color: #aaa; max-height: 120px; overflow-y: auto; display: none; }
+  #debug-box.show { display: block; }
+  #debug-toggle { font-size: 11px; color: rgba(255,255,255,.4); background: none; border: none; cursor: pointer; margin-top: 2px; }
 </style>
 </head>
 <body>
 <video id="camera" autoplay playsinline muted></video>
 <canvas id="canvas" style="display:none"></canvas>
+<div id="debug-box"></div>
 
 <div id="ui">
   <div>
     <div id="topbar">
-      <button class="icon-btn" id="flash-btn" title="Flash">&#x1F526;</button>
+      <button class="icon-btn" id="flash-btn">&#x1F526;</button>
       <div id="rate-pill"><span id="rate-label">Loading rate…</span></div>
       <button class="icon-btn" id="clear-btn">&#x2715;</button>
     </div>
@@ -60,6 +61,7 @@
 
   <div id="bottom">
     <div id="status">Ready</div>
+    <button id="debug-toggle">show detected text</button>
     <div id="btns">
       <button id="snap-btn">&#x1F4F7;</button>
       <button id="scan-btn">&#x29BF; Auto Scan</button>
@@ -69,7 +71,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
-const YEN_RE = /(?:[¥￥]\s*([0-9][0-9,]*(?:\.[0-9]+)?)|([0-9][0-9,]*(?:\.[0-9]+)?)\s*円)/g;
+// Match ¥/￥ prefix or 円 suffix
+const YEN_RE = /(?:[¥￥]\s*([0-9][0-9,]*(?:\.[0-9]+)?)|([0-9][0-9,]*(?:\.[0-9]+)?)\s*(?:円|H|円))/g;
 
 let eurPerJpy = 0.0062;
 let customJpyPerEur = null;
@@ -79,15 +82,24 @@ let worker = null;
 let workerReady = false;
 let track = null;
 let torchOn = false;
+let showDebug = false;
 
 const activeRate = () => customJpyPerEur ? 1 / customJpyPerEur : eurPerJpy;
 
 function extractPrices(text) {
   const seen = new Set();
+  // Try yen symbol prefix
   let m;
-  const re = new RegExp(YEN_RE.source, 'g');
+  let re = new RegExp(YEN_RE.source, 'g');
   while ((m = re.exec(text)) !== null) {
     const v = parseFloat((m[1] ?? m[2]).replace(/,/g, ''));
+    if (v > 0 && v < 10000000) seen.add(v);
+  }
+  // Also catch bare numbers followed by kanji-like chars OCR might mangle
+  // e.g. "19,800H" or "19800H" or "9800 H"
+  const numRe = /([0-9][0-9,]{2,})\s*[HhB円¥￥]/g;
+  while ((m = numRe.exec(text)) !== null) {
+    const v = parseFloat(m[1].replace(/,/g, ''));
     if (v > 0 && v < 10000000) seen.add(v);
   }
   return [...seen].sort((a, b) => a - b);
@@ -103,26 +115,41 @@ function updateRateLabel() {
   document.getElementById('rate-label').textContent = `1 € = ¥${jpe.toLocaleString()}  (${src})`;
 }
 
-// Fetch live rate
 fetch('https://open.er-api.com/v6/latest/JPY')
   .then(r => r.json()).then(d => { if (d?.rates?.EUR) { eurPerJpy = d.rates.EUR; updateRateLabel(); } })
   .catch(() => {});
 
-// Camera
 async function startCamera() {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1920 } }, audio: false });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: false
+    });
     document.getElementById('camera').srcObject = stream;
     track = stream.getVideoTracks()[0];
   } catch(e) { setStatus('Camera error: ' + e.message); }
 }
 
-// Tesseract
 async function initOCR() {
   setStatus('Loading OCR engine…');
-  worker = await Tesseract.createWorker('jpn+eng');
+  worker = await Tesseract.createWorker('jpn+eng', 1, {
+    logger: () => {}
+  });
+  await worker.setParameters({ tessedit_pageseg_mode: '6' }); // uniform block of text
   workerReady = true;
-  setStatus('Ready');
+  setStatus('Ready — tap 📷 or Auto Scan');
+}
+
+function preprocessCanvas(src) {
+  // Draw to a processing canvas, convert to greyscale + boost contrast
+  const c = document.createElement('canvas');
+  const scale = Math.min(1, 1200 / src.width);
+  c.width = src.width * scale;
+  c.height = src.height * scale;
+  const ctx = c.getContext('2d');
+  ctx.filter = 'grayscale(1) contrast(1.8) brightness(1.1)';
+  ctx.drawImage(src, 0, 0, c.width, c.height);
+  return c;
 }
 
 async function scanFrame() {
@@ -133,10 +160,21 @@ async function scanFrame() {
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   canvas.getContext('2d').drawImage(video, 0, 0);
-  const { data: { text } } = await worker.recognize(canvas);
+  const processed = preprocessCanvas(canvas);
+  const { data: { text } } = await worker.recognize(processed);
+  showDebugText(text);
   const prices = extractPrices(text);
-  if (prices.length) renderCards(prices);
-  setStatus(prices.length ? `Found ${prices.length} price(s)` : 'No prices found');
+  if (prices.length) {
+    renderCards(prices);
+    setStatus(`Found ${prices.length} price(s)`);
+  } else {
+    setStatus('No prices found — try holding steady & closer');
+  }
+}
+
+function showDebugText(text) {
+  const box = document.getElementById('debug-box');
+  box.textContent = text.trim() || '(no text detected)';
 }
 
 function renderCards(prices) {
@@ -158,7 +196,6 @@ function renderCards(prices) {
 
 function setStatus(msg) { document.getElementById('status').textContent = msg; }
 
-// Controls
 document.getElementById('snap-btn').onclick = () => scanFrame();
 
 document.getElementById('scan-btn').onclick = () => {
@@ -168,7 +205,7 @@ document.getElementById('scan-btn').onclick = () => {
     btn.textContent = '⏹ Stop';
     btn.classList.add('stop');
     scanFrame();
-    scanTimer = setInterval(scanFrame, 3000);
+    scanTimer = setInterval(scanFrame, 4000);
   } else {
     btn.textContent = '⦿ Auto Scan';
     btn.classList.remove('stop');
@@ -177,11 +214,13 @@ document.getElementById('scan-btn').onclick = () => {
   }
 };
 
-document.getElementById('clear-btn').onclick = () => { document.getElementById('cards').innerHTML = ''; setStatus('Ready'); };
-
-document.getElementById('rate-pill').onclick = () => {
-  document.getElementById('rate-input-row').classList.toggle('show');
+document.getElementById('clear-btn').onclick = () => {
+  document.getElementById('cards').innerHTML = '';
+  setStatus('Ready');
 };
+
+document.getElementById('rate-pill').onclick = () =>
+  document.getElementById('rate-input-row').classList.toggle('show');
 
 document.getElementById('rate-input').oninput = e => {
   customJpyPerEur = parseFloat(e.target.value) || null;
@@ -200,8 +239,14 @@ document.getElementById('flash-btn').onclick = async () => {
   try {
     torchOn = !torchOn;
     await track.applyConstraints({ advanced: [{ torch: torchOn }] });
-    document.getElementById('flash-btn').textContent = torchOn ? '⚡' : '&#x1F526;';
-  } catch(e) { setStatus('Flash not supported'); }
+    document.getElementById('flash-btn').innerHTML = torchOn ? '&#x26A1;' : '&#x1F526;';
+  } catch { setStatus('Flash not supported on this device'); }
+};
+
+document.getElementById('debug-toggle').onclick = () => {
+  showDebug = !showDebug;
+  document.getElementById('debug-box').classList.toggle('show', showDebug);
+  document.getElementById('debug-toggle').textContent = showDebug ? 'hide detected text' : 'show detected text';
 };
 
 startCamera();
