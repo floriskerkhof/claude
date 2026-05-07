@@ -822,41 +822,51 @@ selImg.addEventListener('touchend', e => {
 }, { passive: false });
 
 async function onSelTap(e) {
-  if (!selTargetId) return;
+  if (!selTargetId || selLoading.classList.contains('on')) return;
   const el = getEl(selTargetId);
   if (!el) return;
 
-  // Convert display coords → image pixel coords
+  // ── Correct coordinate conversion for object-fit:contain ──────────────────
+  // The image is letterboxed inside #sel-img — we must subtract the offset.
   const rect = selImg.getBoundingClientRect();
-  const displayX = e.clientX - rect.left;
-  const displayY = e.clientY - rect.top;
+  const natW = selImg.naturalWidth, natH = selImg.naturalHeight;
+  const imgAspect = natW / natH;
+  const boxAspect = rect.width / rect.height;
+  let imgDispW, imgDispH, offX, offY;
+  if (imgAspect > boxAspect) {
+    imgDispW = rect.width; imgDispH = rect.width / imgAspect;
+    offX = 0; offY = (rect.height - imgDispH) / 2;
+  } else {
+    imgDispH = rect.height; imgDispW = rect.height * imgAspect;
+    offX = (rect.width - imgDispW) / 2; offY = 0;
+  }
+  const displayX = e.clientX - rect.left - offX;
+  const displayY = e.clientY - rect.top  - offY;
 
-  // Show tap dot
-  selDot.style.left = (e.clientX - rect.left + rect.left - rect.left) + 'px';
-  selDot.style.top  = (e.clientY - rect.top) + 'px';
-  selDot.style.left = displayX + 'px';
-  selDot.style.top  = displayY + 'px';
+  // Clamp inside image area
+  if (displayX < 0 || displayY < 0 || displayX > imgDispW || displayY > imgDispH) return;
+
+  // Show tap dot (relative to the wrapper, not the image element)
+  selDot.style.left = (e.clientX - rect.left) + 'px';
+  selDot.style.top  = (e.clientY - rect.top)  + 'px';
   selDot.style.display = 'block';
 
-  // image natural size vs displayed size
-  const scaleX = selImg.naturalWidth  / rect.width;
-  const scaleY = selImg.naturalHeight / rect.height;
-  const imgX = Math.round(displayX * scaleX);
-  const imgY = Math.round(displayY * scaleY);
+  // Pixel coords in the natural image
+  const imgX = Math.round(displayX * (natW / imgDispW));
+  const imgY = Math.round(displayY * (natH / imgDispH));
 
   selLoading.classList.add('on');
-  selLoadMsg.textContent = 'Cutting out…';
+  selLoadMsg.textContent = 'Generating masks…';
 
   try {
-    const blob = await resizeForUpload(el.src, 1024);
-    // Recalc coords for the resized image
-    const img = new Image();
-    await new Promise(r => { img.onload = r; img.src = el.src; });
-    const resizeScale = Math.min(1, 1024 / Math.max(img.naturalWidth, img.naturalHeight));
+    // Resize for upload (max 1024px) and rescale tap coords to match
+    const MAX = 1024;
+    const resizeScale = Math.min(1, MAX / Math.max(natW, natH));
+    const rw = Math.round(natW * resizeScale);
+    const rh = Math.round(natH * resizeScale);
     const rx = Math.round(imgX * resizeScale);
     const ry = Math.round(imgY * resizeScale);
-    const rw = Math.round(img.naturalWidth  * resizeScale);
-    const rh = Math.round(img.naturalHeight * resizeScale);
+    const blob = await resizeForUpload(el.src, MAX);
 
     const hfKey = localStorage.getItem('scrl_hfkey') || '';
     const rbKey = localStorage.getItem('scrl_rbkey') || '';
@@ -864,31 +874,37 @@ async function onSelTap(e) {
     let maskedSrc = null;
     let lastErr = '';
 
-    // 1. Try HuggingFace SAM with point prompt
+    // ── 1. HuggingFace SAM: auto-generate all masks, pick the smallest
+    //       one that covers the tap point (= most specific object) ──────────
     if (hfKey) {
       try {
-        maskedSrc = await samCutout(blob, rx, ry, rw, rh, hfKey);
-      } catch (e) {
-        lastErr = 'SAM: ' + e.message;
+        selLoadMsg.textContent = 'Running SAM…';
+        const masks = await samGetMasks(blob, hfKey);
+        if (masks && masks.length) {
+          selLoadMsg.textContent = `Picking from ${masks.length} masks…`;
+          const best = await pickSmallestHitMask(masks, rx, ry, rw, rh);
+          if (best) maskedSrc = await applyMaskToPhoto(el.src, best, natW, natH);
+        }
+      } catch (err) {
+        lastErr = 'SAM: ' + err.message;
         console.warn(lastErr);
       }
     }
 
-    // 2. Fallback: remove.bg (removes background, not object-specific — best effort)
+    // ── 2. Fallback: remove.bg (whole-background removal) ──────────────────
     if (!maskedSrc && rbKey) {
       selLoadMsg.textContent = 'Trying remove.bg…';
       try {
         const rb = await removeBgApi(blob, rbKey);
         maskedSrc = await blobToDataUrl(rb);
-      } catch (e) {
-        lastErr += ' · remove.bg: ' + e.message;
-        console.warn('remove.bg fallback failed:', e.message);
+      } catch (err) {
+        lastErr += ' · remove.bg: ' + err.message;
+        console.warn('remove.bg fallback failed:', err.message);
       }
     }
 
     if (!maskedSrc) throw new Error(lastErr || 'All APIs failed');
 
-    // Apply to element
     el.src = maskedSrc;
     el.frame = 'none';
     const imgNode = document.querySelector('#e' + selTargetId + ' img');
@@ -903,129 +919,111 @@ async function onSelTap(e) {
   }
 }
 
-// ── SAM API (HuggingFace) ─────────────────────────────────────────────────────
-async function samCutout(blob, tapX, tapY, imgW, imgH, hfKey) {
-  const base64 = await blobToBase64(blob);
-
-  // Try with point prompt (interactive SAM)
+// ── SAM: request all auto-generated masks ─────────────────────────────────────
+async function samGetMasks(blob, hfKey) {
   const SAM_MODELS = ['facebook/sam-vit-base', 'facebook/sam-vit-large'];
-
   for (const model of SAM_MODELS) {
     try {
-      const res = await fetchWithRetry(
-        `https://api-inference.huggingface.co/models/${model}`,
-        {
+      let res = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${hfKey}`, 'Content-Type': blob.type || 'image/jpeg' },
+        body: blob,
+      });
+      if (res.status === 503) {
+        selLoadMsg.textContent = 'Model loading, waiting…';
+        await new Promise(r => setTimeout(r, 12000));
+        res = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${hfKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            inputs: base64,
-            parameters: { input_points: [[[tapX, tapY]]], input_labels: [[1]] },
-          }),
-        }
-      );
-      const masks = await res.json();
-      if (Array.isArray(masks) && masks.length > 0) {
-        const best = await pickBestMask(masks, tapX, tapY, imgW, imgH);
-        return applyMaskToPhoto(blob, best, imgW, imgH);
+          headers: { 'Authorization': `Bearer ${hfKey}`, 'Content-Type': blob.type || 'image/jpeg' },
+          body: blob,
+        });
       }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (Array.isArray(data) && data.length) return data;
     } catch (e) {
-      console.warn(model, 'failed:', e.message);
+      console.warn(model, e.message);
     }
-  }
-
-  // Last HF try: auto-generate all masks, pick the one under the tap
-  const res = await fetchWithRetry(
-    'https://api-inference.huggingface.co/models/facebook/sam-vit-base',
-    {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${hfKey}`, 'Content-Type': blob.type || 'image/jpeg' },
-      body: blob,
-    }
-  );
-  const masks = await res.json();
-  if (!Array.isArray(masks) || !masks.length) throw new Error('No masks returned');
-  const best = await pickBestMask(masks, tapX, tapY, imgW, imgH);
-  return applyMaskToPhoto(blob, best, imgW, imgH);
-}
-
-async function fetchWithRetry(url, opts) {
-  let res = await fetch(url, opts);
-  if (res.status === 503) {
-    // Model cold-starting — wait and retry
-    await new Promise(r => setTimeout(r, 10000));
-    res = await fetch(url, opts);
-  }
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res;
-}
-
-// Pick the mask that covers the tap point, preferring highest score
-async function pickBestMask(masks, tapX, tapY, imgW, imgH) {
-  // Sort by score desc
-  const sorted = [...masks].sort((a, b) => (b.score || 0) - (a.score || 0));
-
-  for (const m of sorted) {
-    const maskUrl = maskToDataUrl(m);
-    if (!maskUrl) continue;
-    const hits = await maskHitsPoint(maskUrl, tapX, tapY, imgW, imgH);
-    if (hits) return maskUrl;
-  }
-  // Nothing hit the exact point — return highest-scored mask
-  return maskToDataUrl(sorted[0]);
-}
-
-function maskToDataUrl(m) {
-  if (!m) return null;
-  // HF returns mask as base64 PNG string or data URL
-  if (typeof m.mask === 'string') {
-    return m.mask.startsWith('data:') ? m.mask : `data:image/png;base64,${m.mask}`;
   }
   return null;
 }
 
-function maskHitsPoint(maskDataUrl, x, y, imgW, imgH) {
+// ── Pick smallest mask whose area includes the tap point ──────────────────────
+// Smallest = most granular/specific object (e.g. the umbrella, not the whole scene)
+async function pickSmallestHitMask(masks, tapX, tapY, imgW, imgH) {
+  const candidates = [];
+
+  for (const m of masks) {
+    const url = maskDataUrl(m);
+    if (!url) continue;
+    const { hits, area } = await testMask(url, tapX, tapY, imgW, imgH);
+    if (hits) candidates.push({ url, area, score: m.score || 0 });
+  }
+
+  if (!candidates.length) {
+    // Nothing covers the exact point — fall back to highest-scored mask
+    const sorted = [...masks].sort((a, b) => (b.score || 0) - (a.score || 0));
+    return maskDataUrl(sorted[0]);
+  }
+
+  // Sort by area asc (smallest first), break ties by score
+  candidates.sort((a, b) => a.area - b.area || (b.score - a.score));
+  return candidates[0].url;
+}
+
+function maskDataUrl(m) {
+  if (!m || typeof m.mask !== 'string') return null;
+  return m.mask.startsWith('data:') ? m.mask : `data:image/png;base64,${m.mask}`;
+}
+
+// Returns whether mask covers (tapX,tapY) and the total mask area in pixels
+function testMask(maskUrl, tapX, tapY, imgW, imgH) {
   return new Promise(res => {
     const img = new Image();
     img.onload = () => {
       const c = document.createElement('canvas');
       c.width = imgW; c.height = imgH;
-      c.getContext('2d').drawImage(img, 0, 0, imgW, imgH);
-      const px = c.getContext('2d').getImageData(x, y, 1, 1).data;
-      res(px[0] > 128); // white pixel = object region
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, imgW, imgH);
+      const data = ctx.getImageData(0, 0, imgW, imgH).data;
+      const hitPx = data[(tapY * imgW + tapX) * 4]; // red channel at tap point
+      let area = 0;
+      for (let i = 0; i < data.length; i += 4) if (data[i] > 128) area++;
+      res({ hits: hitPx > 128, area });
     };
-    img.onerror = () => res(false);
-    img.src = maskDataUrl;
+    img.onerror = () => res({ hits: false, area: Infinity });
+    img.src = maskUrl;
   });
 }
 
-// Apply a binary mask PNG to the original photo → transparent PNG data URL
-async function applyMaskToPhoto(photoBlob, maskDataUrl, maskW, maskH) {
-  const photoUrl = await blobToDataUrl(photoBlob);
+// ── Apply binary mask → transparent PNG ──────────────────────────────────────
+async function applyMaskToPhoto(photoSrc, maskUrl, natW, natH) {
   return new Promise((res, rej) => {
     const photo = new Image(), mask = new Image();
     let n = 0;
     const ready = () => {
       if (++n < 2) return;
       const c = document.createElement('canvas');
-      c.width = photo.naturalWidth; c.height = photo.naturalHeight;
+      c.width = natW; c.height = natH;
       const ctx = c.getContext('2d');
-      ctx.drawImage(photo, 0, 0);
-      const imgData = ctx.getImageData(0, 0, c.width, c.height);
+      ctx.drawImage(photo, 0, 0, natW, natH);
+      const imgData = ctx.getImageData(0, 0, natW, natH);
 
       const mc = document.createElement('canvas');
-      mc.width = c.width; mc.height = c.height;
-      mc.getContext('2d').drawImage(mask, 0, 0, c.width, c.height);
-      const maskData = mc.getContext('2d').getImageData(0, 0, c.width, c.height);
+      mc.width = natW; mc.height = natH;
+      mc.getContext('2d').drawImage(mask, 0, 0, natW, natH);
+      const maskData = mc.getContext('2d').getImageData(0, 0, natW, natH);
 
       for (let i = 0; i < imgData.data.length; i += 4) {
-        imgData.data[i + 3] = maskData.data[i]; // mask red channel → alpha
+        imgData.data[i + 3] = maskData.data[i]; // mask red → alpha
       }
       ctx.putImageData(imgData, 0, 0);
       res(c.toDataURL('image/png'));
     };
     photo.onload = ready; mask.onload = ready;
     photo.onerror = rej;  mask.onerror = rej;
-    photo.src = photoUrl; mask.src = maskDataUrl;
+    photo.crossOrigin = 'anonymous';
+    photo.src = photoSrc; mask.src = maskUrl;
   });
 }
 
@@ -1060,14 +1058,6 @@ async function resizeForUpload(dataUrl, maxPx) {
 
 function blobToDataUrl(blob) {
   return new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(blob); });
-}
-
-function blobToBase64(blob) {
-  return new Promise(res => {
-    const r = new FileReader();
-    r.onload = e => res(e.target.result.split(',')[1]); // strip data:…;base64,
-    r.readAsDataURL(blob);
-  });
 }
 
 // ── Settings modal ────────────────────────────────────────────────────────────
