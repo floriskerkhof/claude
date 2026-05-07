@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SABR Volatility Model – Interactive Explorer</title>
+<script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;
+  --surface:#0d1117;
+  --surface2:#161b27;
+  --surface3:#1e2637;
+  --border:#2a3347;
+  --text:#e2e8f0;
+  --muted:#7a8faa;
+  --accent:#4a9eff;
+  --accent2:#7bc4ff;
+  --green:#22d3a0;
+  --red:#f87171;
+  --yellow:#fbbf24;
+  --purple:#a78bfa;
+  --r:10px;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:15px;
+  line-height:1.65;
+  overflow-x:hidden;
+}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(7,9,15,.92);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:0 20px;
+  display:flex;align-items:center;gap:20px;height:50px;
+  overflow-x:auto;scrollbar-width:none;
+}
+nav::-webkit-scrollbar{display:none}
+.nav-logo{font-weight:800;font-size:14px;color:var(--accent);white-space:nowrap;flex-shrink:0}
+nav a{color:var(--muted);font-size:13px;text-decoration:none;white-space:nowrap;flex-shrink:0;transition:color .15s}
+nav a:hover{color:var(--text)}
+.nav-spacer{flex:1}
+
+/* LAYOUT */
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+section{padding:60px 20px;max-width:1080px;margin:0 auto}
+section+section{border-top:1px solid var(--border)}
+
+/* TYPOGRAPHY */
+h1{font-size:clamp(28px,5vw,48px);font-weight:900;line-height:1.15;margin-bottom:14px;
+   background:linear-gradient(135deg,#e2e8f0 30%,var(--accent2));
+   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+h2{font-size:clamp(19px,3vw,26px);font-weight:700;color:var(--accent2);margin-bottom:18px}
+h3{font-size:16px;font-weight:600;color:var(--text);margin-bottom:10px}
+p{color:var(--muted);margin-bottom:10px}
+p.lead{color:var(--text);font-size:16px;margin-bottom:22px}
+.section-intro{max-width:680px;margin-bottom:28px}
+.hl{color:var(--accent2);font-weight:600}
+
+/* HERO */
+#hero{padding-top:72px;text-align:center}
+.badge{
+  display:inline-block;
+  background:rgba(74,158,255,.12);border:1px solid rgba(74,158,255,.28);
+  color:var(--accent);font-size:11px;font-weight:700;letter-spacing:1.2px;
+  padding:4px 14px;border-radius:20px;margin-bottom:22px;text-transform:uppercase;
+}
+.hero-sub{color:var(--muted);font-size:clamp(14px,2vw,17px);max-width:580px;margin:0 auto 32px}
+.bs-fail{
+  background:var(--surface2);border:1px solid var(--border);
+  border-left:3px solid var(--yellow);border-radius:var(--r);
+  padding:14px 18px;margin:0 auto 36px;max-width:620px;text-align:left;
+  font-size:14px;color:var(--text);
+}
+.bs-fail strong{color:var(--yellow)}
+.hero-plots{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.hero-plots{grid-template-columns:1fr}}
+.hplot-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r);padding:10px;
+}
+.hplot-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+.hplot-label.flat{color:var(--muted)}
+.hplot-label.sabr{color:var(--accent)}
+
+/* SLIDER GRID */
+.ctrl-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:600px){.ctrl-grid{grid-template-columns:1fr}}
+.sl-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 18px;
+}
+.sl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.sl-name{font-size:14px;font-weight:700;color:var(--accent2)}
+.sl-val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+.sl-tip{font-size:12px;color:var(--muted);margin-bottom:9px;line-height:1.45}
+input[type=range]{
+  width:100%;height:4px;-webkit-appearance:none;
+  background:var(--border);border-radius:2px;cursor:pointer;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:var(--accent);border:2px solid var(--bg);
+  box-shadow:0 0 6px rgba(74,158,255,.45);
+}
+.sl-ann{margin-top:7px;font-size:12px;color:var(--green);min-height:14px;transition:color .2s}
+
+/* BETA DIAGRAM */
+.beta-diag{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.bc{flex:1;min-width:90px;background:var(--surface3);border:1px solid var(--border);
+    border-radius:7px;padding:8px 10px;font-size:11px}
+.bc-lbl{font-weight:700;color:var(--accent2);margin-bottom:3px}
+.bc-desc{color:var(--muted)}
+
+/* SURFACE */
+#surface-plot{background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;margin-bottom:8px}
+
+/* COLLAPSIBLE */
+.coll{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);
+  margin-top:14px;overflow:hidden}
+.coll-btn{width:100%;text-align:left;padding:11px 16px;background:none;border:none;
+  color:var(--muted);font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.coll-btn:hover{color:var(--text)}
+.coll-arrow{transition:transform .25s;display:inline-block}
+.coll-btn.open .coll-arrow{transform:rotate(180deg)}
+.coll-body{display:none;padding:14px 16px;border-top:1px solid var(--border);
+  font-size:13px;color:var(--muted);line-height:1.6}
+.coll-body.open{display:block}
+.coll-body p{margin-bottom:8px}
+.coll-body p:last-child{margin:0}
+.formula-box{
+  background:var(--surface3);border:1px solid var(--border);border-radius:8px;
+  padding:14px 18px;margin:10px 0;overflow-x:auto;font-size:13px;text-align:center;
+}
+
+/* SMILE */
+.smile-ctrl{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+.smile-ctrl label{font-size:13px;color:var(--muted)}
+select{
+  background:var(--surface3);border:1px solid var(--border);color:var(--text);
+  padding:7px 11px;border-radius:6px;font-size:13px;cursor:pointer;outline:none;
+}
+select:focus{border-color:var(--accent)}
+.smile-wrap{background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px}
+
+/* PRICING */
+.price-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:660px){.price-grid{grid-template-columns:1fr}}
+.price-panel{background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px}
+.igroup{margin-bottom:14px}
+.igroup label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;
+  text-transform:uppercase;letter-spacing:.5px}
+.igroup input{
+  width:100%;background:var(--surface3);border:1px solid var(--border);
+  color:var(--text);padding:9px 11px;border-radius:6px;font-size:14px;outline:none;
+}
+.igroup input:focus{border-color:var(--accent)}
+.igroup select{width:100%}
+.pr-row{display:flex;justify-content:space-between;align-items:baseline;
+  padding:9px 0;border-bottom:1px solid var(--border)}
+.pr-row:last-child{border:none}
+.pr-lbl{font-size:13px;color:var(--muted)}
+.pr-val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.pr-val.bs{color:var(--muted)}
+.pr-val.sabr{color:var(--accent)}
+.pr-val.diff{color:var(--yellow)}
+.pr-val.small{font-size:15px}
+.pr-explain{
+  margin-top:12px;background:rgba(74,158,255,.07);
+  border:1px solid rgba(74,158,255,.18);border-radius:8px;
+  padding:11px 13px;font-size:13px;color:var(--text);line-height:1.55;
+}
+
+/* SCENARIOS */
+.sc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.sc-card{
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px 18px;cursor:pointer;
+  transition:border-color .18s,background .18s,transform .12s;user-select:none;
+}
+.sc-card:hover{border-color:var(--accent);background:var(--surface3);transform:translateY(-2px)}
+.sc-card.active{border-color:var(--accent);background:rgba(74,158,255,.09)}
+.sc-icon{font-size:24px;margin-bottom:8px}
+.sc-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px}
+.sc-desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.sc-chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:11px;background:var(--surface3);border:1px solid var(--border);
+  border-radius:4px;padding:2px 7px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* GLOSSARY */
+#glossary{padding:36px 20px;max-width:1080px;margin:0 auto;border-top:1px solid var(--border)}
+.gloss-strip{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.gt{
+  position:relative;background:var(--surface2);border:1px solid var(--border);
+  border-radius:6px;padding:7px 13px;cursor:default;font-size:13px;
+  transition:border-color .15s;
+}
+.gt:hover{border-color:var(--accent)}
+.gt-word{color:var(--accent2);font-weight:600}
+.gt-tip{
+  display:none;position:absolute;bottom:calc(100% + 8px);left:0;
+  background:var(--surface3);border:1px solid var(--border);border-radius:8px;
+  padding:10px 13px;font-size:12px;color:var(--text);line-height:1.5;
+  width:230px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.55);
+}
+.gt:hover .gt-tip{display:block}
+
+footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);
+  border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">SABR Explorer</span>
+  <a href="#hero">Overview</a>
+  <a href="#surface">Surface</a>
+  <a href="#smile">Smile</a>
+  <a href="#pricing">Pricing</a>
+  <a href="#scenarios">Scenarios</a>
+  <span class="nav-spacer"></span>
+  <a href="#glossary" style="color:var(--accent)">Glossary</a>
+</nav>
+
+<!-- ══════════════════════════════════════
+     HERO
+     ══════════════════════════════════════ -->
+<section id="hero">
+  <div class="badge">Interactive Learning</div>
+  <h1>The SABR Volatility Model</h1>
+  <p class="hero-sub">Understand how professional traders price options using a model that captures the shapes real markets produce — purely through interaction.</p>
+
+  <div class="bs-fail">
+    <strong>Why Black-Scholes isn't enough:</strong>
+    Black-Scholes assumes every option on the same underlying has the same implied volatility — a flat surface.
+    In reality, out-of-the-money puts trade at higher vol than ATM options (the "smile"), and puts are pricier than calls of equal distance (the "skew").
+    SABR models this directly by treating volatility itself as a random process.
+  </div>
+
+  <div class="hero-plots">
+    <div class="hplot-card">
+      <div class="hplot-label flat">Black-Scholes — Flat surface</div>
+      <div id="hero-flat" style="height:260px"></div>
+    </div>
+    <div class="hplot-card" style="border-color:rgba(74,158,255,.35)">
+      <div class="hplot-label sabr">SABR — Realistic surface</div>
+      <div id="hero-sabr" style="height:260px"></div>
+    </div>
+  </div>
+
+  <div class="coll" style="text-align:left;margin-top:20px">
+    <button class="coll-btn" onclick="toggleColl(this)">
+      Plain-English explanation <span class="coll-arrow">▼</span>
+    </button>
+    <div class="coll-body">
+      <p>Think of implied volatility as the market's price tag for uncertainty. Under Black-Scholes the price tag is the same for every strike — imagine a perfectly flat tablecloth (left surface above).</p>
+      <p>SABR says: no, uncertainty itself is uncertain. Volatility can spike or collapse, and the direction of price moves is often correlated with those vol moves (negative correlation → crashes happen with vol spikes). This creates the curved, tilted surface on the right.</p>
+      <p>The four SABR parameters let you dial in the exact shape of that curvature, tilt, and level — matching what you actually see in listed options markets every day.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     INTERACTIVE SURFACE
+     ══════════════════════════════════════ -->
+<section id="surface">
+  <div class="section-intro">
+    <h2>Interactive Volatility Surface</h2>
+    <p class="lead">Move any slider — the 3-D surface updates in real time. Every slider explains its market meaning in plain English.</p>
+  </div>
+
+  <div class="ctrl-grid">
+
+    <div class="sl-card">
+      <div class="sl-head">
+        <span class="sl-name">σ₀ — Initial Volatility</span>
+        <span class="sl-val" id="val-s0">20%</span>
+      </div>
+      <p class="sl-tip">The overall level of the vol surface — the "base price of uncertainty." Higher σ₀ means every option is more expensive. Calm markets: 10–15%. Stressed markets: 30%+.</p>
+      <input type="range" id="sl-s0" min="5" max="80" step="1" value="20" oninput="onSlider()">
+      <div class="sl-ann" id="ann-s0"></div>
+    </div>
+
+    <div class="sl-card">
+      <div class="sl-head">
+        <span class="sl-name">α — Vol of Vol (curvature)</span>
+        <span class="sl-val" id="val-vv">40%</span>
+      </div>
+      <p class="sl-tip">How violently volatility itself jumps around. Higher α bows the wings of the smile upward — OTM options become relatively more expensive. Think post-crisis VIX spikes.</p>
+      <input type="range" id="sl-vv" min="1" max="100" step="1" value="40" oninput="onSlider()">
+      <div class="sl-ann" id="ann-vv"></div>
+    </div>
+
+    <div class="sl-card">
+      <div class="sl-head">
+        <span class="sl-name">β — Elasticity (backbone)</span>
+        <span class="sl-val" id="val-beta">0.50</span>
+      </div>
+      <p class="sl-tip">How the ATM vol level moves when the forward price moves. Log-normal markets (β=1, equities) keep ATM vol roughly constant. Normal markets (β=0, rates) see ATM vol rise as the level falls.</p>
+      <input type="range" id="sl-beta" min="0" max="100" step="1" value="50" oninput="onSlider()">
+      <div class="sl-ann" id="ann-beta"></div>
+      <div class="beta-diag">
+        <div class="bc"><div class="bc-lbl">β = 0</div><div class="bc-desc">Normal — rates &amp; spreads</div></div>
+        <div class="bc"><div class="bc-lbl">β = 0.5</div><div class="bc-desc">Hybrid — FX, credit</div></div>
+        <div class="bc"><div class="bc-lbl">β = 1</div><div class="bc-desc">Log-normal — equities</div></div>
+      </div>
+    </div>
+
+    <div class="sl-card">
+      <div class="sl-head">
+        <span class="sl-name">ρ — Correlation (skew)</span>
+        <span class="sl-val" id="val-rho">−0.30</span>
+      </div>
+      <p class="sl-tip">The correlation between price moves and vol moves. Negative ρ tilts the smile left — put vols rise above call vols (equity crash fear). Positive ρ tilts right (some commodity markets fear supply squeezes).</p>
+      <input type="range" id="sl-rho" min="-99" max="99" step="1" value="-30" oninput="onSlider()">
+      <div class="sl-ann" id="ann-rho"></div>
+    </div>
+
+  </div>
+
+  <div id="surface-plot" style="height:460px"></div>
+
+  <div class="coll">
+    <button class="coll-btn" onclick="toggleColl(this)">
+      The Hagan 2002 closed-form formula <span class="coll-arrow">▼</span>
+    </button>
+    <div class="coll-body">
+      <p>The SABR model specifies that the forward price <em>F</em> and its volatility <em>α</em> evolve as:</p>
+      <div class="formula-box">\[dF = \alpha\, F^\beta\, dW_1 \qquad d\alpha = \nu\,\alpha\, dW_2 \qquad \langle dW_1\,dW_2\rangle = \rho\,dt\]</div>
+      <p>Hagan et al. (2002) derived a fast closed-form approximation for the implied Black-Scholes vol this produces:</p>
+      <div class="formula-box">
+        \[\sigma_B \approx \frac{\alpha}{(FK)^{\frac{1-\beta}{2}}} \cdot \frac{z}{\chi(z)} \cdot \left[1 + \left(\frac{(1-\beta)^2\alpha^2}{24(FK)^{1-\beta}} + \frac{\rho\beta\nu\alpha}{4(FK)^{\frac{1-\beta}{2}}} + \frac{(2-3\rho^2)\nu^2}{24}\right)T\right]\]
+      </div>
+      <p>where \(z = \tfrac{\nu}{\alpha}(FK)^{\frac{1-\beta}{2}}\ln\tfrac{F}{K}\) and \(\chi(z)=\ln\!\left[\tfrac{\sqrt{1-2\rho z+z^2}+z-\rho}{1-\rho}\right]\). The ATM case (K≈F) uses a limiting form to avoid 0/0. This implied vol is then fed into the standard Black-Scholes formula to get the option price.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SMILE CROSS-SECTION
+     ══════════════════════════════════════ -->
+<section id="smile">
+  <div class="section-intro">
+    <h2>Volatility Smile Cross-Section</h2>
+    <p class="lead">Slice the surface at a fixed maturity. The dashed grey line is what Black-Scholes assumes (flat at σ₀); the blue curve is the SABR smile. The gold dot marks ATM.</p>
+  </div>
+
+  <div class="smile-ctrl">
+    <label>Maturity:</label>
+    <select id="smile-T" onchange="updateSmile()">
+      <option value="0.083">1 Month</option>
+      <option value="0.25">3 Months</option>
+      <option value="0.5">6 Months</option>
+      <option value="1.0" selected>1 Year</option>
+      <option value="2.0">2 Years</option>
+    </select>
+    <span style="font-size:13px;color:var(--muted)">Forward = <span class="hl">100</span></span>
+  </div>
+
+  <div class="smile-wrap">
+    <canvas id="smile-chart" style="max-height:320px"></canvas>
+  </div>
+
+  <div class="coll" style="margin-top:14px">
+    <button class="coll-btn" onclick="toggleColl(this)">
+      Reading the smile — plain English <span class="coll-arrow">▼</span>
+    </button>
+    <div class="coll-body">
+      <p><strong style="color:var(--yellow)">ATM (K = 100):</strong> Where both curves meet. The SABR ATM vol equals σ₀ at T=0 and drifts slightly with the correction terms over time.</p>
+      <p><strong style="color:var(--red)">Left wing (K &lt; 100 — downside strikes):</strong> Negative ρ pushes this higher. A trader paying more for a 90-strike put than BS suggests is buying crash insurance.</p>
+      <p><strong style="color:var(--accent)">Right wing (K &gt; 100 — upside strikes):</strong> Mostly shaped by α (vol of vol). High α lifts both wings roughly symmetrically before the ρ skew tilts the whole shape.</p>
+      <p><strong style="color:var(--muted)">Maturity effect:</strong> Shorter maturities show sharper, more dramatic smiles. Longer maturities are flatter — vol uncertainty has more time to mean-revert.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     OPTION PRICE IMPACT
+     ══════════════════════════════════════ -->
+<section id="pricing">
+  <div class="section-intro">
+    <h2>Option Price Impact Panel</h2>
+    <p class="lead">Enter any contract and see what price Black-Scholes (using flat σ₀) vs SABR gives, and why they differ. Uses the current slider parameters.</p>
+  </div>
+
+  <div class="price-grid">
+
+    <div class="price-panel">
+      <h3>Inputs</h3>
+      <div style="margin-top:14px">
+        <div class="igroup">
+          <label>Forward Price (F)</label>
+          <input type="number" id="p-F" value="100" min="1" oninput="updatePricing()">
+        </div>
+        <div class="igroup">
+          <label>Strike (K)</label>
+          <input type="number" id="p-K" value="90" min="1" oninput="updatePricing()">
+        </div>
+        <div class="igroup">
+          <label>Time to Maturity (years)</label>
+          <input type="number" id="p-T" value="1.0" min="0.01" step="0.25" oninput="updatePricing()">
+        </div>
+        <div class="igroup">
+          <label>Option Type</label>
+          <select id="p-type" onchange="updatePricing()">
+            <option value="put" selected>Put</option>
+            <option value="call">Call</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="price-panel">
+      <h3>Results</h3>
+      <div style="margin-top:14px">
+        <div class="pr-row">
+          <span class="pr-lbl">BS Price (flat σ₀)</span>
+          <span class="pr-val bs" id="out-bs">—</span>
+        </div>
+        <div class="pr-row">
+          <span class="pr-lbl">SABR Price</span>
+          <span class="pr-val sabr" id="out-sabr">—</span>
+        </div>
+        <div class="pr-row">
+          <span class="pr-lbl">Price Difference</span>
+          <span class="pr-val diff" id="out-diff">—</span>
+        </div>
+        <div class="pr-row">
+          <span class="pr-lbl">BS Vol used</span>
+          <span class="pr-val small" style="color:var(--muted)" id="out-bsvol">—</span>
+        </div>
+        <div class="pr-row">
+          <span class="pr-lbl">SABR Implied Vol at K</span>
+          <span class="pr-val small" style="color:var(--accent2)" id="out-sabrvol">—</span>
+        </div>
+        <div class="pr-explain" id="out-explain">Move the sliders or change inputs to see results.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SCENARIO CARDS
+     ══════════════════════════════════════ -->
+<section id="scenarios">
+  <div class="section-intro">
+    <h2>Market Scenario Cards</h2>
+    <p class="lead">Click any card to instantly load a real-world parameter set. All charts and the pricing panel update immediately.</p>
+  </div>
+
+  <div class="sc-grid">
+
+    <div class="sc-card" onclick="loadScenario(this,'crash')">
+      <div class="sc-icon">📉</div>
+      <div class="sc-name">Equity Crash Fear</div>
+      <div class="sc-desc">S&P 500 style: high vol-of-vol and a strongly negative skew. Protective puts are expensive. The smile tilts hard to the left — the market is paying a premium to hedge downside.</div>
+      <div class="sc-chips">
+        <span class="chip">σ₀=30%</span>
+        <span class="chip">α=60%</span>
+        <span class="chip">β=1.0</span>
+        <span class="chip">ρ=−0.70</span>
+      </div>
+    </div>
+
+    <div class="sc-card" onclick="loadScenario(this,'rates')">
+      <div class="sc-icon">📊</div>
+      <div class="sc-name">Rate Market (Normal)</div>
+      <div class="sc-desc">Swaptions desk style: interest rates can go negative and behave more like an additive process. β=0 makes the vol backbone flat in strike space, matching how rate traders think.</div>
+      <div class="sc-chips">
+        <span class="chip">σ₀=15%</span>
+        <span class="chip">α=25%</span>
+        <span class="chip">β=0.0</span>
+        <span class="chip">ρ=−0.10</span>
+      </div>
+    </div>
+
+    <div class="sc-card" onclick="loadScenario(this,'fx')">
+      <div class="sc-icon">💱</div>
+      <div class="sc-name">FX Symmetric Smile</div>
+      <div class="sc-desc">G10 FX style: currency crises can go either way — the dollar can crash or the foreign currency can. ρ≈0 produces a symmetric smile where OTM calls and puts cost similar vol premia.</div>
+      <div class="sc-chips">
+        <span class="chip">σ₀=12%</span>
+        <span class="chip">α=35%</span>
+        <span class="chip">β=0.5</span>
+        <span class="chip">ρ=0.00</span>
+      </div>
+    </div>
+
+    <div class="sc-card" onclick="loadScenario(this,'skew')">
+      <div class="sc-icon">⚡</div>
+      <div class="sc-name">Deep Skew</div>
+      <div class="sc-desc">Extreme negative ρ creates a dramatic left tilt — the vol surface almost collapses on the right and soars on the left. Seen in single stocks with bankruptcy risk or after major market dislocations.</div>
+      <div class="sc-chips">
+        <span class="chip">σ₀=25%</span>
+        <span class="chip">α=45%</span>
+        <span class="chip">β=0.5</span>
+        <span class="chip">ρ=−0.90</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     GLOSSARY
+     ══════════════════════════════════════ -->
+<div id="glossary">
+  <h2>Glossary</h2>
+  <p style="font-size:13px;color:var(--muted)">Hover any term for a definition.</p>
+  <div class="gloss-strip">
+
+    <div class="gt"><span class="gt-word">Implied Volatility</span>
+      <div class="gt-tip">The volatility number you reverse-engineer from a market option price using Black-Scholes. It's the market's consensus forecast of uncertainty, not a historical statistic.</div>
+    </div>
+    <div class="gt"><span class="gt-word">Vol Surface</span>
+      <div class="gt-tip">A 3-D map of implied vol across all strikes and maturities. In a perfect BS world it's flat; in reality it curves, tilts, and changes every trading day.</div>
+    </div>
+    <div class="gt"><span class="gt-word">Vol Smile</span>
+      <div class="gt-tip">A cross-section of the vol surface at one maturity. Named "smile" because implied vol is often higher at both OTM puts and calls, bowing upward from ATM.</div>
+    </div>
+    <div class="gt"><span class="gt-word">Skew</span>
+      <div class="gt-tip">When the smile is asymmetric — one side is higher than the other. Negative skew means OTM puts are pricier than equidistant OTM calls (equity crash fear).</div>
+    </div>
+    <div class="gt"><span class="gt-word">ATM</span>
+      <div class="gt-tip">At-The-Money: a strike equal to (or close to) the forward price. ATM options have maximum time value and greatest sensitivity to volatility changes.</div>
+    </div>
+    <div class="gt"><span class="gt-word">Vol of Vol</span>
+      <div class="gt-tip">How much the volatility level itself fluctuates. High vol-of-vol means vol can spike or collapse dramatically, producing fatter tails and more pronounced smile curvature.</div>
+    </div>
+    <div class="gt"><span class="gt-word">Backbone</span>
+      <div class="gt-tip">How the ATM vol level moves when the forward price moves. β=1 keeps ATM vol roughly constant as prices move; β=0 means ATM vol moves inversely with the price level.</div>
+    </div>
+    <div class="gt"><span class="gt-word">Forward Price</span>
+      <div class="gt-tip">The fair price for delivery of an asset at a future date. Options pricing uses the forward (not spot) to strip out carry costs and dividends.</div>
+    </div>
+    <div class="gt"><span class="gt-word">Delta</span>
+      <div class="gt-tip">How much the option price changes per $1 move in the forward. SABR and flat BS can give different deltas, especially for skewed smiles and OTM strikes.</div>
+    </div>
+    <div class="gt"><span class="gt-word">CEV</span>
+      <div class="gt-tip">Constant Elasticity of Variance — the backbone model embedded in SABR. The β parameter controls the CEV exponent, shaping how vol relates to the price level.</div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  Built with Plotly.js · Chart.js · MathJax · Hagan et al. (2002) SABR approximation
+  <br style="margin-bottom:4px">
+  All mathematics runs in your browser — no server required.
+</footer>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════ -->
+<script>
+// ─── MATH ────────────────────────────────────────────────────────────────────
+
+function normCDF(x) {
+  // Abramowitz & Stegun 26.2.17 — max error 7.5e-8
+  const p  = 0.2316419;
+  const a  = [0.319381530, -0.356563782, 1.781477937, -1.821255978, 1.330274429];
+  const t  = 1 / (1 + p * Math.abs(x));
+  let poly = 0, tn = t;
+  for (let i = 0; i < 5; i++) { poly += a[i] * tn; tn *= t; }
+  const pdf = Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+  const val = 1 - pdf * poly;
+  return x >= 0 ? val : 1 - val;
+}
+
+/**
+ * Hagan 2002 SABR implied vol.
+ * sigma0 = α in paper (initial vol)
+ * volvol = ν in paper (vol of vol)
+ */
+function sabrVol(F, K, T, sigma0, volvol, beta, rho) {
+  if (T <= 0 || sigma0 <= 0) return sigma0 > 0 ? sigma0 : 0.001;
+  F = Math.max(F, 1e-8);
+  K = Math.max(K, 1e-8);
+
+  const ATM = 1e-5;
+
+  if (Math.abs(K - F) / F < ATM) {
+    // ATM limit
+    const Fb = Math.pow(F, 1 - beta);
+    const c1 = Math.pow((1 - beta) * sigma0, 2) / (24 * Math.pow(F, 2 * (1 - beta)));
+    const c2 = rho * beta * volvol * sigma0 / (4 * Fb);
+    const c3 = (2 - 3 * rho * rho) * volvol * volvol / 24;
+    return Math.max(0.0005, (sigma0 / Fb) * (1 + (c1 + c2 + c3) * T));
+  }
+
+  const logFK  = Math.log(F / K);
+  const FKh    = Math.pow(F * K, (1 - beta) / 2);   // (FK)^{(1-β)/2}
+  const FK1b   = Math.pow(F * K, 1 - beta);          // (FK)^{1-β}
+  const lnb    = (1 - beta) * logFK;
+
+  const z      = (volvol / sigma0) * FKh * logFK;
+  const disc   = Math.sqrt(Math.max(0, 1 - 2 * rho * z + z * z));
+  const chiZ   = Math.log((disc + z - rho) / (1 - rho));
+  const zchi   = Math.abs(chiZ) < 1e-12 ? 1 : z / chiZ;
+
+  const denom  = FKh * (1 + lnb * lnb / 24 + lnb * lnb * lnb * lnb / 1920);
+
+  const corr   = (
+    Math.pow((1 - beta) * sigma0, 2) / (24 * FK1b) +
+    rho * beta * volvol * sigma0 / (4 * FKh) +
+    (2 - 3 * rho * rho) * volvol * volvol / 24
+  );
+
+  const vol = (sigma0 / denom) * zchi * (1 + corr * T);
+  return Math.max(0.0005, Math.min(vol, 5.0));
+}
+
+function bsPrice(F, K, T, vol, type) {
+  if (T <= 0 || vol <= 0) return type === 'call' ? Math.max(F-K,0) : Math.max(K-F,0);
+  const sq = Math.sqrt(T);
+  const d1 = Math.log(F / K) / (vol * sq) + 0.5 * vol * sq;
+  const d2 = d1 - vol * sq;
+  return type === 'call'
+    ? F * normCDF(d1) - K * normCDF(d2)
+    : K * normCDF(-d2) - F * normCDF(-d1);
+}
+
+function bsDelta(F, K, T, vol, type) {
+  if (T <= 0 || vol <= 0) return type === 'call' ? (F > K ? 1 : 0) : (F < K ? -1 : 0);
+  const d1 = Math.log(F / K) / (vol * Math.sqrt(T)) + 0.5 * vol * Math.sqrt(T);
+  return type === 'call' ? normCDF(d1) : normCDF(d1) - 1;
+}
+
+// ─── PARAMS ──────────────────────────────────────────────────────────────────
+
+const F0 = 100;
+
+function getP() {
+  return {
+    s0:  parseInt(document.getElementById('sl-s0').value)   / 100,
+    vv:  parseInt(document.getElementById('sl-vv').value)   / 100,
+    beta:parseInt(document.getElementById('sl-beta').value) / 100,
+    rho: parseInt(document.getElementById('sl-rho').value)  / 100,
+  };
+}
+
+// ─── SURFACE DATA ─────────────────────────────────────────────────────────────
+
+const NK = 22, NM = 18;
+
+function surfaceData(s0, vv, beta, rho, flat) {
+  const ks = [], ms = [], vs = [];
+  for (let i = 0; i < NK; i++) ks.push(F0 * (0.6 + 0.8 * i / (NK - 1)));
+  for (let j = 0; j < NM; j++) ms.push(0.083 + 1.917 * j / (NM - 1));
+  for (let j = 0; j < NM; j++) {
+    const row = [];
+    for (let i = 0; i < NK; i++) {
+      const v = flat ? s0 : sabrVol(F0, ks[i], ms[j], s0, vv, beta, rho);
+      row.push(v * 100);
+    }
+    vs.push(row);
+  }
+  return { ks, ms, vs };
+}
+
+// ─── PLOTLY HELPERS ───────────────────────────────────────────────────────────
+
+const SCENE_BASE = {
+  bgcolor:'rgba(0,0,0,0)',
+  xaxis:{ title:'Strike', gridcolor:'#2a3347', zerolinecolor:'#2a3347', tickfont:{size:10} },
+  yaxis:{ title:'Maturity (yr)', gridcolor:'#2a3347', zerolinecolor:'#2a3347', tickfont:{size:10} },
+  zaxis:{ title:'Impl. Vol (%)', gridcolor:'#2a3347', zerolinecolor:'#2a3347', tickfont:{size:10} },
+  camera:{ eye:{ x:1.6, y:-1.6, z:1.0 } },
+};
+
+const LAYOUT_BASE = {
+  paper_bgcolor:'rgba(0,0,0,0)',
+  plot_bgcolor:'rgba(0,0,0,0)',
+  font:{ color:'#7a8faa', size:11 },
+  margin:{ l:10, r:10, t:10, b:10 },
+  showlegend:false,
+};
+
+function surfTrace(d, cs) {
+  return {
+    type:'surface', x:d.ks, y:d.ms, z:d.vs,
+    colorscale:cs, showscale:false, opacity:1,
+    lighting:{ diffuse:0.7, specular:0.25, ambient:0.85 },
+    contours:{ z:{ show:true, usecolormap:true, project:{z:false} } },
+  };
+}
+
+const CS_MAIN = [[0,'#1a3f7a'],[0.25,'#2563eb'],[0.5,'#22d3a0'],[0.75,'#fbbf24'],[1,'#ef4444']];
+const CS_FLAT = [[0,'#374151'],[0.5,'#6b7280'],[1,'#9ca3af']];
+const CS_HERO = [[0,'#1a3f7a'],[0.33,'#2563eb'],[0.66,'#fbbf24'],[1,'#ef4444']];
+
+let mainSurfInit = false;
+
+function initMainSurface() {
+  const p = getP();
+  const d = surfaceData(p.s0, p.vv, p.beta, p.rho, false);
+  Plotly.newPlot('surface-plot', [surfTrace(d, CS_MAIN)],
+    { ...LAYOUT_BASE, scene:{ ...SCENE_BASE }, height:460 },
+    { responsive:true, displayModeBar:false }
+  );
+  mainSurfInit = true;
+}
+
+function updateMainSurface() {
+  if (!mainSurfInit) { initMainSurface(); return; }
+  const p = getP();
+  const d = surfaceData(p.s0, p.vv, p.beta, p.rho, false);
+  Plotly.restyle('surface-plot', { x:[d.ks], y:[d.ms], z:[d.vs] }, [0]);
+}
+
+function initHeroPlots() {
+  const s0=0.20, vv=0.50, beta=0.5, rho=-0.40;
+  const dFlat = surfaceData(s0, 0, 0.5, 0, true);
+  const dSABR = surfaceData(s0, vv, beta, rho, false);
+  const hl = { ...LAYOUT_BASE, height:260,
+    scene:{ ...SCENE_BASE,
+      xaxis:{ ...SCENE_BASE.xaxis, showticklabels:false, title:'' },
+      yaxis:{ ...SCENE_BASE.yaxis, showticklabels:false, title:'' },
+      zaxis:{ ...SCENE_BASE.zaxis, range:[0,42], title:'Vol %' },
+    }
+  };
+  Plotly.newPlot('hero-flat', [surfTrace(dFlat, CS_FLAT)], hl, { responsive:true, displayModeBar:false });
+  Plotly.newPlot('hero-sabr', [surfTrace(dSABR, CS_HERO)], hl, { responsive:true, displayModeBar:false });
+}
+
+// ─── SMILE CHART ──────────────────────────────────────────────────────────────
+
+let smileChart = null;
+
+function initSmileChart() {
+  const ctx = document.getElementById('smile-chart').getContext('2d');
+  smileChart = new Chart(ctx, {
+    type:'line',
+    data:{ labels:[], datasets:[
+      { label:'SABR Implied Vol', data:[], borderColor:'#4a9eff',
+        backgroundColor:'rgba(74,158,255,0.07)', borderWidth:2.5,
+        pointRadius:0, tension:0.35, fill:true },
+      { label:'Flat BS Vol (σ₀)', data:[], borderColor:'#4a5568',
+        borderWidth:1.5, borderDash:[6,4], pointRadius:0, tension:0 },
+      { label:'ATM', data:[], borderColor:'#fbbf24', backgroundColor:'#fbbf24',
+        pointRadius:[], borderWidth:0, showLine:false },
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:true, animation:{ duration:180 },
+      plugins:{
+        legend:{ labels:{ color:'#7a8faa', font:{ size:12 } } },
+        tooltip:{
+          mode:'index', intersect:false,
+          backgroundColor:'#1e2637', borderColor:'#2a3347', borderWidth:1,
+          titleColor:'#e2e8f0', bodyColor:'#7a8faa',
+          callbacks:{
+            title: items => `K = ${parseFloat(smileChart.data.labels[items[0].dataIndex]).toFixed(1)}`,
+            label: item => item.raw != null ? `${item.dataset.label}: ${parseFloat(item.raw).toFixed(2)}%` : null,
+          }
+        }
+      },
+      scales:{
+        x:{ ticks:{ color:'#7a8faa', maxTicksLimit:9,
+              callback:(v,i) => { const lbl=smileChart.data.labels[i]; return lbl ? parseFloat(lbl).toFixed(0) : ''; } },
+            grid:{ color:'#2a3347' },
+            title:{ display:true, text:'Strike (K)', color:'#7a8faa' } },
+        y:{ ticks:{ color:'#7a8faa', callback: v => v.toFixed(1)+'%' },
+            grid:{ color:'#2a3347' },
+            title:{ display:true, text:'Implied Vol (%)', color:'#7a8faa' } }
+      }
+    }
+  });
+}
+
+function updateSmile() {
+  if (!smileChart) return;
+  const p = getP();
+  const T = parseFloat(document.getElementById('smile-T').value);
+
+  const strikes=[], svols=[], bvols=[];
+  for (let i=0; i<=60; i++) {
+    const K = F0 * (0.65 + 0.70 * i / 60);
+    strikes.push(K.toFixed(2));
+    svols.push(sabrVol(F0, K, T, p.s0, p.vv, p.beta, p.rho) * 100);
+    bvols.push(p.s0 * 100);
+  }
+
+  // ATM point
+  let atmIdx=0, minD=Infinity;
+  for (let i=0; i<strikes.length; i++) {
+    const d = Math.abs(parseFloat(strikes[i]) - F0);
+    if (d < minD) { minD = d; atmIdx = i; }
+  }
+  const atmPts = svols.map((v,i) => i===atmIdx ? v : null);
+  const atmRadii = svols.map((_,i) => i===atmIdx ? 9 : 0);
+
+  smileChart.data.labels = strikes;
+  smileChart.data.datasets[0].data = svols;
+  smileChart.data.datasets[1].data = bvols;
+  smileChart.data.datasets[2].data = atmPts;
+  smileChart.data.datasets[2].pointRadius = atmRadii;
+  smileChart.update('none');
+}
+
+// ─── PRICING ──────────────────────────────────────────────────────────────────
+
+function updatePricing() {
+  const p  = getP();
+  const F  = parseFloat(document.getElementById('p-F').value) || 100;
+  const K  = parseFloat(document.getElementById('p-K').value) || 90;
+  const T  = parseFloat(document.getElementById('p-T').value) || 1;
+  const tp = document.getElementById('p-type').value;
+
+  if (F<=0||K<=0||T<=0) return;
+
+  const vBS   = p.s0;
+  const vSABR = sabrVol(F, K, T, p.s0, p.vv, p.beta, p.rho);
+  const pBS   = bsPrice(F, K, T, vBS,   tp);
+  const pSABR = bsPrice(F, K, T, vSABR, tp);
+  const diff  = pSABR - pBS;
+
+  const dBS   = bsDelta(F, K, T, vBS,   tp);
+  const dSABR = bsDelta(F, K, T, vSABR, tp);
+
+  document.getElementById('out-bs').textContent    = pBS.toFixed(4);
+  document.getElementById('out-sabr').textContent  = pSABR.toFixed(4);
+  document.getElementById('out-diff').textContent  = (diff >= 0 ? '+' : '') + diff.toFixed(4);
+  document.getElementById('out-bsvol').textContent  = (vBS*100).toFixed(2)+'%';
+  document.getElementById('out-sabrvol').textContent= (vSABR*100).toFixed(2)+'%';
+
+  const diffEl = document.getElementById('out-diff');
+  diffEl.style.color = diff > 0.0005 ? 'var(--green)' : diff < -0.0005 ? 'var(--red)' : 'var(--muted)';
+
+  const volDiff = (vSABR - vBS) * 100;
+  const mono    = K / F;
+  let expl = '';
+
+  if (Math.abs(volDiff) < 0.05) {
+    expl = `SABR and flat BS agree closely here (vol diff < 0.05pp). At ATM or with low vol-of-vol the two models converge.`;
+  } else if (volDiff > 0) {
+    expl = `SABR prices this ${tp} at a higher implied vol (+${volDiff.toFixed(2)}pp above σ₀). `;
+    if (mono < 0.97 && p.rho < -0.1)
+      expl += `This OTM put is on the expensive side of the skew — negative ρ (${p.rho.toFixed(2)}) tilts the smile left, lifting downside vols. `;
+    else if (mono > 1.03 && p.rho > 0.1)
+      expl += `This OTM call sits on the expensive side of a positive skew (ρ=${p.rho.toFixed(2)}). `;
+    else
+      expl += `The smile wings are elevated by vol-of-vol α=${(p.vv*100).toFixed(0)}%. Both OTM sides cost more than flat BS implies. `;
+  } else {
+    expl = `SABR gives a lower vol here (${volDiff.toFixed(2)}pp vs σ₀). This can occur near ATM with certain parameter combinations where the correction term reduces vol slightly. `;
+  }
+  expl += `BS delta: ${dBS.toFixed(4)}  SABR delta: ${dSABR.toFixed(4)} (diff: ${(dSABR-dBS>=0?'+':'') + (dSABR-dBS).toFixed(4)}).`;
+
+  document.getElementById('out-explain').textContent = expl;
+}
+
+// ─── ANNOTATIONS ─────────────────────────────────────────────────────────────
+
+function updateAnnotations() {
+  const p = getP();
+
+  const rhoEl = document.getElementById('ann-rho');
+  if (p.rho < -0.25) {
+    rhoEl.textContent = '↑ Put-side smile rises — left skew (crash fear)';
+    rhoEl.style.color = 'var(--red)';
+  } else if (p.rho > 0.25) {
+    rhoEl.textContent = '↑ Call-side smile rises — right skew (squeeze fear)';
+    rhoEl.style.color = 'var(--green)';
+  } else {
+    rhoEl.textContent = '≈ Symmetric smile — equal fear of up/down moves';
+    rhoEl.style.color = 'var(--muted)';
+  }
+
+  const vvEl = document.getElementById('ann-vv');
+  if (p.vv > 0.55) {
+    vvEl.textContent = '↑ High vol-of-vol → fat wings, dramatic curvature';
+    vvEl.style.color = 'var(--red)';
+  } else if (p.vv > 0.25) {
+    vvEl.textContent = '↑ Moderate curvature — typical equity index smile';
+    vvEl.style.color = 'var(--yellow)';
+  } else {
+    vvEl.textContent = '↓ Low curvature → smile nearly flat';
+    vvEl.style.color = 'var(--green)';
+  }
+
+  const betaEl = document.getElementById('ann-beta');
+  if (p.beta < 0.1) {
+    betaEl.textContent = 'Normal backbone — ATM vol rises as forward falls';
+    betaEl.style.color = 'var(--purple)';
+  } else if (p.beta > 0.9) {
+    betaEl.textContent = 'Log-normal backbone — ATM vol roughly constant';
+    betaEl.style.color = 'var(--accent)';
+  } else {
+    betaEl.textContent = `Mixed backbone β=${p.beta.toFixed(2)} — partial CEV adjustment`;
+    betaEl.style.color = 'var(--muted)';
+  }
+
+  const s0El = document.getElementById('ann-s0');
+  if (p.s0 > 0.40) {
+    s0El.textContent = 'High vol — all options expensive, stressed regime';
+    s0El.style.color = 'var(--red)';
+  } else if (p.s0 < 0.12) {
+    s0El.textContent = 'Low vol — calm market, options cheap';
+    s0El.style.color = 'var(--green)';
+  } else {
+    s0El.textContent = 'Normal vol range';
+    s0El.style.color = 'var(--muted)';
+  }
+}
+
+// ─── SLIDER LABELS ───────────────────────────────────────────────────────────
+
+function updateLabels() {
+  const s0  = parseInt(document.getElementById('sl-s0').value);
+  const vv  = parseInt(document.getElementById('sl-vv').value);
+  const b   = parseInt(document.getElementById('sl-beta').value);
+  const rho = parseInt(document.getElementById('sl-rho').value);
+  document.getElementById('val-s0').textContent   = s0 + '%';
+  document.getElementById('val-vv').textContent   = vv + '%';
+  document.getElementById('val-beta').textContent = (b / 100).toFixed(2);
+  const rhoSign = rho >= 0 ? '+' : '';
+  document.getElementById('val-rho').textContent  = rhoSign + (rho / 100).toFixed(2);
+}
+
+// ─── MASTER UPDATE ────────────────────────────────────────────────────────────
+
+let debounce = null;
+
+function onSlider() {
+  updateLabels();
+  updateAnnotations();
+  updateSmile();
+  updatePricing();
+  clearTimeout(debounce);
+  debounce = setTimeout(updateMainSurface, 90);
+}
+
+// ─── SCENARIOS ───────────────────────────────────────────────────────────────
+
+const SCENARIOS = {
+  crash: { s0:30, vv:60, beta:100, rho:-70 },
+  rates: { s0:15, vv:25, beta:  0, rho:-10 },
+  fx:    { s0:12, vv:35, beta: 50, rho:  0 },
+  skew:  { s0:25, vv:45, beta: 50, rho:-90 },
+};
+
+function loadScenario(card, key) {
+  document.querySelectorAll('.sc-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+  const s = SCENARIOS[key];
+  document.getElementById('sl-s0').value   = s.s0;
+  document.getElementById('sl-vv').value   = s.vv;
+  document.getElementById('sl-beta').value = s.beta;
+  document.getElementById('sl-rho').value  = s.rho;
+  onSlider();
+  document.getElementById('surface').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ─── COLLAPSIBLES ─────────────────────────────────────────────────────────────
+
+function toggleColl(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+
+window.addEventListener('DOMContentLoaded', () => {
+  updateLabels();
+  updateAnnotations();
+  initHeroPlots();
+  initMainSurface();
+  initSmileChart();
+  updateSmile();
+  updatePricing();
+});
+</script>
+
+<!--
+================================================================================
+  README — GitHub Pages Deployment
+================================================================================
+
+  SETUP STEPS:
+  1. Push this repo to GitHub (branch: claude/sabr-volatility-educator-AuQjH).
+  2. In repository Settings → Pages:
+       Source: Deploy from a branch
+       Branch: main (or your branch)  /  Folder: /docs
+  3. Save. GitHub builds and serves the page at:
+       https://<owner>.github.io/<repo>/sabr.html
+  4. No build step, no dependencies to install — fully static.
+
+  LIBRARIES (CDN only, no npm):
+    Plotly.js  2.26.0  — 3D vol surface and hero comparison charts
+    Chart.js   4.4.0   — 2D smile cross-section
+    MathJax    3       — Hagan formula rendering
+
+  MATH IMPLEMENTATION:
+    sabrVol()  — Hagan et al. (2002) SABR approximation, full non-ATM and ATM cases
+    bsPrice()  — Black-Scholes forward-price formulation (r=0 discounting)
+    bsDelta()  — Black-Scholes delta for comparison
+    All computation is client-side JavaScript, no backend.
+
+  BROWSER REQUIREMENTS:
+    Modern browser with JavaScript enabled (Chrome, Firefox, Safari, Edge).
+    WebGL strongly recommended for Plotly 3D performance (enabled by default
+    in all major browsers).
+================================================================================
+-->
+</body>
+</html>
