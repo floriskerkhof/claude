@@ -12,205 +12,79 @@
   <link rel="manifest" href="manifest.json" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --bg: #faf8f5;
       --ink: #1a1a1a;
       --muted: #999;
-      --chip-bg: #f0ece8;
       --radius: 14px;
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
+    html, body { height: 100%; background: var(--bg); font-family: -apple-system, 'Helvetica Neue', sans-serif; -webkit-text-size-adjust: 100%; overflow: hidden; }
+    #app { display: flex; flex-direction: column; height: 100dvh; }
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      font-family: -apple-system, 'Helvetica Neue', sans-serif;
-      -webkit-text-size-adjust: 100%;
-      overflow: hidden;
-    }
-
-    #app {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      height: 100dvh;
-    }
-
-    /* ── Header ── */
     header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       padding: 14px 20px 10px;
       padding-top: max(14px, env(safe-area-inset-top, 14px));
       flex-shrink: 0;
     }
-
-    .title {
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      color: var(--ink);
-    }
+    .title { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink); }
 
     #save-btn {
-      background: var(--ink);
-      color: #fff;
-      border: none;
-      border-radius: 22px;
-      padding: 9px 18px;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.2px;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: opacity .15s, transform .1s;
-      min-width: 110px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+      background: var(--ink); color: #fff; border: none; border-radius: 22px;
+      padding: 9px 18px; font-size: 14px; font-weight: 600; letter-spacing: 0.2px;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+      transition: opacity .15s, transform .12s;
+      min-width: 116px; display: flex; align-items: center; justify-content: center; gap: 6px;
     }
     #save-btn:disabled { background: #ccc; }
-    #save-btn:active { transform: scale(0.96); }
+    #save-btn:active { transform: scale(0.95); }
 
-    /* ── Canvas area ── */
-    #canvas-wrap {
-      flex-shrink: 0;
-      display: flex;
-      justify-content: center;
-      padding: 0 16px;
-    }
-
+    #canvas-wrap { flex-shrink: 0; display: flex; justify-content: center; padding: 0 16px; }
     #canvas-container {
-      position: relative;
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: none;
+      position: relative; border-radius: var(--radius); overflow: hidden;
+      box-shadow: 0 6px 32px rgba(0,0,0,0.13);
+      cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: none;
     }
+    #preview { display: block; border-radius: var(--radius); }
 
-    #preview {
-      display: block;
-      border-radius: var(--radius);
-    }
+    #hint { text-align: center; font-size: 13px; color: var(--muted); padding: 8px 20px 0; flex-shrink: 0; min-height: 28px; }
 
-    /* ── Hint ── */
-    #hint {
-      text-align: center;
-      font-size: 13px;
-      color: var(--muted);
-      padding: 8px 20px 0;
-      flex-shrink: 0;
-      min-height: 28px;
-    }
-
-    /* ── Template picker ── */
-    #picker-section {
-      flex-shrink: 0;
-      padding-top: 12px;
-    }
-
-    .picker-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: #bbb;
-      text-transform: uppercase;
-      letter-spacing: 1.1px;
-      padding: 0 20px 8px;
-    }
+    #picker-section { flex-shrink: 0; padding-top: 12px; }
+    .section-label { font-size: 11px; font-weight: 600; color: #bbb; text-transform: uppercase; letter-spacing: 1.1px; padding: 0 20px 8px; }
 
     #template-list {
-      display: flex;
-      gap: 8px;
-      padding: 0 16px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      padding-bottom: 4px;
+      display: flex; gap: 8px; padding: 0 16px 4px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
     }
     #template-list::-webkit-scrollbar { display: none; }
 
     .tpl-chip {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 8px 12px;
-      border-radius: 20px;
-      background: var(--chip-bg);
-      border: 1.5px solid transparent;
-      white-space: nowrap;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: background .15s, border-color .15s;
-      flex-shrink: 0;
+      display: flex; align-items: center; gap: 5px;
+      padding: 8px 13px; border-radius: 20px;
+      background: #f0ece8; border: 1.5px solid transparent;
+      white-space: nowrap; cursor: pointer; -webkit-tap-highlight-color: transparent;
+      transition: background .15s, border-color .15s; flex-shrink: 0;
     }
-    .tpl-chip.active {
-      background: var(--ink);
-      border-color: var(--ink);
-    }
+    .tpl-chip.active { background: var(--ink); border-color: var(--ink); }
     .tpl-chip .chip-emoji { font-size: 13px; }
-    .tpl-chip .chip-name {
-      font-size: 13px;
-      font-weight: 500;
-      color: #555;
-      letter-spacing: 0.2px;
-    }
+    .tpl-chip .chip-name { font-size: 13px; font-weight: 500; color: #555; }
     .tpl-chip.active .chip-name { color: #fff; }
-    .tpl-chip .chip-count {
-      font-size: 11px;
-      color: #aaa;
-    }
-    .tpl-chip.active .chip-count { color: rgba(255,255,255,0.5); }
+    .tpl-chip .chip-count { font-size: 11px; color: #aaa; }
+    .tpl-chip.active .chip-count { color: rgba(255,255,255,0.45); }
 
-    /* ── Color swatches ── */
-    #bg-section {
-      flex-shrink: 0;
-      padding: 10px 20px 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .bg-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: #bbb;
-      text-transform: uppercase;
-      letter-spacing: 1.1px;
-    }
+    #bg-section { flex-shrink: 0; padding: 10px 20px 0; display: flex; align-items: center; gap: 10px; }
     .swatch {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: transform .1s;
-      flex-shrink: 0;
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 2.5px solid transparent; cursor: pointer;
+      -webkit-tap-highlight-color: transparent; transition: transform .12s; flex-shrink: 0;
     }
-    .swatch.active { border-color: var(--ink); transform: scale(1.15); }
+    .swatch.active { border-color: var(--ink); transform: scale(1.18); }
     .swatch:active { transform: scale(0.9); }
 
-    /* ── Spacer ── */
     .spacer { flex: 1; }
+    .bottom-pad { flex-shrink: 0; height: max(16px, env(safe-area-inset-bottom, 0px)); }
 
-    /* ── Bottom safe area ── */
-    .bottom-pad {
-      flex-shrink: 0;
-      height: max(16px, var(--safe-bottom));
-    }
-
-    /* ── Spinner ── */
-    .spinner {
-      width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,0.4);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-    }
+    .spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
@@ -230,236 +104,387 @@
   <p id="hint">Tap a slot to add a photo</p>
 
   <div id="picker-section">
-    <p class="picker-label">Layout</p>
+    <p class="section-label">Layout</p>
     <div id="template-list"></div>
   </div>
 
   <div id="bg-section">
-    <span class="bg-label">Background</span>
+    <span class="section-label" style="padding:0">Background</span>
   </div>
 
   <div class="spacer"></div>
   <div class="bottom-pad"></div>
 </div>
 
-<!-- Hidden file input -->
 <input type="file" id="file-input" accept="image/*" style="display:none" />
 
 <script>
 // ─── Templates ───────────────────────────────────────────────────────────────
+// All x,y,w,h are fractions of the 1080×1080 export canvas.
+// GAP = 0.018 (~20px at 1080) used as consistent gutter.
+
+const G = 0.018; // gutter fraction
+
 const TEMPLATES = [
+  // ── 1. Magazine ─ large left + two stacked right
   {
-    id: 'grid-2x2', name: '2×2 Grid', emoji: '▦', photoCount: 4,
+    id: 'magazine', name: 'Magazine', emoji: '◧', photoCount: 3,
+    bg: '#f7f4f0',
+    slots: [
+      { x: G,           y: G,             w: 0.56, h: 1-G*2,  shape: 'framed' },
+      { x: G+0.56+G,    y: G,             w: 0.38, h: 0.49-G, shape: 'framed' },
+      { x: G+0.56+G,    y: G+0.49+G,     w: 0.38, h: 0.49-G, shape: 'framed' },
+    ],
+  },
+
+  // ── 2. Triptych ─ three equal vertical strips
+  {
+    id: 'triptych', name: 'Triptych', emoji: '⦀', photoCount: 3,
     bg: '#faf8f5',
     slots: [
-      { x:.02, y:.02, w:.47, h:.47, shape:'rect' },
-      { x:.51, y:.02, w:.47, h:.47, shape:'rect' },
-      { x:.02, y:.51, w:.47, h:.47, shape:'rect' },
-      { x:.51, y:.51, w:.47, h:.47, shape:'rect' },
+      { x: G,           y: G*2, w: 0.307, h: 1-G*4, shape: 'framed' },
+      { x: G+0.307+G,   y: G*2, w: 0.307, h: 1-G*4, shape: 'framed' },
+      { x: G+0.614+G*2, y: G*2, w: 0.307, h: 1-G*4, shape: 'framed' },
     ],
   },
+
+  // ── 3. Mosaic ─ big top-left, varied sizes
   {
-    id: 'grid-3x3', name: '3×3 Grid', emoji: '⊞', photoCount: 9,
+    id: 'mosaic', name: 'Mosaic', emoji: '▤', photoCount: 4,
+    bg: '#f2ede8',
+    slots: [
+      { x: G,         y: G,         w: 0.60, h: 0.60,    shape: 'framed' },
+      { x: G+0.60+G,  y: G,         w: 0.36, h: 0.29-G,  shape: 'framed' },
+      { x: G+0.60+G,  y: G+0.29+G, w: 0.36, h: 0.29-G,  shape: 'framed' },
+      { x: G,         y: G+0.60+G, w: 1-G*2, h: 0.37-G, shape: 'framed' },
+    ],
+  },
+
+  // ── 4. Asymmetric ─ tall left + two right stacked, unequal heights
+  {
+    id: 'asymmetric', name: 'Asymmetric', emoji: '◫', photoCount: 3,
+    bg: '#eef2f0',
+    slots: [
+      { x: G,          y: G,          w: 0.44, h: 1-G*2,  shape: 'framed' },
+      { x: G+0.44+G,   y: G,          w: 0.52, h: 0.62-G, shape: 'framed' },
+      { x: G+0.44+G,   y: G+0.62+G,  w: 0.52, h: 0.35-G, shape: 'framed' },
+    ],
+  },
+
+  // ── 5. Hero + Strip ─ full-width hero, three equal below
+  {
+    id: 'hero-strip', name: 'Hero', emoji: '✦', photoCount: 4,
     bg: '#faf8f5',
     slots: [
-      { x:.01, y:.01, w:.32, h:.32, shape:'rect' },
-      { x:.34, y:.01, w:.32, h:.32, shape:'rect' },
-      { x:.67, y:.01, w:.32, h:.32, shape:'rect' },
-      { x:.01, y:.34, w:.32, h:.32, shape:'rect' },
-      { x:.34, y:.34, w:.32, h:.32, shape:'rect' },
-      { x:.67, y:.34, w:.32, h:.32, shape:'rect' },
-      { x:.01, y:.67, w:.32, h:.32, shape:'rect' },
-      { x:.34, y:.67, w:.32, h:.32, shape:'rect' },
-      { x:.67, y:.67, w:.32, h:.32, shape:'rect' },
+      { x: G,              y: G,         w: 1-G*2, h: 0.54,     shape: 'framed' },
+      { x: G,              y: G+0.54+G,  w: 0.295, h: 0.42-G*2, shape: 'framed' },
+      { x: G+0.295+G,      y: G+0.54+G,  w: 0.295, h: 0.42-G*2, shape: 'framed' },
+      { x: G+0.295*2+G*2,  y: G+0.54+G,  w: 0.295, h: 0.42-G*2, shape: 'framed' },
     ],
   },
+
+  // ── 6. Scatter ─ overlapping polaroids
   {
-    id: 'spotlight', name: 'Spotlight', emoji: '✦', photoCount: 3,
-    bg: '#fff9f0',
+    id: 'scatter', name: 'Scatter', emoji: '✂', photoCount: 4,
+    bg: '#f5f0e8',
     slots: [
-      { x:.05, y:.03, w:.90, h:.55, shape:'rect' },
-      { x:.03, y:.60, w:.45, h:.37, shape:'rect' },
-      { x:.52, y:.60, w:.45, h:.37, shape:'rect' },
+      { x: 0.04, y: 0.05, w: 0.48, h: 0.46, rot: -4, shape: 'polaroid', z: 1 },
+      { x: 0.48, y: 0.02, w: 0.46, h: 0.44, rot:  5, shape: 'polaroid', z: 2 },
+      { x: 0.06, y: 0.50, w: 0.44, h: 0.44, rot:  3, shape: 'polaroid', z: 1 },
+      { x: 0.46, y: 0.52, w: 0.46, h: 0.44, rot: -3, shape: 'polaroid', z: 2 },
     ],
   },
+
+  // ── 7. Cascade ─ diagonal waterfall
   {
-    id: 'collage', name: 'Collage', emoji: '✂', photoCount: 4,
-    bg: '#f5f0eb',
+    id: 'cascade', name: 'Cascade', emoji: '◩', photoCount: 3,
+    bg: '#f0ecea',
     slots: [
-      { x:.03, y:.04, w:.50, h:.44, rot:-3, shape:'polaroid', z:1 },
-      { x:.45, y:.08, w:.50, h:.44, rot:4,  shape:'polaroid', z:2 },
-      { x:.05, y:.50, w:.48, h:.44, rot:2,  shape:'polaroid', z:1 },
-      { x:.47, y:.54, w:.48, h:.44, rot:-2, shape:'polaroid', z:2 },
+      { x: 0.03, y: 0.03, w: 0.55, h: 0.42, shape: 'framed' },
+      { x: 0.22, y: 0.31, w: 0.55, h: 0.42, shape: 'framed', z: 2 },
+      { x: 0.41, y: 0.57, w: 0.55, h: 0.40, shape: 'framed', z: 1 },
     ],
   },
+
+  // ── 8. Film ─ dark cinematic strips
   {
-    id: 'strip', name: 'Film Strip', emoji: '🎞', photoCount: 3,
-    bg: '#1a1a1a',
+    id: 'film', name: 'Film', emoji: '🎞', photoCount: 3,
+    bg: '#111111',
     slots: [
-      { x:.05, y:.10, w:.90, h:.25, shape:'rect' },
-      { x:.05, y:.375, w:.90, h:.25, shape:'rect' },
-      { x:.05, y:.65, w:.90, h:.25, shape:'rect' },
+      { x: 0.06, y: 0.08,  w: 0.88, h: 0.245, shape: 'rect' },
+      { x: 0.06, y: 0.378, w: 0.88, h: 0.245, shape: 'rect' },
+      { x: 0.06, y: 0.675, w: 0.88, h: 0.245, shape: 'rect' },
     ],
   },
+
+  // ── 9. Bubbles ─ overlapping circles, varied sizes
   {
-    id: 'circles', name: 'Bubbles', emoji: '◉', photoCount: 3,
-    bg: '#e8f4f8',
+    id: 'bubbles', name: 'Bubbles', emoji: '◉', photoCount: 3,
+    bg: '#deeaf2',
     slots: [
-      { x:.10, y:.05, w:.55, h:.55, shape:'circle', z:2 },
-      { x:.45, y:.38, w:.50, h:.50, shape:'circle', z:1 },
-      { x:.02, y:.42, w:.40, h:.40, shape:'circle', z:1 },
+      { x: 0.06, y: 0.04, w: 0.58, h: 0.58, shape: 'circle', z: 2 },
+      { x: 0.40, y: 0.36, w: 0.52, h: 0.52, shape: 'circle', z: 1 },
+      { x: 0.02, y: 0.44, w: 0.38, h: 0.38, shape: 'circle', z: 1 },
     ],
   },
+
+  // ── 10. Duo ─ two square photos centered with breathing room
   {
     id: 'duo', name: 'Duo', emoji: '◫', photoCount: 2,
     bg: '#faf8f5',
     slots: [
-      { x:.02, y:.02, w:.47, h:.96, shape:'rect' },
-      { x:.51, y:.02, w:.47, h:.96, shape:'rect' },
+      { x: 0.04, y: 0.08, w: 0.455, h: 0.84, shape: 'framed' },
+      { x: 0.505, y: 0.08, w: 0.455, h: 0.84, shape: 'framed' },
     ],
   },
-  {
-    id: 'hero-small', name: 'Hero + 2', emoji: '⬛', photoCount: 3,
-    bg: '#faf8f5',
-    slots: [
-      { x:.02, y:.02, w:.96, h:.60, shape:'rect' },
-      { x:.02, y:.64, w:.47, h:.34, shape:'rect' },
-      { x:.51, y:.64, w:.47, h:.34, shape:'rect' },
-    ],
-  },
+
+  // ── 11. Polaroid Row ─ three polaroids in a row
   {
     id: 'polaroid-row', name: 'Polaroids', emoji: '📷', photoCount: 3,
-    bg: '#f0ece8',
+    bg: '#ede8e0',
     slots: [
-      { x:.02, y:.18, w:.30, h:.38, rot:-5, shape:'polaroid' },
-      { x:.34, y:.14, w:.32, h:.40, rot:0,  shape:'polaroid' },
-      { x:.66, y:.18, w:.30, h:.38, rot:4,  shape:'polaroid' },
+      { x: 0.03, y: 0.20, w: 0.295, h: 0.38, rot: -6, shape: 'polaroid' },
+      { x: 0.35, y: 0.16, w: 0.305, h: 0.40, rot:  0, shape: 'polaroid' },
+      { x: 0.67, y: 0.20, w: 0.295, h: 0.38, rot:  5, shape: 'polaroid' },
     ],
   },
+
+  // ── 12. Solo ─ single photo, generous frame
   {
-    id: 'one', name: 'Solo', emoji: '◼', photoCount: 1,
+    id: 'solo', name: 'Solo', emoji: '◼', photoCount: 1,
     bg: '#faf8f5',
     slots: [
-      { x:.04, y:.04, w:.92, h:.92, shape:'rect' },
+      { x: 0.05, y: 0.05, w: 0.90, h: 0.90, shape: 'framed' },
     ],
   },
 ];
 
-const BG_COLORS = [
-  '#faf8f5', '#fff9f0', '#f5f0eb', '#f0ece8',
-  '#e8f4f8', '#f0f4ee', '#f4eef4', '#1a1a1a',
+const BG_SWATCHES = [
+  '#faf8f5', '#f7f4f0', '#f2ede8', '#eef2f0',
+  '#deeaf2', '#ede8e0', '#2c2c2c', '#111111',
 ];
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let currentTemplate = TEMPLATES[0];
-let photos = new Array(currentTemplate.photoCount).fill(null); // HTMLImageElement | null
+let photos = new Array(currentTemplate.photoCount).fill(null);
 let currentBg = currentTemplate.bg;
 let pendingSlot = -1;
 
-// ─── Canvas setup ────────────────────────────────────────────────────────────
-const EXPORT_SIZE = 1080;
+// ─── Canvas ───────────────────────────────────────────────────────────────────
+const SIZE = 1080;
 const canvas = document.getElementById('preview');
 const ctx = canvas.getContext('2d');
-canvas.width = EXPORT_SIZE;
-canvas.height = EXPORT_SIZE;
+canvas.width = SIZE;
+canvas.height = SIZE;
 
-function canvasDisplaySize() {
-  const pad = 32;
-  return Math.min(window.innerWidth - pad, 420);
+function displaySize() {
+  return Math.min(window.innerWidth - 32, 420);
 }
-
 function resizeCanvas() {
-  const s = canvasDisplaySize();
+  const s = displaySize();
   canvas.style.width = s + 'px';
   canvas.style.height = s + 'px';
-  document.getElementById('canvas-container').style.width = s + 'px';
-  document.getElementById('canvas-container').style.height = s + 'px';
+  const c = document.getElementById('canvas-container');
+  c.style.width = s + 'px';
+  c.style.height = s + 'px';
 }
 
-// ─── Drawing ─────────────────────────────────────────────────────────────────
-function drawSlot(slot, img, s) {
-  const x = slot.x * s, y = slot.y * s;
-  const w = slot.w * s, h = slot.h * s;
+// ─── Rendering ───────────────────────────────────────────────────────────────
+
+function render() {
+  ctx.clearRect(0, 0, SIZE, SIZE);
+
+  // Background
+  ctx.fillStyle = currentBg;
+  ctx.fillRect(0, 0, SIZE, SIZE);
+
+  // Subtle noise texture on light backgrounds
+  if (currentBg !== '#111111' && currentBg !== '#2c2c2c') {
+    paintNoise(0.018);
+  }
+
+  // Sort by z-index
+  const sorted = currentTemplate.slots
+    .map((s, i) => ({ ...s, _i: i }))
+    .sort((a, b) => (a.z || 0) - (b.z || 0));
+
+  for (const slot of sorted) {
+    drawSlot(slot, photos[slot._i]);
+  }
+
+  updateHint();
+  updateSaveBtn();
+}
+
+function paintNoise(alpha) {
+  // Very subtle paper grain — draw random semi-transparent dots
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  for (let i = 0; i < 8000; i++) {
+    const x = Math.random() * SIZE;
+    const y = Math.random() * SIZE;
+    const d = Math.random() < 0.5 ? 255 : 0;
+    ctx.fillStyle = `rgb(${d},${d},${d})`;
+    ctx.fillRect(x, y, 1.2, 1.2);
+  }
+  ctx.restore();
+}
+
+function drawSlot(slot, img) {
+  const x = slot.x * SIZE, y = slot.y * SIZE;
+  const w = slot.w * SIZE, h = slot.h * SIZE;
   const rot = (slot.rot || 0) * Math.PI / 180;
-  const isPolaroid = slot.shape === 'polaroid';
-  const isCircle = slot.shape === 'circle';
-  const captionH = isPolaroid ? Math.max(16, h * 0.12) : 0;
-  const photoH = h - captionH;
+  const cx = x + w / 2, cy = y + h / 2;
 
   ctx.save();
-  // Translate to center of slot for rotation
-  ctx.translate(x + w / 2, y + h / 2);
+  ctx.translate(cx, cy);
   ctx.rotate(rot);
 
-  if (isPolaroid) {
-    // Shadow
-    ctx.shadowColor = 'rgba(0,0,0,0.18)';
-    ctx.shadowBlur = 18;
-    ctx.shadowOffsetY = 6;
-    // White polaroid card
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    roundRect(ctx, -w/2, -h/2, w, h, 4);
-    ctx.fill();
-    ctx.shadowColor = 'transparent';
-    // Photo area
-    ctx.save();
-    ctx.beginPath();
-    roundRect(ctx, -w/2, -h/2, w, photoH, 2);
-    ctx.clip();
-    if (img) drawCover(img, -w/2, -h/2, w, photoH);
-    else drawEmpty(-w/2, -h/2, w, photoH);
-    ctx.restore();
-  } else if (isCircle) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(0, 0, w / 2, 0, Math.PI * 2);
-    ctx.clip();
-    if (img) drawCover(img, -w/2, -h/2, w, h);
-    else drawEmpty(-w/2, -h/2, w, h);
-    ctx.restore();
-  } else {
-    ctx.save();
-    ctx.beginPath();
-    roundRect(ctx, -w/2, -h/2, w, h, 4);
-    ctx.clip();
-    if (img) drawCover(img, -w/2, -h/2, w, h);
-    else drawEmpty(-w/2, -h/2, w, h);
-    ctx.restore();
+  switch (slot.shape) {
+    case 'polaroid': drawPolaroid(w, h, img); break;
+    case 'circle':   drawCircle(w, h, img); break;
+    case 'framed':   drawFramed(w, h, img); break;
+    default:         drawRect(w, h, img); break;
   }
 
   ctx.restore();
 }
 
+// Framed: photo with a thin white border + drop shadow
+function drawFramed(w, h, img) {
+  const border = Math.round(w * 0.022);
+  const r = 6;
+
+  // Shadow
+  ctx.shadowColor = 'rgba(0,0,0,0.16)';
+  ctx.shadowBlur = 22;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 5;
+
+  // White frame
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); rrect(ctx, -w/2, -h/2, w, h, r + border); ctx.fill();
+  ctx.shadowColor = 'transparent';
+
+  // Photo clipped inside
+  ctx.save();
+  ctx.beginPath(); rrect(ctx, -w/2 + border, -h/2 + border, w - border*2, h - border*2, r);
+  ctx.clip();
+  if (img) drawCover(img, -w/2 + border, -h/2 + border, w - border*2, h - border*2);
+  else     drawEmpty(-w/2 + border, -h/2 + border, w - border*2, h - border*2);
+  ctx.restore();
+}
+
+// Rect: photo flush, no frame, subtle rounded corners
+function drawRect(w, h, img) {
+  const r = 4;
+  ctx.save();
+  ctx.beginPath(); rrect(ctx, -w/2, -h/2, w, h, r); ctx.clip();
+  if (img) drawCover(img, -w/2, -h/2, w, h);
+  else     drawEmpty(-w/2, -h/2, w, h);
+  ctx.restore();
+}
+
+// Polaroid: thick white frame, heavier bottom
+function drawPolaroid(w, h, img) {
+  const pad  = Math.round(w * 0.06);
+  const padB = Math.round(w * 0.18); // heavier bottom
+  const photoH = h - pad - padB;
+  const r = 5;
+
+  // Shadow
+  ctx.shadowColor = 'rgba(0,0,0,0.22)';
+  ctx.shadowBlur = 28;
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 8;
+
+  // Card
+  ctx.fillStyle = '#fefefe';
+  ctx.beginPath(); rrect(ctx, -w/2, -h/2, w, h, r); ctx.fill();
+  ctx.shadowColor = 'transparent';
+
+  // Photo area
+  ctx.save();
+  ctx.beginPath(); rrect(ctx, -w/2 + pad, -h/2 + pad, w - pad*2, photoH, 2); ctx.clip();
+  if (img) drawCover(img, -w/2 + pad, -h/2 + pad, w - pad*2, photoH);
+  else     drawEmpty(-w/2 + pad, -h/2 + pad, w - pad*2, photoH);
+  ctx.restore();
+
+  // Subtle inner shadow at top of photo area
+  const grad = ctx.createLinearGradient(0, -h/2 + pad, 0, -h/2 + pad + 30);
+  grad.addColorStop(0, 'rgba(0,0,0,0.06)');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = grad;
+  ctx.save();
+  ctx.beginPath(); rrect(ctx, -w/2 + pad, -h/2 + pad, w - pad*2, photoH, 2); ctx.clip();
+  ctx.fillRect(-w/2 + pad, -h/2 + pad, w - pad*2, 30);
+  ctx.restore();
+}
+
+// Circle
+function drawCircle(w, h, img) {
+  const r = Math.min(w, h) / 2;
+
+  // Shadow
+  ctx.shadowColor = 'rgba(0,0,0,0.18)';
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetY = 4;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.shadowColor = 'transparent';
+  if (img) drawCover(img, -r, -r, r*2, r*2);
+  else     drawEmpty(-r, -r, r*2, r*2);
+  ctx.restore();
+
+  // Ring border
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+  ctx.lineWidth = 6;
+  ctx.stroke();
+}
+
+// Cover-fit an image into a rect
 function drawCover(img, dx, dy, dw, dh) {
-  const imgRatio = img.naturalWidth / img.naturalHeight;
-  const dstRatio = dw / dh;
+  const ir = img.naturalWidth / img.naturalHeight;
+  const dr = dw / dh;
   let sx, sy, sw, sh;
-  if (imgRatio > dstRatio) {
-    sh = img.naturalHeight;
-    sw = sh * dstRatio;
-    sx = (img.naturalWidth - sw) / 2;
-    sy = 0;
-  } else {
-    sw = img.naturalWidth;
-    sh = sw / dstRatio;
-    sx = 0;
-    sy = (img.naturalHeight - sh) / 2;
-  }
+  if (ir > dr) { sh = img.naturalHeight; sw = sh * dr; sx = (img.naturalWidth - sw)/2; sy = 0; }
+  else          { sw = img.naturalWidth;  sh = sw / dr; sx = 0; sy = (img.naturalHeight - sh)/2; }
   ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
+// Empty placeholder
 function drawEmpty(x, y, w, h) {
-  ctx.fillStyle = '#ddd8d0';
+  // Soft fill
+  ctx.fillStyle = currentBg === '#111111' || currentBg === '#2c2c2c'
+    ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
   ctx.fillRect(x, y, w, h);
-  ctx.fillStyle = '#b0aa9f';
-  ctx.font = `${Math.min(w, h) * 0.18}px -apple-system, sans-serif`;
+
+  // Dashed border
+  ctx.save();
+  ctx.setLineDash([12, 8]);
+  ctx.strokeStyle = currentBg === '#111111' || currentBg === '#2c2c2c'
+    ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.18)';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(x + 6, y + 6, w - 12, h - 12);
+  ctx.restore();
+
+  // Plus icon
+  const fs = Math.min(w, h) * 0.22;
+  ctx.font = `300 ${fs}px -apple-system, sans-serif`;
+  ctx.fillStyle = currentBg === '#111111' || currentBg === '#2c2c2c'
+    ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.22)';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('+', x + w / 2, y + h / 2);
+  ctx.fillText('+', x + w/2, y + h/2);
 }
 
-function roundRect(ctx, x, y, w, h, r) {
+// Rounded rect path helper
+function rrect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + w - r, y);
@@ -473,96 +498,59 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-function render() {
-  ctx.clearRect(0, 0, EXPORT_SIZE, EXPORT_SIZE);
-  // Background
-  ctx.fillStyle = currentBg;
-  ctx.fillRect(0, 0, EXPORT_SIZE, EXPORT_SIZE);
-
-  // Sort by z-index
-  const sorted = currentTemplate.slots.map((s, i) => ({ ...s, _i: i }));
-  sorted.sort((a, b) => (a.z || 0) - (b.z || 0));
-
-  for (const slot of sorted) {
-    drawSlot(slot, photos[slot._i], EXPORT_SIZE);
-  }
-
-  updateHint();
-  updateSaveBtn();
-}
-
 // ─── Hit testing ─────────────────────────────────────────────────────────────
-function hitTest(cx, cy) {
-  // cx, cy are in display pixels relative to canvas element
-  const s = canvasDisplaySize();
-  const scale = EXPORT_SIZE / s;
-  const ex = cx * scale;
-  const ey = cy * scale;
+function hitTest(ex, ey) {
+  // ex, ey in display pixels → convert to canvas coords
+  const scale = SIZE / displaySize();
+  const px = ex * scale, py = ey * scale;
 
-  // Test slots in reverse z-order (top first)
-  const sorted = currentTemplate.slots.map((sl, i) => ({ ...sl, _i: i }));
-  sorted.sort((a, b) => (b.z || 0) - (a.z || 0));
+  const sorted = currentTemplate.slots
+    .map((s, i) => ({ ...s, _i: i }))
+    .sort((a, b) => (b.z || 0) - (a.z || 0));
 
   for (const slot of sorted) {
-    const x = slot.x * EXPORT_SIZE, y = slot.y * EXPORT_SIZE;
-    const w = slot.w * EXPORT_SIZE, h = slot.h * EXPORT_SIZE;
+    const x = slot.x * SIZE, y = slot.y * SIZE;
+    const w = slot.w * SIZE, h = slot.h * SIZE;
     const rot = -(slot.rot || 0) * Math.PI / 180;
-    const cx2 = x + w / 2, cy2 = y + h / 2;
-    // Rotate point into slot local space
-    const dx = ex - cx2, dy = ey - cy2;
+    const cx = x + w/2, cy = y + h/2;
+    const dx = px - cx, dy = py - cy;
     const lx = dx * Math.cos(rot) - dy * Math.sin(rot);
     const ly = dx * Math.sin(rot) + dy * Math.cos(rot);
-    if (lx >= -w/2 && lx <= w/2 && ly >= -h/2 && ly <= h/2) {
-      return slot._i;
-    }
+    if (lx >= -w/2 && lx <= w/2 && ly >= -h/2 && ly <= h/2) return slot._i;
   }
   return -1;
 }
 
-// ─── File input ───────────────────────────────────────────────────────────────
+// ─── Photo picking ───────────────────────────────────────────────────────────
 const fileInput = document.getElementById('file-input');
-
 fileInput.addEventListener('change', () => {
   const file = fileInput.files[0];
   if (!file || pendingSlot < 0) return;
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = e => {
     const img = new Image();
-    img.onload = () => {
-      photos[pendingSlot] = img;
-      pendingSlot = -1;
-      fileInput.value = '';
-      render();
-    };
+    img.onload = () => { photos[pendingSlot] = img; pendingSlot = -1; fileInput.value = ''; render(); };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 });
 
-// ─── Canvas click/tap ─────────────────────────────────────────────────────────
-document.getElementById('canvas-container').addEventListener('click', (e) => {
+document.getElementById('canvas-container').addEventListener('click', e => {
   const rect = canvas.getBoundingClientRect();
-  const cx = e.clientX - rect.left;
-  const cy = e.clientY - rect.top;
-  const slot = hitTest(cx, cy);
-  if (slot < 0) return;
-
-  if (photos[slot]) {
-    // Existing photo: offer replace/remove
-    if (confirm('Replace or remove this photo?\n\nOK = Replace   Cancel = Remove')) {
-      pendingSlot = slot;
-      fileInput.click();
+  const i = hitTest(e.clientX - rect.left, e.clientY - rect.top);
+  if (i < 0) return;
+  if (photos[i]) {
+    if (confirm('Replace or remove this photo?\nOK = Replace   Cancel = Remove')) {
+      pendingSlot = i; fileInput.click();
     } else {
-      photos[slot] = null;
-      render();
+      photos[i] = null; render();
     }
   } else {
-    pendingSlot = slot;
-    fileInput.click();
+    pendingSlot = i; fileInput.click();
   }
 });
 
-// ─── Template picker ──────────────────────────────────────────────────────────
+// ─── Template picker ─────────────────────────────────────────────────────────
 function buildTemplatePicker() {
   const list = document.getElementById('template-list');
   list.innerHTML = '';
@@ -570,65 +558,49 @@ function buildTemplatePicker() {
     const chip = document.createElement('button');
     chip.className = 'tpl-chip' + (t.id === currentTemplate.id ? ' active' : '');
     chip.innerHTML = `<span class="chip-emoji">${t.emoji}</span><span class="chip-name">${t.name}</span><span class="chip-count">${t.photoCount}p</span>`;
-    chip.addEventListener('click', () => selectTemplate(t));
+    chip.addEventListener('click', () => {
+      const prev = photos;
+      currentTemplate = t;
+      photos = new Array(t.photoCount).fill(null);
+      for (let i = 0; i < Math.min(prev.length, t.photoCount); i++) photos[i] = prev[i];
+      currentBg = t.bg;
+      updateSwatchActive();
+      buildTemplatePicker();
+      render();
+    });
     list.appendChild(chip);
   }
 }
 
-function selectTemplate(t) {
-  const prev = photos;
-  currentTemplate = t;
-  photos = new Array(t.photoCount).fill(null);
-  for (let i = 0; i < Math.min(prev.length, t.photoCount); i++) {
-    photos[i] = prev[i];
-  }
-  currentBg = t.bg;
-  updateSwatchActive();
-  buildTemplatePicker();
-  render();
-}
-
-// ─── Background color picker ──────────────────────────────────────────────────
+// ─── BG picker ───────────────────────────────────────────────────────────────
 function buildBgPicker() {
-  const section = document.getElementById('bg-section');
-  for (const color of BG_COLORS) {
+  const sec = document.getElementById('bg-section');
+  for (const color of BG_SWATCHES) {
     const sw = document.createElement('button');
     sw.className = 'swatch' + (color === currentBg ? ' active' : '');
     sw.style.background = color;
-    sw.style.border = color === '#1a1a1a' ? '2px solid #555' : '2px solid transparent';
+    if (color === '#111111' || color === '#2c2c2c') sw.style.border = '2.5px solid #555';
     sw.dataset.color = color;
-    sw.addEventListener('click', () => {
-      currentBg = color;
-      updateSwatchActive();
-      render();
-    });
-    section.appendChild(sw);
+    sw.addEventListener('click', () => { currentBg = color; updateSwatchActive(); render(); });
+    sec.appendChild(sw);
   }
 }
-
 function updateSwatchActive() {
-  document.querySelectorAll('.swatch').forEach(sw => {
-    sw.classList.toggle('active', sw.dataset.color === currentBg);
-  });
+  document.querySelectorAll('.swatch').forEach(sw => sw.classList.toggle('active', sw.dataset.color === currentBg));
 }
 
-// ─── UI helpers ───────────────────────────────────────────────────────────────
+// ─── UI state ────────────────────────────────────────────────────────────────
 function updateHint() {
   const filled = photos.filter(Boolean).length;
-  const hint = document.getElementById('hint');
-  if (filled === 0) {
-    hint.textContent = 'Tap a slot to add a photo';
-  } else if (filled < currentTemplate.photoCount) {
+  const el = document.getElementById('hint');
+  if (filled === 0) el.textContent = 'Tap a slot to add a photo';
+  else if (filled < currentTemplate.photoCount) {
     const left = currentTemplate.photoCount - filled;
-    hint.textContent = `${left} more slot${left > 1 ? 's' : ''} to fill`;
-  } else {
-    hint.textContent = 'All slots filled — ready to save!';
-  }
+    el.textContent = `${left} more slot${left > 1 ? 's' : ''} to fill`;
+  } else el.textContent = 'All slots filled — ready to save!';
 }
-
 function updateSaveBtn() {
-  const filled = photos.filter(Boolean).length;
-  document.getElementById('save-btn').disabled = filled === 0;
+  document.getElementById('save-btn').disabled = photos.filter(Boolean).length === 0;
 }
 
 // ─── Save & Share ─────────────────────────────────────────────────────────────
@@ -636,31 +608,20 @@ document.getElementById('save-btn').addEventListener('click', async () => {
   const btn = document.getElementById('save-btn');
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner"></div>';
-
   try {
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.97));
-    const file = new File([blob], 'scrl-page.jpg', { type: 'image/jpeg' });
-
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.97));
+    const file = new File([blob], 'scrl.jpg', { type: 'image/jpeg' });
     if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: 'scrl page',
-      });
+      await navigator.share({ files: [file], title: 'scrl' });
     } else {
-      // Fallback: trigger download
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'scrl-page.jpg';
-      a.click();
+      const a = document.createElement('a'); a.href = url; a.download = 'scrl.jpg'; a.click();
       URL.revokeObjectURL(url);
     }
   } catch (e) {
     if (e.name !== 'AbortError') alert('Could not save. Please try again.');
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Save & Share';
-    updateSaveBtn();
+    btn.disabled = false; btn.textContent = 'Save & Share'; updateSaveBtn();
   }
 });
 
@@ -669,8 +630,7 @@ resizeCanvas();
 buildTemplatePicker();
 buildBgPicker();
 render();
-
-window.addEventListener('resize', () => { resizeCanvas(); });
+window.addEventListener('resize', resizeCanvas);
 </script>
 </body>
 </html>
