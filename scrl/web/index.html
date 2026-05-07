@@ -51,6 +51,7 @@
     .el-ctrl{position:absolute;width:30px;height:30px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;z-index:20;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
     .btn-del{top:-15px;right:-15px;background:rgba(220,50,50,.9);color:#fff}
     .btn-fwd{top:-15px;left:-15px;background:rgba(30,30,30,.8);color:#fff;font-size:11px}
+    .btn-bk{bottom:-13px;left:-13px;background:rgba(30,30,30,.8);color:#fff;font-size:11px}
     .rz-handle{position:absolute;bottom:-13px;right:-13px;width:28px;height:28px;background:#fff;border:2.5px solid rgba(59,126,246,.8);border-radius:50%;cursor:se-resize;touch-action:none;z-index:20;box-shadow:0 2px 8px rgba(0,0,0,.15)}
     .el:not(.sel) .el-ctrl,.el:not(.sel) .rz-handle{display:none}
 
@@ -379,6 +380,14 @@ window.fwdEl = function(id, ev) {
   document.getElementById('e' + id).style.zIndex = el.z;
 };
 
+window.bkEl = function(id, ev) {
+  ev?.stopPropagation();
+  const el = getEl(id); if (!el) return;
+  const minZ = els.reduce((m, e) => Math.min(m, e.z), Infinity);
+  el.z = minZ - 1;
+  document.getElementById('e' + id).style.zIndex = el.z;
+};
+
 function select(id) {
   if (selId === id) return;
   if (selId) document.getElementById('e' + selId)?.classList.remove('sel');
@@ -418,6 +427,7 @@ function buildInner(el) {
   return body +
     `<button class="el-ctrl btn-del" onclick="delEl(${el.id})">×</button>` +
     `<button class="el-ctrl btn-fwd" onclick="fwdEl(${el.id},event)">↑</button>` +
+    `<button class="el-ctrl btn-bk"  onclick="bkEl(${el.id},event)">↓</button>` +
     `<div class="rz-handle"></div>`;
 }
 
@@ -445,6 +455,10 @@ function onElTouch(e, id) {
   if (e.target.classList.contains('btn-fwd')) {
     e.preventDefault(); e.stopPropagation();
     fwdEl(id, e); return;
+  }
+  if (e.target.classList.contains('btn-bk')) {
+    e.preventDefault(); e.stopPropagation();
+    bkEl(id, e); return;
   }
 
   e.preventDefault();
