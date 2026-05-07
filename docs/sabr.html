@@ -394,7 +394,11 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);
 
   <!-- LIVE MARKET STORY -->
   <div class="market-story">
-    <div class="ms-header"><span class="ms-dot"></span>Live Market Reading — what these parameters mean right now</div>
+    <div class="ms-header">
+      <span class="ms-dot"></span>
+      Live Market Reading — what these parameters mean right now
+      <button id="mode-btn" onclick="toggleMode()" style="margin-left:auto;background:var(--surface3);border:1px solid var(--border);color:var(--accent2);font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;white-space:nowrap;flex-shrink:0">Plain English</button>
+    </div>
     <div class="ms-grid">
       <div class="ms-cell">
         <div class="ms-label">Market Regime</div>
@@ -1008,71 +1012,104 @@ function updateAnnotations() {
 
 // ─── MARKET STORY ─────────────────────────────────────────────────────────────
 
+let plainMode = false;
+
+function toggleMode() {
+  plainMode = !plainMode;
+  const btn = document.getElementById('mode-btn');
+  btn.textContent     = plainMode ? 'Finance Terms' : 'Plain English';
+  btn.style.color     = plainMode ? 'var(--yellow)'  : 'var(--accent2)';
+  btn.style.borderColor = plainMode ? 'rgba(251,191,36,.4)' : 'var(--border)';
+  updateMarketStory();
+}
+
 function updateMarketStory() {
-  const p = getP();
+  const p     = getP();
   const s0pct = (p.s0 * 100).toFixed(0);
   const vvpct = (p.vv * 100).toFixed(0);
+  const dailyMove = (p.s0 * 100 / Math.sqrt(252)).toFixed(1);
 
-  // Regime
-  let regime;
+  // ── REGIME ──────────────────────────────────────────────────────────────────
+  let regimeF, regimeP;
   if (p.beta > 0.8 && p.rho < -0.2) {
-    regime = `<strong>Equity market</strong> (e.g. S&P 500, single stocks). Log-normal backbone, negative skew. The most common setup for equity index options desks.`;
+    regimeF = `<strong>Equity market</strong> (S&P 500, single stocks). Log-normal backbone (β≈1) with negative skew. Standard setup for equity index options desks.`;
+    regimeP = `<strong>This looks like a stock market.</strong> Stocks tend to crash faster than they rise — a 30% drop can happen in weeks, while a 30% gain takes months. The shape of this surface reflects that asymmetry being priced in.`;
   } else if (p.beta < 0.15) {
-    regime = `<strong>Interest rate market</strong> (e.g. EUR swaptions, US Treasuries). Normal/additive backbone because rates can go negative and move like a normal variable.`;
+    regimeF = `<strong>Interest rate market</strong> (swaptions, Treasuries). Normal backbone (β≈0) because rates can go negative and behave additively.`;
+    regimeP = `<strong>This looks like a bond/interest rate market.</strong> Unlike stock prices, interest rates can go below zero (as we saw in Europe). So the model treats them like a thermometer — not a stock multiplier. A move from 2% to 1% is the same "size" as 1% to 0%.`;
   } else if (Math.abs(p.rho) < 0.12) {
-    regime = `<strong>FX market</strong> (e.g. EUR/USD, USD/JPY). Symmetric smile because either currency can crash. Intermediate β reflects FX isn't purely log-normal.`;
+    regimeF = `<strong>FX market</strong> (EUR/USD, USD/JPY). Symmetric smile — either currency can crash. Intermediate β reflects FX isn't purely log-normal.`;
+    regimeP = `<strong>This looks like a currency market.</strong> When EUR/USD moves, either the dollar or the euro could be crashing — so the market prices fear of big moves equally in both directions. Neither side of the surface is consistently more expensive.`;
   } else if (p.rho < -0.65) {
-    regime = `<strong>Stressed equity or credit market</strong>. Extreme negative skew suggests either a crash scenario or a high-leverage single stock where the market prices serious downside risk.`;
+    regimeF = `<strong>Stressed equity or credit market.</strong> Extreme negative skew — a crash scenario or high-leverage single stock with serious downside risk priced in.`;
+    regimeP = `<strong>This looks like a market in fear.</strong> Think: a bank in 2008, a company facing a lawsuit, or the whole S&P 500 during COVID. People are rushing to buy crash insurance and the price of that insurance has surged far above what a simple model would predict.`;
   } else if (p.rho > 0.4) {
-    regime = `<strong>Commodity market</strong> (e.g. oil, natural gas). Positive ρ: prices spike upward on supply shocks, so call options command a premium over puts.`;
+    regimeF = `<strong>Commodity market</strong> (crude oil, natural gas). Positive ρ — prices spike upward on supply shocks, so call options command a premium over puts.`;
+    regimeP = `<strong>This looks like an oil or gas market.</strong> Commodity prices can spike violently upward when supply is cut — a war, an embargo, a cold winter. So the market charges more for bets on prices going up than bets on them falling. The opposite of stocks.`;
   } else {
-    regime = `<strong>Mixed / hybrid market.</strong> Parameters don't point cleanly to one asset class — could be a structured product, cross-asset or mid-skew situation.`;
+    regimeF = `<strong>Mixed market.</strong> Parameters don't map cleanly to one asset class — could be a structured product, cross-asset, or mid-skew situation.`;
+    regimeP = `<strong>A mixed picture.</strong> The parameters don't point clearly at one type of market. Try one of the scenario cards below to see a clean real-world example.`;
   }
 
-  // Vol level
-  let vol;
+  // ── VOL LEVEL ────────────────────────────────────────────────────────────────
+  let volF, volP;
   if (p.s0 >= 0.50) {
-    vol = `<strong>${s0pct}% vol is extreme</strong> — think S&P 500 in March 2020 (VIX hit 80), the 2008 financial crisis, or a single stock in a bankruptcy scare. Every option is very expensive. Selling options feels terrifying.`;
+    volF = `<strong>${s0pct}% implied vol — extreme.</strong> S&P 500 in March 2020 (VIX hit 80), or 2008. Every option is very expensive. Selling options at this level feels terrifying.`;
+    volP = `<strong>Full panic mode.</strong> At ${s0pct}%, the market expects the price to swing about ${dailyMove}% on a typical day. Buying insurance for your portfolio right now is like buying flood insurance after the river has already burst — the premium is enormous. This is what happened in March 2020 and in 2008.`;
   } else if (p.s0 >= 0.30) {
-    vol = `<strong>${s0pct}% vol is elevated</strong> — comparable to S&P 500 with VIX around 30–40 (e.g. mid-2022 rate shock, late 2018 selloff). Markets are in risk-off mode. Hedging costs are high.`;
+    volF = `<strong>${s0pct}% implied vol — elevated.</strong> VIX around 30–40. Mid-2022 rate shock, late-2018 selloff. Hedging is expensive, markets are risk-off.`;
+    volP = `<strong>The market is scared.</strong> At ${s0pct}%, expect ~${dailyMove}% typical daily swings. It's like everyone is nervously reading the news every morning. If you own stocks and want to protect them, that protection is expensive — but many people still have to buy it.`;
   } else if (p.s0 >= 0.18) {
-    vol = `<strong>${s0pct}% vol is normal</strong> — typical S&P 500 or EUR/USD baseline. VIX around 15–22. Options have reasonable time value. No extreme fear or complacency.`;
+    volF = `<strong>${s0pct}% implied vol — normal.</strong> Typical S&P 500 or EUR/USD baseline. VIX around 15–22. Reasonable option time value, no extreme fear or complacency.`;
+    volP = `<strong>Normal market conditions.</strong> At ${s0pct}%, expect roughly ${dailyMove}% daily moves. Options cost a fair amount — not cheap, not alarming. This is roughly what markets looked like in 2018–2019. Nothing unusual to report.`;
   } else if (p.s0 >= 0.10) {
-    vol = `<strong>${s0pct}% vol is low</strong> — "sell vol" environment (e.g. 2017, early 2020 pre-COVID). Options are cheap. Hedge funds run carry trades selling OTM options to collect premium.`;
+    volF = `<strong>${s0pct}% implied vol — low.</strong> "Sell vol" environment (2017, early 2020 pre-COVID). Options are cheap. Some traders sell OTM options to collect premium.`;
+    volP = `<strong>Very calm market.</strong> At ${s0pct}%, expect only ~${dailyMove}% daily moves. Insurance (options) is cheap. Some traders actually make money by selling that cheap insurance to nervous people and pocketing the premium — a strategy that works great until the market suddenly blows up.`;
   } else {
-    vol = `<strong>${s0pct}% vol is very low</strong> — almost artificially suppressed. Options are essentially free relative to history. Typically precedes sudden vol spikes when complacency ends.`;
+    volF = `<strong>${s0pct}% implied vol — extremely low.</strong> Artificially suppressed. Options are nearly free. Historically precedes sudden vol spikes.`;
+    volP = `<strong>Eerily quiet.</strong> At ${s0pct}%, options are almost free. This is like early January 2020 — nothing seemed wrong. The danger is that cheap insurance means people stop buying it, and then when something does blow up, everyone is exposed at once.`;
   }
 
-  // Skew
-  let skew;
+  // ── SKEW ────────────────────────────────────────────────────────────────────
+  let skewF, skewP;
   if (p.rho <= -0.70) {
-    skew = `<strong>Extreme negative skew (ρ=${p.rho.toFixed(2)}).</strong> A 10-delta downside put might trade at 5–8 vol points above ATM. Big institutional players — pension funds, risk managers — are paying heavily for crash protection. This is the "equity tail risk" premium.`;
+    skewF = `<strong>Extreme negative skew (ρ=${p.rho.toFixed(2)}).</strong> Downside puts trade 5–8 vol pts above ATM. Pension funds and risk managers are paying heavily for crash protection — the "equity tail risk" premium.`;
+    skewP = `<strong>Everyone is buying crash insurance.</strong> ρ=${p.rho.toFixed(2)} means when prices fall, fear explodes. Imagine a neighborhood that floods every few years — flood insurance is much pricier than the pure probability would suggest because everyone wants it at once. Here, the option that pays out if the market crashes (a put) costs dramatically more than the option that pays out if it rallies by the same amount (a call). Big institutions — pension funds, banks — are constantly competing to buy that crash insurance.`;
   } else if (p.rho <= -0.30) {
-    skew = `<strong>Moderate negative skew (ρ=${p.rho.toFixed(2)}).</strong> Standard equity index skew. The market fears a sudden drop more than a sudden rally. Put options cost more than equidistant calls — the classic "negative risk premium" for downside hedges.`;
+    skewF = `<strong>Moderate negative skew (ρ=${p.rho.toFixed(2)}).</strong> Standard equity index skew. Put options cost more than equidistant calls. The classic negative risk premium for downside hedges.`;
+    skewP = `<strong>Falling is feared more than rising.</strong> ρ=${p.rho.toFixed(2)} means: when prices drop, volatility spikes — the typical stock market pattern. If you wanted to insure against a 20% drop in your portfolio, you'd pay noticeably more than for a bet the portfolio rises 20%. This is normal in stock markets — crashes happen fast and scare everyone at once, so crash insurance always carries a premium.`;
   } else if (p.rho <= -0.05) {
-    skew = `<strong>Mild negative skew (ρ=${p.rho.toFixed(2)}).</strong> Slight preference for downside protection, but not dramatic. Common in diversified equity indices or situations where the market isn't particularly fearful of a crash.`;
+    skewF = `<strong>Mild negative skew (ρ=${p.rho.toFixed(2)}).</strong> Slight put premium over calls. Markets not particularly fearful of a crash.`;
+    skewP = `<strong>A small tilt toward crash fear, but barely.</strong> ρ=${p.rho.toFixed(2)} is close to zero. Insuring against a 20% drop costs only marginally more than betting on a 20% rise. The market is relaxed — no one is rushing to buy crash protection.`;
   } else if (p.rho <= 0.05) {
-    skew = `<strong>Near-zero skew (ρ≈0).</strong> The smile is almost symmetric — the market prices up and down moves equally. Typical for G10 FX pairs where currency crises can go both ways (dollar crash or EM currency crash).`;
+    skewF = `<strong>Near-zero skew (ρ≈0).</strong> Symmetric smile — the market prices up and down moves equally. Typical of G10 FX pairs.`;
+    skewP = `<strong>Totally balanced fear.</strong> ρ≈0 means the market is equally worried about big moves in either direction. Think EUR/USD: the dollar could crash (US debt crisis) or the euro could crash (EU breakup). Either way, protection costs the same regardless of direction.`;
   } else {
-    skew = `<strong>Positive skew (ρ=${p.rho.toFixed(2)}).</strong> Call options are pricier than equidistant puts. The market fears a sudden upside spike more than a crash. Seen in crude oil (supply shocks), natural gas, and sometimes gold during inflationary panics.`;
+    skewF = `<strong>Positive skew (ρ=${p.rho.toFixed(2)}).</strong> Call options pricier than equidistant puts. Fear of violent upside spikes — crude oil, natural gas, gold.`;
+    skewP = `<strong>Rising is feared more than falling.</strong> ρ=${p.rho.toFixed(2)} means when prices surge, volatility surges with it. Think oil during a supply war — the price can double overnight if a pipeline is bombed. Bets on prices going up (calls) cost more than bets on them falling (puts). This is rare in stock markets but common in energy.`;
   }
 
-  // Curvature
-  let curv;
+  // ── CURVATURE ────────────────────────────────────────────────────────────────
+  let curvF, curvP;
   if (p.vv >= 0.65) {
-    curv = `<strong>Very high vol-of-vol (α=${vvpct}%).</strong> Deep OTM options are dramatically expensive relative to ATM. The market is pricing in "regime uncertainty" — not just a big move, but uncertainty about how uncertain things will be. Think: March 2020 gamma explosion, 2008 Lehman week.`;
+    curvF = `<strong>Very high vol-of-vol (α=${vvpct}%).</strong> Deep OTM options are dramatically expensive. Market is pricing "regime uncertainty" — not just big moves, but unpredictability about how volatile things will be. March 2020, Lehman week.`;
+    curvP = `<strong>Uncertainty about uncertainty itself.</strong> α=${vvpct}% means it's not just that things are volatile — it's that we don't even know how volatile they'll get. Imagine forecasting a hurricane: you know it's bad, but you have no idea if it'll be Category 2 or Category 5. Options that only pay out in extreme moves (deep OTM) are very expensive because a vol spike could suddenly make those extreme outcomes likely.`;
   } else if (p.vv >= 0.35) {
-    curv = `<strong>Moderate vol-of-vol (α=${vvpct}%).</strong> Smile curvature is noticeable. OTM strangles cost meaningfully more than ATM straddles. A vega-hedged trader still faces convexity (volga) risk from wings. Typical for equity indices in normal times.`;
+    curvF = `<strong>Moderate vol-of-vol (α=${vvpct}%).</strong> Noticeable smile curvature. OTM strangles cost more than ATM straddles. Convexity (volga) risk is real. Typical for equity indices.`;
+    curvP = `<strong>Extreme bets are priced up.</strong> α=${vvpct}% means options far from today's price — either way — cost more than a simple model predicts. It's like buying a lottery ticket: the pure math says it's overpriced, but people still pay because if vol spikes, those extreme outcomes suddenly become realistic.`;
   } else if (p.vv >= 0.15) {
-    curv = `<strong>Low vol-of-vol (α=${vvpct}%).</strong> The smile is nearly flat in curvature. OTM options don't cost much more than ATM on a relative basis. Simple Black-Scholes would only slightly misprice OTM strikes here.`;
+    curvF = `<strong>Low vol-of-vol (α=${vvpct}%).</strong> Nearly flat smile curvature. OTM options barely more expensive than ATM. Black-Scholes would only slightly misprice OTM strikes.`;
+    curvP = `<strong>Volatility is fairly predictable.</strong> α=${vvpct}% means: we're not sure where the price will go, but we're fairly confident about the range of outcomes. Options that only pay off in extreme scenarios don't cost much more than the math predicts — the market doesn't think those extremes are likely.`;
   } else {
-    curv = `<strong>Near-zero vol-of-vol (α=${vvpct}%).</strong> SABR collapses toward a deterministic CEV model. The smile is almost entirely driven by β and ρ, not by stochastic vol. In practice, this is unrealistic — vol is always somewhat random.`;
+    curvF = `<strong>Near-zero vol-of-vol (α=${vvpct}%).</strong> SABR approaches a deterministic CEV model. Smile driven by β and ρ only. Unrealistic in practice.`;
+    curvP = `<strong>Volatility is treated as almost fixed.</strong> α=${vvpct}% — so low it's almost academic. The model says we know almost exactly how volatile things will be going forward. This never really happens — vol always has some randomness. Raise α to see a more realistic picture.`;
   }
 
-  document.getElementById('ms-regime').innerHTML = regime;
-  document.getElementById('ms-vol').innerHTML    = vol;
-  document.getElementById('ms-skew').innerHTML   = skew;
-  document.getElementById('ms-curv').innerHTML   = curv;
+  const f = plainMode;
+  document.getElementById('ms-regime').innerHTML = f ? regimeP : regimeF;
+  document.getElementById('ms-vol').innerHTML    = f ? volP    : volF;
+  document.getElementById('ms-skew').innerHTML   = f ? skewP   : skewF;
+  document.getElementById('ms-curv').innerHTML   = f ? curvP   : curvF;
 }
 
 // ─── SHAPE INTERPRETER ───────────────────────────────────────────────────────
