@@ -106,8 +106,20 @@
     /* ── cutout button ── */
     #cutout-btn{position:fixed;bottom:calc(76px + max(0px,env(safe-area-inset-bottom)) + 44px);right:18px;background:#fff;border:1.5px solid #ddd;border-radius:22px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.12);z-index:150;display:none;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent;white-space:nowrap}
     #cutout-btn.on{display:flex}
-    #cutout-btn.loading{color:#999;pointer-events:none}
     .cut-spin{width:13px;height:13px;border:2px solid #ccc;border-top-color:#666;border-radius:50%;animation:sp .7s linear infinite}
+
+    /* ── object selection overlay ── */
+    #sel-overlay{position:fixed;inset:0;z-index:800;background:#000;display:none;flex-direction:column}
+    #sel-overlay.on{display:flex}
+    #sel-header{display:flex;align-items:center;justify-content:space-between;padding:max(16px,env(safe-area-inset-top)) 18px 14px;flex-shrink:0}
+    #sel-cancel{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:20px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    #sel-hint{color:#fff;font-size:14px;font-weight:500;text-align:center;opacity:.85}
+    #sel-img-wrap{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    #sel-img{max-width:100%;max-height:100%;object-fit:contain;display:block;touch-action:none;-webkit-tap-highlight-color:transparent}
+    #sel-dot{position:absolute;width:28px;height:28px;border-radius:50%;border:3px solid #fff;background:rgba(59,126,246,.7);transform:translate(-50%,-50%);pointer-events:none;display:none;box-shadow:0 0 0 4px rgba(59,126,246,.3)}
+    #sel-loading{position:absolute;inset:0;background:rgba(0,0,0,.65);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;font-size:15px;font-weight:500}
+    #sel-loading.on{display:flex}
+    .big-spin{width:40px;height:40px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}
 
     /* ── settings button ── */
     #btn-settings{background:none;border:none;font-size:20px;cursor:pointer;padding:4px;-webkit-tap-highlight-color:transparent;color:#999;line-height:1}
@@ -157,7 +169,7 @@
     <button class="fr-btn" data-f="fs">Stamp</button>
   </div>
 
-  <button id="cutout-btn">✂ Cut out background</button>
+  <button id="cutout-btn">✂ Cut out object</button>
 
   <!-- Settings modal -->
   <div id="settings-modal">
@@ -234,6 +246,23 @@
   </div>
 
   <div id="overlay"></div>
+</div>
+
+<!-- Object selection overlay -->
+<div id="sel-overlay">
+  <div id="sel-header">
+    <button id="sel-cancel">Cancel</button>
+    <span id="sel-hint">Tap the object to cut out</span>
+    <div style="width:70px"></div>
+  </div>
+  <div id="sel-img-wrap">
+    <img id="sel-img" draggable="false" />
+    <div id="sel-dot"></div>
+    <div id="sel-loading">
+      <div class="big-spin"></div>
+      <span id="sel-loading-msg">Cutting out…</span>
+    </div>
+  </div>
 </div>
 
 <input type="file" id="inp-photo" accept="image/*" style="display:none">
@@ -377,6 +406,16 @@ function bindGestures(node, id) {
 }
 
 function onElTouch(e, id) {
+  // Fire button actions directly — e.preventDefault() would block onclick
+  if (e.target.classList.contains('btn-del')) {
+    e.preventDefault(); e.stopPropagation();
+    delEl(id); return;
+  }
+  if (e.target.classList.contains('btn-fwd')) {
+    e.preventDefault(); e.stopPropagation();
+    fwdEl(id, e); return;
+  }
+
   e.preventDefault();
   e.stopPropagation();
   select(id);
@@ -733,7 +772,7 @@ function coverDraw(ctx, img, dx, dy, dw, dh) {
   ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
-// ── Cutout button visibility ──────────────────────────────────────────────────
+// ── Cutout button ─────────────────────────────────────────────────────────────
 const cutoutBtn = document.getElementById('cutout-btn');
 
 function updateCutoutBtn() {
@@ -741,116 +780,280 @@ function updateCutoutBtn() {
   cutoutBtn.classList.toggle('on', !!(el && el.type === 'photo'));
 }
 
-cutoutBtn.addEventListener('click', () => doCutout(selId));
+cutoutBtn.addEventListener('click', () => openSelectOverlay(selId));
 
-// ── Cutout logic ──────────────────────────────────────────────────────────────
-async function doCutout(id) {
+// ── Object selection overlay ──────────────────────────────────────────────────
+const selOverlay  = document.getElementById('sel-overlay');
+const selImg      = document.getElementById('sel-img');
+const selDot      = document.getElementById('sel-dot');
+const selLoading  = document.getElementById('sel-loading');
+const selLoadMsg  = document.getElementById('sel-loading-msg');
+let selTargetId   = null;
+
+document.getElementById('sel-cancel').addEventListener('click', closeSelectOverlay);
+
+function openSelectOverlay(id) {
   const el = getEl(id);
   if (!el || el.type !== 'photo') return;
 
-  const rbKey = localStorage.getItem('scrl_rbkey') || '';
   const hfKey = localStorage.getItem('scrl_hfkey') || '';
-
-  if (!rbKey && !hfKey) {
-    openSettings('Add at least one API key to use background cutout.');
+  const rbKey = localStorage.getItem('scrl_rbkey') || '';
+  if (!hfKey && !rbKey) {
+    openSettings('Add at least one API key to use object cutout.');
     return;
   }
 
-  cutoutBtn.classList.add('loading');
-  cutoutBtn.innerHTML = '<div class="cut-spin"></div> Cutting out…';
+  selTargetId = id;
+  selImg.src = el.src;
+  selDot.style.display = 'none';
+  selLoading.classList.remove('on');
+  selOverlay.classList.add('on');
+}
+
+function closeSelectOverlay() {
+  selOverlay.classList.remove('on');
+  selTargetId = null;
+  selImg.src = '';
+}
+
+// Tap on the image → kick off SAM
+selImg.addEventListener('click', onSelTap);
+selImg.addEventListener('touchend', e => {
+  e.preventDefault();
+  const t = e.changedTouches[0];
+  onSelTap({ clientX: t.clientX, clientY: t.clientY });
+}, { passive: false });
+
+async function onSelTap(e) {
+  if (!selTargetId) return;
+  const el = getEl(selTargetId);
+  if (!el) return;
+
+  // Convert display coords → image pixel coords
+  const rect = selImg.getBoundingClientRect();
+  const displayX = e.clientX - rect.left;
+  const displayY = e.clientY - rect.top;
+
+  // Show tap dot
+  selDot.style.left = (e.clientX - rect.left + rect.left - rect.left) + 'px';
+  selDot.style.top  = (e.clientY - rect.top) + 'px';
+  selDot.style.left = displayX + 'px';
+  selDot.style.top  = displayY + 'px';
+  selDot.style.display = 'block';
+
+  // image natural size vs displayed size
+  const scaleX = selImg.naturalWidth  / rect.width;
+  const scaleY = selImg.naturalHeight / rect.height;
+  const imgX = Math.round(displayX * scaleX);
+  const imgY = Math.round(displayY * scaleY);
+
+  selLoading.classList.add('on');
+  selLoadMsg.textContent = 'Cutting out…';
 
   try {
-    // Downscale to max 1500px for speed, keeping aspect ratio
-    const blob = await resizeForUpload(el.src, 1500);
+    const blob = await resizeForUpload(el.src, 1024);
+    // Recalc coords for the resized image
+    const img = new Image();
+    await new Promise(r => { img.onload = r; img.src = el.src; });
+    const resizeScale = Math.min(1, 1024 / Math.max(img.naturalWidth, img.naturalHeight));
+    const rx = Math.round(imgX * resizeScale);
+    const ry = Math.round(imgY * resizeScale);
+    const rw = Math.round(img.naturalWidth  * resizeScale);
+    const rh = Math.round(img.naturalHeight * resizeScale);
 
-    let resultBlob = null;
+    const hfKey = localStorage.getItem('scrl_hfkey') || '';
+    const rbKey = localStorage.getItem('scrl_rbkey') || '';
+
+    let maskedSrc = null;
     let lastErr = '';
 
-    if (rbKey) {
-      try { resultBlob = await removeBgApi(blob, rbKey); }
-      catch (e) { lastErr = 'remove.bg: ' + e.message; console.warn(lastErr); }
+    // 1. Try HuggingFace SAM with point prompt
+    if (hfKey) {
+      try {
+        maskedSrc = await samCutout(blob, rx, ry, rw, rh, hfKey);
+      } catch (e) {
+        lastErr = 'SAM: ' + e.message;
+        console.warn(lastErr);
+      }
     }
 
-    if (!resultBlob && hfKey) {
-      try { resultBlob = await huggingFaceApi(blob, hfKey); }
-      catch (e) { lastErr += (lastErr ? ' · ' : '') + 'HuggingFace: ' + e.message; console.warn('HF failed:', e.message); }
+    // 2. Fallback: remove.bg (removes background, not object-specific — best effort)
+    if (!maskedSrc && rbKey) {
+      selLoadMsg.textContent = 'Trying remove.bg…';
+      try {
+        const rb = await removeBgApi(blob, rbKey);
+        maskedSrc = await blobToDataUrl(rb);
+      } catch (e) {
+        lastErr += ' · remove.bg: ' + e.message;
+        console.warn('remove.bg fallback failed:', e.message);
+      }
     }
 
-    if (!resultBlob) throw new Error(lastErr || 'Both APIs failed');
+    if (!maskedSrc) throw new Error(lastErr || 'All APIs failed');
 
-    const newSrc = await blobToDataUrl(resultBlob);
-    el.src = newSrc;
-    el.frame = 'none'; // transparent PNG looks bad inside a white frame
-    const imgNode = document.querySelector('#e' + id + ' img');
-    if (imgNode) { imgNode.src = newSrc; imgNode.style.objectFit = 'contain'; }
-    syncStyle(id);
+    // Apply to element
+    el.src = maskedSrc;
+    el.frame = 'none';
+    const imgNode = document.querySelector('#e' + selTargetId + ' img');
+    if (imgNode) { imgNode.src = maskedSrc; imgNode.style.objectFit = 'contain'; }
+    syncStyle(selTargetId);
+    closeSelectOverlay();
 
   } catch (err) {
+    selLoading.classList.remove('on');
+    selDot.style.display = 'none';
     alert('Cutout failed: ' + err.message + '\n\nCheck your API keys in ⚙ Settings.');
-  } finally {
-    cutoutBtn.classList.remove('loading');
-    cutoutBtn.innerHTML = '✂ Cut out background';
   }
 }
 
+// ── SAM API (HuggingFace) ─────────────────────────────────────────────────────
+async function samCutout(blob, tapX, tapY, imgW, imgH, hfKey) {
+  const base64 = await blobToBase64(blob);
+
+  // Try with point prompt (interactive SAM)
+  const SAM_MODELS = ['facebook/sam-vit-base', 'facebook/sam-vit-large'];
+
+  for (const model of SAM_MODELS) {
+    try {
+      const res = await fetchWithRetry(
+        `https://api-inference.huggingface.co/models/${model}`,
+        {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${hfKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            inputs: base64,
+            parameters: { input_points: [[[tapX, tapY]]], input_labels: [[1]] },
+          }),
+        }
+      );
+      const masks = await res.json();
+      if (Array.isArray(masks) && masks.length > 0) {
+        const best = await pickBestMask(masks, tapX, tapY, imgW, imgH);
+        return applyMaskToPhoto(blob, best, imgW, imgH);
+      }
+    } catch (e) {
+      console.warn(model, 'failed:', e.message);
+    }
+  }
+
+  // Last HF try: auto-generate all masks, pick the one under the tap
+  const res = await fetchWithRetry(
+    'https://api-inference.huggingface.co/models/facebook/sam-vit-base',
+    {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${hfKey}`, 'Content-Type': blob.type || 'image/jpeg' },
+      body: blob,
+    }
+  );
+  const masks = await res.json();
+  if (!Array.isArray(masks) || !masks.length) throw new Error('No masks returned');
+  const best = await pickBestMask(masks, tapX, tapY, imgW, imgH);
+  return applyMaskToPhoto(blob, best, imgW, imgH);
+}
+
+async function fetchWithRetry(url, opts) {
+  let res = await fetch(url, opts);
+  if (res.status === 503) {
+    // Model cold-starting — wait and retry
+    await new Promise(r => setTimeout(r, 10000));
+    res = await fetch(url, opts);
+  }
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res;
+}
+
+// Pick the mask that covers the tap point, preferring highest score
+async function pickBestMask(masks, tapX, tapY, imgW, imgH) {
+  // Sort by score desc
+  const sorted = [...masks].sort((a, b) => (b.score || 0) - (a.score || 0));
+
+  for (const m of sorted) {
+    const maskUrl = maskToDataUrl(m);
+    if (!maskUrl) continue;
+    const hits = await maskHitsPoint(maskUrl, tapX, tapY, imgW, imgH);
+    if (hits) return maskUrl;
+  }
+  // Nothing hit the exact point — return highest-scored mask
+  return maskToDataUrl(sorted[0]);
+}
+
+function maskToDataUrl(m) {
+  if (!m) return null;
+  // HF returns mask as base64 PNG string or data URL
+  if (typeof m.mask === 'string') {
+    return m.mask.startsWith('data:') ? m.mask : `data:image/png;base64,${m.mask}`;
+  }
+  return null;
+}
+
+function maskHitsPoint(maskDataUrl, x, y, imgW, imgH) {
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = imgW; c.height = imgH;
+      c.getContext('2d').drawImage(img, 0, 0, imgW, imgH);
+      const px = c.getContext('2d').getImageData(x, y, 1, 1).data;
+      res(px[0] > 128); // white pixel = object region
+    };
+    img.onerror = () => res(false);
+    img.src = maskDataUrl;
+  });
+}
+
+// Apply a binary mask PNG to the original photo → transparent PNG data URL
+async function applyMaskToPhoto(photoBlob, maskDataUrl, maskW, maskH) {
+  const photoUrl = await blobToDataUrl(photoBlob);
+  return new Promise((res, rej) => {
+    const photo = new Image(), mask = new Image();
+    let n = 0;
+    const ready = () => {
+      if (++n < 2) return;
+      const c = document.createElement('canvas');
+      c.width = photo.naturalWidth; c.height = photo.naturalHeight;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(photo, 0, 0);
+      const imgData = ctx.getImageData(0, 0, c.width, c.height);
+
+      const mc = document.createElement('canvas');
+      mc.width = c.width; mc.height = c.height;
+      mc.getContext('2d').drawImage(mask, 0, 0, c.width, c.height);
+      const maskData = mc.getContext('2d').getImageData(0, 0, c.width, c.height);
+
+      for (let i = 0; i < imgData.data.length; i += 4) {
+        imgData.data[i + 3] = maskData.data[i]; // mask red channel → alpha
+      }
+      ctx.putImageData(imgData, 0, 0);
+      res(c.toDataURL('image/png'));
+    };
+    photo.onload = ready; mask.onload = ready;
+    photo.onerror = rej;  mask.onerror = rej;
+    photo.src = photoUrl; mask.src = maskDataUrl;
+  });
+}
+
+// ── Shared API helpers ────────────────────────────────────────────────────────
 async function removeBgApi(blob, key) {
   const fd = new FormData();
   fd.append('image_file', blob, 'photo.jpg');
   fd.append('size', 'auto');
   const res = await fetch('https://api.remove.bg/v1.0/removebg', {
-    method: 'POST',
-    headers: { 'X-Api-Key': key },
-    body: fd,
+    method: 'POST', headers: { 'X-Api-Key': key }, body: fd,
   });
   if (!res.ok) {
-    const json = await res.json().catch(() => ({}));
-    throw new Error(json.errors?.[0]?.title || `HTTP ${res.status}`);
+    const j = await res.json().catch(() => ({}));
+    throw new Error(j.errors?.[0]?.title || `HTTP ${res.status}`);
   }
   return res.blob();
-}
-
-async function huggingFaceApi(blob, key) {
-  // Try RMBG-1.4 first, fall back to BiRefNet
-  const models = [
-    'briaai/RMBG-1.4',
-    'ZhengPeng7/BiRefNet',
-  ];
-  let lastErr = '';
-  for (const model of models) {
-    try {
-      const res = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': blob.type || 'image/jpeg' },
-        body: blob,
-      });
-      if (res.status === 503) {
-        // Model loading — wait and retry once
-        await new Promise(r => setTimeout(r, 8000));
-        const res2 = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': blob.type || 'image/jpeg' },
-          body: blob,
-        });
-        if (!res2.ok) throw new Error(`HTTP ${res2.status}`);
-        return res2.blob();
-      }
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.blob();
-    } catch (e) {
-      lastErr = e.message;
-    }
-  }
-  throw new Error(lastErr);
 }
 
 async function resizeForUpload(dataUrl, maxPx) {
   return new Promise(res => {
     const img = new Image();
     img.onload = () => {
-      const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+      const s = Math.min(1, maxPx / Math.max(img.width, img.height));
       const c = document.createElement('canvas');
-      c.width  = Math.round(img.width  * scale);
-      c.height = Math.round(img.height * scale);
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
       c.toBlob(b => res(b), 'image/jpeg', 0.92);
     };
@@ -860,6 +1063,14 @@ async function resizeForUpload(dataUrl, maxPx) {
 
 function blobToDataUrl(blob) {
   return new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(blob); });
+}
+
+function blobToBase64(blob) {
+  return new Promise(res => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result.split(',')[1]); // strip data:…;base64,
+    r.readAsDataURL(blob);
+  });
 }
 
 // ── Settings modal ────────────────────────────────────────────────────────────
