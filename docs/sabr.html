@@ -1092,31 +1092,46 @@ function updateShapeInterp() {
   // Overall level
   text += `The surface sits at roughly <strong>${(atmVol*100).toFixed(1)}% ATM vol</strong>. `;
 
-  // Tilt / skew
+  // Tilt / skew — fix wording when right wing is below ATM
   if (leftUp > rightUp + 0.5) {
     const diff = (leftUp - rightUp).toFixed(1);
-    text += `It tilts <strong>left (put-heavy)</strong>: the downside K=85 strike is ${leftUp.toFixed(1)}pp above ATM while K=115 is only ${rightUp.toFixed(1)}pp above — a ${diff}pp skew gap. `;
-    text += `A portfolio manager buying a 1-year 85-strike put pays ${diff}pp extra vol compared to what a flat model would assume. `;
-    text += `This extra cost is the market's "crash insurance premium." `;
+    const rightDesc = rightUp < 0
+      ? `${Math.abs(rightUp.toFixed(1))}pp <em>below</em> ATM`
+      : `${rightUp.toFixed(1)}pp above ATM`;
+    text += `It tilts <strong>left (put-heavy)</strong>: K=85 is ${leftUp.toFixed(1)}pp above ATM while K=115 is ${rightDesc} — a ${diff}pp skew gap. `;
+    if (rightUp < 0) {
+      text += `Notice the call side is actually <em>cheaper</em> than ATM vol — this is a pure skew (tilted ramp), not a flat surface. `;
+    }
+    text += `A portfolio manager buying a K=85 put pays ${diff}pp extra vol vs what a flat model would assume — that is the market's "crash insurance premium." `;
   } else if (rightUp > leftUp + 0.5) {
     const diff = (rightUp - leftUp).toFixed(1);
-    text += `It tilts <strong>right (call-heavy)</strong>: upside K=115 is ${rightUp.toFixed(1)}pp above ATM while K=85 is only ${leftUp.toFixed(1)}pp above — a ${diff}pp reverse-skew gap. `;
-    text += `This means the market fears a violent upside move more than a crash — typical in supply-constrained commodities. `;
+    const leftDesc = leftUp < 0
+      ? `${Math.abs(leftUp.toFixed(1))}pp <em>below</em> ATM`
+      : `${leftUp.toFixed(1)}pp above ATM`;
+    text += `It tilts <strong>right (call-heavy)</strong>: K=115 is ${rightUp.toFixed(1)}pp above ATM while K=85 is ${leftDesc} — a ${diff}pp reverse-skew gap. `;
+    text += `The market fears a violent upside spike more than a crash — typical in supply-constrained commodities. `;
   } else {
     text += `It is <strong>roughly symmetric</strong> — both OTM sides elevated by similar amounts (left +${leftUp.toFixed(1)}pp, right +${rightUp.toFixed(1)}pp). `;
     text += `Neither direction is feared more than the other — classic FX smile structure. `;
   }
 
-  // Wing elevation (curvature)
-  const avgWing = (leftUp + rightUp) / 2;
-  if (avgWing > 6) {
-    text += `<strong>Wings are very elevated</strong> (+${avgWing.toFixed(1)}pp average). An OTM strangle is dramatically more expensive than BS suggests — sellers of these options face large gap risk.`;
-  } else if (avgWing > 2.5) {
-    text += `<strong>Wings are moderately elevated</strong> (+${avgWing.toFixed(1)}pp average). OTM options carry a meaningful premium over Black-Scholes. Structured product desks must account for this when pricing barrier options and digitals.`;
-  } else if (avgWing > 0.5) {
-    text += `<strong>Wings barely lift</strong> (+${avgWing.toFixed(1)}pp average). The smile is nearly flat. A flat Black-Scholes model would only slightly underprice OTM options here.`;
+  // Curvature = butterfly vol (symmetric bow above ATM).
+  // Use butterfly = (leftUp + rightUp)/2 — this is the correct convexity measure,
+  // BUT don't say "flat" when there is clearly a large skew gap.
+  const butterfly = (leftUp + rightUp) / 2;
+  const skewGap   = Math.abs(leftUp - rightUp);
+
+  if (butterfly > 6) {
+    text += `<strong>Wings are very elevated</strong> on top of the skew (+${butterfly.toFixed(1)}pp butterfly). An OTM strangle is dramatically more expensive than an ATM straddle — sellers face large gap risk.`;
+  } else if (butterfly > 2.5) {
+    text += `<strong>Moderate wing convexity</strong> (+${butterfly.toFixed(1)}pp butterfly). OTM strangles cost meaningfully more than ATM straddles. Structured desks must account for this in barrier and digital pricing.`;
+  } else if (butterfly > 0.5) {
+    text += `<strong>Mild wing convexity</strong> (+${butterfly.toFixed(1)}pp butterfly). Some symmetric elevation above ATM, but not dramatic.`;
+  } else if (skewGap > 2) {
+    // Significant tilt but low butterfly — a ramp, not a bowl
+    text += `<strong>Low convexity (+${butterfly.toFixed(1)}pp butterfly)</strong> — this is a tilted ramp, not a bowl. The skew dominates: one side is expensive, the other is cheap, but OTM strangles aren't dramatically overpriced versus ATM straddles.`;
   } else {
-    text += `<strong>Almost no smile curvature.</strong> The surface is close to flat — SABR and Black-Scholes would price OTM options similarly. This is unrealistic in practice.`;
+    text += `<strong>Almost no curvature or skew</strong> — SABR and Black-Scholes give nearly the same answer for all strikes. Increase α (vol-of-vol) or push ρ away from zero to see the surface shape emerge.`;
   }
 
   document.getElementById('si-text').innerHTML = text;
