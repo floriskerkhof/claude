@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "scrl",
+    "slug": "scrl",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#faf8f5"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.scrl.app",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "scrl needs access to your photos to create scrapbook pages.",
+        "NSPhotoLibraryAddUsageDescription": "scrl saves your finished scrapbook pages to your photo library.",
+        "NSCameraUsageDescription": "scrl lets you take photos directly for your scrapbook."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#faf8f5"
+      },
+      "package": "com.scrl.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "scrl needs access to your photos to create scrapbook pages.",
+          "cameraPermission": "scrl lets you take photos directly for your scrapbook."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "scrl saves your finished scrapbook pages to your photo library.",
+          "savePhotosPermission": "scrl saves your finished scrapbook pages to your photo library."
+        }
+      ]
+    ],
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "scrl-app"
+      }
+    }
+  }
+}
