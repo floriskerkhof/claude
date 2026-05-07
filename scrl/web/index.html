@@ -139,6 +139,22 @@
     .sc-status.ok{color:#2d6a4f}
     .sc-status.err{color:#c0392b}
     #btn-savekeys{margin:0 20px;background:var(--ink);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;width:calc(100% - 40px);-webkit-tap-highlight-color:transparent}
+
+    /* ── eraser overlay ── */
+    #eraser-overlay{position:fixed;inset:0;z-index:900;background:#111;display:none;flex-direction:column}
+    #eraser-overlay.on{display:flex}
+    #eraser-header{display:flex;align-items:center;justify-content:space-between;padding:max(16px,env(safe-area-inset-top)) 18px 14px;flex-shrink:0}
+    #eraser-cancel{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:20px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    #eraser-done{background:#fff;border:none;color:#111;border-radius:20px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    #eraser-hint{color:#fff;font-size:14px;font-weight:500;opacity:.85}
+    #eraser-canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#111}
+    #eraser-canvas{touch-action:none;cursor:crosshair;display:block;max-width:100%;max-height:100%}
+    #eraser-footer{flex-shrink:0;display:flex;align-items:center;gap:12px;padding:14px 18px max(18px,env(safe-area-inset-bottom));background:#1a1a1a}
+    #eraser-mode-btn{padding:8px 16px;border-radius:20px;border:1.5px solid #666;background:transparent;color:#fff;font-size:13px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+    #eraser-mode-btn.restore{border-color:#7ecf7e;color:#7ecf7e}
+    #eraser-size{flex:1;-webkit-appearance:none;height:4px;background:#444;border-radius:2px;outline:none}
+    #eraser-size::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;background:#fff;border-radius:50%;cursor:pointer}
+    #eraser-size-lbl{color:#888;font-size:12px;min-width:28px;text-align:right}
   </style>
 </head>
 <body>
@@ -166,6 +182,7 @@
     <button class="fr-btn" data-f="fp">Polaroid</button>
     <button class="fr-btn" data-f="fs">Stamp</button>
     <button id="cutout-btn">✂ Cut out</button>
+    <button id="eraser-btn">◌ Erase</button>
   </div>
 
   <!-- Settings modal -->
@@ -259,6 +276,23 @@
       <div class="big-spin"></div>
       <span id="sel-loading-msg">Cutting out…</span>
     </div>
+  </div>
+</div>
+
+<!-- Eraser overlay -->
+<div id="eraser-overlay">
+  <div id="eraser-header">
+    <button id="eraser-cancel">Cancel</button>
+    <span id="eraser-hint">Erase mode</span>
+    <button id="eraser-done">Done</button>
+  </div>
+  <div id="eraser-canvas-wrap">
+    <canvas id="eraser-canvas"></canvas>
+  </div>
+  <div id="eraser-footer">
+    <button id="eraser-mode-btn">◌ Erase</button>
+    <input type="range" id="eraser-size" min="5" max="80" value="22">
+    <span id="eraser-size-lbl">22</span>
   </div>
 </div>
 
@@ -1097,6 +1131,153 @@ document.getElementById('btn-savekeys').addEventListener('click', () => {
     status.textContent = 'Add at least one key.';
   }
 });
+
+// ── Eraser ────────────────────────────────────────────────────────────────────
+const eraserOverlay  = document.getElementById('eraser-overlay');
+const eraserCanvas   = document.getElementById('eraser-canvas');
+const eraserModeBtn  = document.getElementById('eraser-mode-btn');
+const eraserSizeSldr = document.getElementById('eraser-size');
+const eraserSizeLbl  = document.getElementById('eraser-size-lbl');
+let eraserTargetId   = null;
+let eraserMode       = 'erase'; // 'erase' | 'restore'
+let eraserOrigCanvas = null;
+let eraserCtx        = null;
+let eraserLastPt     = null;
+let eraserBrush      = 22;
+
+document.getElementById('eraser-btn').addEventListener('click', () => openEraser(selId));
+document.getElementById('eraser-cancel').addEventListener('click', closeEraser);
+document.getElementById('eraser-done').addEventListener('click', doneEraser);
+
+eraserModeBtn.addEventListener('click', () => {
+  eraserMode = eraserMode === 'erase' ? 'restore' : 'erase';
+  const isErase = eraserMode === 'erase';
+  eraserModeBtn.textContent = isErase ? '◌ Erase' : '+ Restore';
+  eraserModeBtn.classList.toggle('restore', !isErase);
+  document.getElementById('eraser-hint').textContent = isErase ? 'Erase mode' : 'Restore mode';
+});
+
+eraserSizeSldr.addEventListener('input', () => {
+  eraserBrush = +eraserSizeSldr.value;
+  eraserSizeLbl.textContent = eraserBrush;
+});
+
+function openEraser(id) {
+  const el = getEl(id);
+  if (!el || el.type !== 'photo') return;
+  eraserTargetId = id;
+  eraserMode = 'erase';
+  eraserModeBtn.textContent = '◌ Erase';
+  eraserModeBtn.classList.remove('restore');
+  document.getElementById('eraser-hint').textContent = 'Erase mode';
+
+  const img = new Image();
+  img.onload = () => {
+    const MAX = 2000;
+    const sc = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+    eraserCanvas.width  = Math.round(img.naturalWidth  * sc);
+    eraserCanvas.height = Math.round(img.naturalHeight * sc);
+    eraserCtx = eraserCanvas.getContext('2d');
+    eraserCtx.clearRect(0, 0, eraserCanvas.width, eraserCanvas.height);
+    eraserCtx.drawImage(img, 0, 0, eraserCanvas.width, eraserCanvas.height);
+    eraserOrigCanvas = document.createElement('canvas');
+    eraserOrigCanvas.width  = eraserCanvas.width;
+    eraserOrigCanvas.height = eraserCanvas.height;
+    eraserOrigCanvas.getContext('2d').drawImage(img, 0, 0, eraserCanvas.width, eraserCanvas.height);
+    eraserOverlay.classList.add('on');
+  };
+  img.src = el.src;
+}
+
+function closeEraser() {
+  eraserOverlay.classList.remove('on');
+  eraserTargetId = null;
+  eraserOrigCanvas = null;
+  eraserCtx = null;
+  eraserLastPt = null;
+}
+
+function doneEraser() {
+  if (!eraserTargetId || !eraserCtx) { closeEraser(); return; }
+  const el = getEl(eraserTargetId);
+  if (el) {
+    el.src = eraserCanvas.toDataURL('image/png');
+    el.frame = 'none';
+    const imgNode = document.querySelector('#e' + eraserTargetId + ' img');
+    if (imgNode) { imgNode.src = el.src; imgNode.style.objectFit = 'contain'; }
+    syncStyle(eraserTargetId);
+  }
+  closeEraser();
+}
+
+function eraserBrushAt(cx, cy) {
+  if (!eraserCtx) return;
+  const r = eraserBrush;
+  if (eraserMode === 'erase') {
+    eraserCtx.save();
+    eraserCtx.globalCompositeOperation = 'destination-out';
+    eraserCtx.beginPath();
+    eraserCtx.arc(cx, cy, r, 0, Math.PI * 2);
+    eraserCtx.fill();
+    eraserCtx.restore();
+  } else {
+    eraserCtx.save();
+    eraserCtx.beginPath();
+    eraserCtx.arc(cx, cy, r, 0, Math.PI * 2);
+    eraserCtx.clip();
+    eraserCtx.drawImage(eraserOrigCanvas, 0, 0);
+    eraserCtx.restore();
+  }
+}
+
+function eraserStrokeTo(pt) {
+  if (!eraserLastPt) { eraserBrushAt(pt.x, pt.y); eraserLastPt = pt; return; }
+  const dx = pt.x - eraserLastPt.x, dy = pt.y - eraserLastPt.y;
+  const dist = Math.hypot(dx, dy);
+  const step = Math.max(1, eraserBrush / 3);
+  for (let i = 0; i <= dist; i += step) {
+    const t = dist > 0 ? i / dist : 0;
+    eraserBrushAt(eraserLastPt.x + dx * t, eraserLastPt.y + dy * t);
+  }
+  eraserLastPt = pt;
+}
+
+function eraserPtFromTouch(touch) {
+  const rect = eraserCanvas.getBoundingClientRect();
+  return {
+    x: (touch.clientX - rect.left) * eraserCanvas.width  / rect.width,
+    y: (touch.clientY - rect.top)  * eraserCanvas.height / rect.height,
+  };
+}
+
+eraserCanvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  eraserLastPt = null;
+  eraserStrokeTo(eraserPtFromTouch(e.touches[0]));
+}, { passive: false });
+
+eraserCanvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  eraserStrokeTo(eraserPtFromTouch(e.touches[0]));
+}, { passive: false });
+
+eraserCanvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  eraserLastPt = null;
+}, { passive: false });
+
+eraserCanvas.addEventListener('mousedown', e => {
+  eraserLastPt = null;
+  const rect = eraserCanvas.getBoundingClientRect();
+  eraserStrokeTo({ x: (e.clientX - rect.left) * eraserCanvas.width / rect.width, y: (e.clientY - rect.top) * eraserCanvas.height / rect.height });
+  eraserCanvas._down = true;
+});
+eraserCanvas.addEventListener('mousemove', e => {
+  if (!eraserCanvas._down) return;
+  const rect = eraserCanvas.getBoundingClientRect();
+  eraserStrokeTo({ x: (e.clientX - rect.left) * eraserCanvas.width / rect.width, y: (e.clientY - rect.top) * eraserCanvas.height / rect.height });
+});
+eraserCanvas.addEventListener('mouseup', () => { eraserCanvas._down = false; eraserLastPt = null; });
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 renderBg();
