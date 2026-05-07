@@ -55,8 +55,6 @@
     .el:not(.sel) .el-ctrl,.el:not(.sel) .rz-handle{display:none}
 
     /* ── frame toolbar ── */
-    #frame-bar{position:fixed;bottom:calc(76px + max(0px,env(safe-area-inset-bottom)));left:0;right:0;display:flex;justify-content:center;gap:7px;padding:0 16px;z-index:150;pointer-events:none;opacity:0;transition:opacity .2s}
-    #frame-bar.on{opacity:1;pointer-events:all}
     .fr-btn{padding:6px 12px;border-radius:16px;border:1.5px solid #ddd;background:#fff;font-size:12px;font-weight:500;color:#333;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.1);white-space:nowrap;-webkit-tap-highlight-color:transparent}
     .fr-btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 
@@ -103,10 +101,11 @@
     .spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
     @keyframes sp{to{transform:rotate(360deg)}}
 
-    /* ── cutout button ── */
-    #cutout-btn{position:fixed;bottom:calc(76px + max(0px,env(safe-area-inset-bottom)) + 44px);right:18px;background:#fff;border:1.5px solid #ddd;border-radius:22px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.12);z-index:150;display:none;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent;white-space:nowrap}
-    #cutout-btn.on{display:flex}
     .cut-spin{width:13px;height:13px;border:2px solid #ccc;border-top-color:#666;border-radius:50%;animation:sp .7s linear infinite}
+    #cutout-btn{padding:6px 12px;border-radius:16px;border:1.5px solid #ddd;background:#fff;font-size:12px;font-weight:500;color:#333;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.1);white-space:nowrap;-webkit-tap-highlight-color:transparent;display:none}
+    #cutout-btn.on{display:block}
+    #frame-bar{position:fixed;bottom:calc(76px + max(0px,env(safe-area-inset-bottom)));left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:7px;padding:0 16px 8px;z-index:150;pointer-events:none;opacity:0;transition:opacity .2s}
+    #frame-bar.on{opacity:1;pointer-events:all}
 
     /* ── object selection overlay ── */
     #sel-overlay{position:fixed;inset:0;z-index:800;background:#000;display:none;flex-direction:column}
@@ -167,9 +166,8 @@
     <button class="fr-btn" data-f="fw">White</button>
     <button class="fr-btn" data-f="fp">Polaroid</button>
     <button class="fr-btn" data-f="fs">Stamp</button>
+    <button id="cutout-btn">✂ Cut out</button>
   </div>
-
-  <button id="cutout-btn">✂ Cut out object</button>
 
   <!-- Settings modal -->
   <div id="settings-modal">
@@ -776,8 +774,8 @@ function coverDraw(ctx, img, dx, dy, dw, dh) {
 const cutoutBtn = document.getElementById('cutout-btn');
 
 function updateCutoutBtn() {
-  const el = selId ? getEl(selId) : null;
-  cutoutBtn.classList.toggle('on', !!(el && el.type === 'photo'));
+  // cutout-btn lives inside frame-bar which already shows/hides with photos
+  // just always show it — frame-bar visibility handles the rest
 }
 
 cutoutBtn.addEventListener('click', () => openSelectOverlay(selId));
