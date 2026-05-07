@@ -102,13 +102,43 @@
     /* spinner */
     .spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
     @keyframes sp{to{transform:rotate(360deg)}}
+
+    /* ── cutout button ── */
+    #cutout-btn{position:fixed;bottom:calc(76px + max(0px,env(safe-area-inset-bottom)) + 44px);right:18px;background:#fff;border:1.5px solid #ddd;border-radius:22px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.12);z-index:150;display:none;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+    #cutout-btn.on{display:flex}
+    #cutout-btn.loading{color:#999;pointer-events:none}
+    .cut-spin{width:13px;height:13px;border:2px solid #ccc;border-top-color:#666;border-radius:50%;animation:sp .7s linear infinite}
+
+    /* ── settings button ── */
+    #btn-settings{background:none;border:none;font-size:20px;cursor:pointer;padding:4px;-webkit-tap-highlight-color:transparent;color:#999;line-height:1}
+
+    /* ── settings modal ── */
+    #settings-modal{position:fixed;inset:0;z-index:600;display:none;align-items:flex-end;justify-content:center;padding-bottom:max(0px,env(safe-area-inset-bottom))}
+    #settings-modal.on{display:flex}
+    #settings-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.4)}
+    #settings-card{position:relative;background:#fff;border-radius:20px 20px 0 0;padding:0 0 24px;width:100%;z-index:1;max-height:90dvh;overflow-y:auto}
+    .sc-handle{width:36px;height:4px;background:#ddd;border-radius:2px;margin:12px auto 16px}
+    .sc-title{font-size:17px;font-weight:700;padding:0 20px 4px;color:var(--ink)}
+    .sc-sub{font-size:13px;color:#999;padding:0 20px 16px;line-height:1.5}
+    .sc-field{padding:0 20px 14px;display:flex;flex-direction:column;gap:6px}
+    .sc-label{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:#555}
+    .sc-label a{font-size:12px;font-weight:500;color:var(--accent);text-decoration:none}
+    .sc-inp{width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #e0dbd4;font-size:15px;background:#faf8f5;color:var(--ink);outline:none;font-family:monospace;letter-spacing:.5px}
+    .sc-inp:focus{border-color:var(--ink)}
+    .sc-status{font-size:12px;padding:0 20px 12px;min-height:18px}
+    .sc-status.ok{color:#2d6a4f}
+    .sc-status.err{color:#c0392b}
+    #btn-savekeys{margin:0 20px;background:var(--ink);color:#fff;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;width:calc(100% - 40px);-webkit-tap-highlight-color:transparent}
   </style>
 </head>
 <body>
 <div id="app">
   <header>
     <span class="title">scrl</span>
-    <button id="save-btn" disabled>Save &amp; Share</button>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button id="btn-settings" title="API Keys">⚙</button>
+      <button id="save-btn" disabled>Save &amp; Share</button>
+    </div>
   </header>
 
   <div id="stage-wrap">
@@ -125,6 +155,32 @@
     <button class="fr-btn" data-f="fw">White</button>
     <button class="fr-btn" data-f="fp">Polaroid</button>
     <button class="fr-btn" data-f="fs">Stamp</button>
+  </div>
+
+  <button id="cutout-btn">✂ Cut out background</button>
+
+  <!-- Settings modal -->
+  <div id="settings-modal">
+    <div id="settings-backdrop"></div>
+    <div id="settings-card">
+      <div class="sc-handle"></div>
+      <p class="sc-title">API Keys</p>
+      <p class="sc-sub">Used for background cutout. Both are free — add at least one.<br>Keys are saved on your device only.</p>
+      <div class="sc-field">
+        <label class="sc-label">
+          remove.bg <a href="https://www.remove.bg/api" target="_blank">Get free key →</a>
+        </label>
+        <input class="sc-inp" id="inp-rbkey" type="password" placeholder="e.g. abc123XYZ…" autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="sc-field">
+        <label class="sc-label">
+          Hugging Face <a href="https://huggingface.co/settings/tokens" target="_blank">Get free token →</a>
+        </label>
+        <input class="sc-inp" id="inp-hfkey" type="password" placeholder="hf_…" autocomplete="off" spellcheck="false" />
+      </div>
+      <p class="sc-status" id="keys-status"></p>
+      <button id="btn-savekeys">Save keys</button>
+    </div>
   </div>
 
   <div id="toolbar">
@@ -274,6 +330,7 @@ function select(id) {
   } else {
     showFrameBar(false);
   }
+  updateCutoutBtn();
 }
 
 function deselect() { select(null); }
@@ -675,6 +732,173 @@ function coverDraw(ctx, img, dx, dy, dw, dh) {
   else          { sw = img.naturalWidth;  sh = sw/dr; sx = 0; sy = (img.naturalHeight-sh)/2; }
   ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
 }
+
+// ── Cutout button visibility ──────────────────────────────────────────────────
+const cutoutBtn = document.getElementById('cutout-btn');
+
+function updateCutoutBtn() {
+  const el = selId ? getEl(selId) : null;
+  cutoutBtn.classList.toggle('on', !!(el && el.type === 'photo'));
+}
+
+cutoutBtn.addEventListener('click', () => doCutout(selId));
+
+// ── Cutout logic ──────────────────────────────────────────────────────────────
+async function doCutout(id) {
+  const el = getEl(id);
+  if (!el || el.type !== 'photo') return;
+
+  const rbKey = localStorage.getItem('scrl_rbkey') || '';
+  const hfKey = localStorage.getItem('scrl_hfkey') || '';
+
+  if (!rbKey && !hfKey) {
+    openSettings('Add at least one API key to use background cutout.');
+    return;
+  }
+
+  cutoutBtn.classList.add('loading');
+  cutoutBtn.innerHTML = '<div class="cut-spin"></div> Cutting out…';
+
+  try {
+    // Downscale to max 1500px for speed, keeping aspect ratio
+    const blob = await resizeForUpload(el.src, 1500);
+
+    let resultBlob = null;
+    let lastErr = '';
+
+    if (rbKey) {
+      try { resultBlob = await removeBgApi(blob, rbKey); }
+      catch (e) { lastErr = 'remove.bg: ' + e.message; console.warn(lastErr); }
+    }
+
+    if (!resultBlob && hfKey) {
+      try { resultBlob = await huggingFaceApi(blob, hfKey); }
+      catch (e) { lastErr += (lastErr ? ' · ' : '') + 'HuggingFace: ' + e.message; console.warn('HF failed:', e.message); }
+    }
+
+    if (!resultBlob) throw new Error(lastErr || 'Both APIs failed');
+
+    const newSrc = await blobToDataUrl(resultBlob);
+    el.src = newSrc;
+    el.frame = 'none'; // transparent PNG looks bad inside a white frame
+    const imgNode = document.querySelector('#e' + id + ' img');
+    if (imgNode) { imgNode.src = newSrc; imgNode.style.objectFit = 'contain'; }
+    syncStyle(id);
+
+  } catch (err) {
+    alert('Cutout failed: ' + err.message + '\n\nCheck your API keys in ⚙ Settings.');
+  } finally {
+    cutoutBtn.classList.remove('loading');
+    cutoutBtn.innerHTML = '✂ Cut out background';
+  }
+}
+
+async function removeBgApi(blob, key) {
+  const fd = new FormData();
+  fd.append('image_file', blob, 'photo.jpg');
+  fd.append('size', 'auto');
+  const res = await fetch('https://api.remove.bg/v1.0/removebg', {
+    method: 'POST',
+    headers: { 'X-Api-Key': key },
+    body: fd,
+  });
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new Error(json.errors?.[0]?.title || `HTTP ${res.status}`);
+  }
+  return res.blob();
+}
+
+async function huggingFaceApi(blob, key) {
+  // Try RMBG-1.4 first, fall back to BiRefNet
+  const models = [
+    'briaai/RMBG-1.4',
+    'ZhengPeng7/BiRefNet',
+  ];
+  let lastErr = '';
+  for (const model of models) {
+    try {
+      const res = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': blob.type || 'image/jpeg' },
+        body: blob,
+      });
+      if (res.status === 503) {
+        // Model loading — wait and retry once
+        await new Promise(r => setTimeout(r, 8000));
+        const res2 = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': blob.type || 'image/jpeg' },
+          body: blob,
+        });
+        if (!res2.ok) throw new Error(`HTTP ${res2.status}`);
+        return res2.blob();
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.blob();
+    } catch (e) {
+      lastErr = e.message;
+    }
+  }
+  throw new Error(lastErr);
+}
+
+async function resizeForUpload(dataUrl, maxPx) {
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width  = Math.round(img.width  * scale);
+      c.height = Math.round(img.height * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(b => res(b), 'image/jpeg', 0.92);
+    };
+    img.src = dataUrl;
+  });
+}
+
+function blobToDataUrl(blob) {
+  return new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(blob); });
+}
+
+// ── Settings modal ────────────────────────────────────────────────────────────
+const settingsModal = document.getElementById('settings-modal');
+
+function openSettings(msg) {
+  // Pre-fill saved keys (masked)
+  const rb = localStorage.getItem('scrl_rbkey') || '';
+  const hf = localStorage.getItem('scrl_hfkey') || '';
+  document.getElementById('inp-rbkey').value = rb;
+  document.getElementById('inp-hfkey').value = hf;
+  const status = document.getElementById('keys-status');
+  status.className = 'sc-status';
+  status.textContent = msg || (rb || hf ? '✓ Keys saved' : '');
+  if (rb || hf) status.className = 'sc-status ok';
+  settingsModal.classList.add('on');
+}
+
+function closeSettings() {
+  settingsModal.classList.remove('on');
+}
+
+document.getElementById('btn-settings').addEventListener('click', () => openSettings());
+document.getElementById('settings-backdrop').addEventListener('click', closeSettings);
+
+document.getElementById('btn-savekeys').addEventListener('click', () => {
+  const rb = document.getElementById('inp-rbkey').value.trim();
+  const hf = document.getElementById('inp-hfkey').value.trim();
+  if (rb) localStorage.setItem('scrl_rbkey', rb); else localStorage.removeItem('scrl_rbkey');
+  if (hf) localStorage.setItem('scrl_hfkey', hf); else localStorage.removeItem('scrl_hfkey');
+  const status = document.getElementById('keys-status');
+  if (rb || hf) {
+    status.className = 'sc-status ok';
+    status.textContent = '✓ Saved! Tap a photo then ✂ Cut out.';
+  } else {
+    status.className = 'sc-status err';
+    status.textContent = 'Add at least one key.';
+  }
+});
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 renderBg();
