@@ -221,6 +221,52 @@ select:focus{border-color:var(--accent)}
 footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);
   border-top:1px solid var(--border)}
 
+/* TAB BAR */
+.tab-bar{
+  background:rgba(7,9,15,.95);border-bottom:1px solid var(--border);
+  display:flex;padding:0 20px;gap:4px;
+}
+.tab-btn{
+  padding:10px 18px;font-size:13px;font-weight:600;
+  background:none;border:none;border-bottom:2px solid transparent;
+  color:var(--muted);cursor:pointer;transition:color .15s,border-color .15s;
+  white-space:nowrap;
+}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* CHEAT SHEET */
+#main-cheatsheet{display:none;max-width:1080px;margin:0 auto;padding:40px 20px}
+.cs-section{margin-bottom:44px}
+.cs-section-title{
+  font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--accent);margin-bottom:16px;padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+}
+.cs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.cs-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 18px;
+}
+.cs-card:hover{border-color:rgba(74,158,255,.35)}
+.cs-term{font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px;display:flex;align-items:baseline;gap:8px}
+.cs-sym{font-size:13px;color:var(--accent2);font-weight:400}
+.cs-def{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:8px}
+.cs-ex{
+  font-size:12px;color:var(--text);line-height:1.5;
+  background:var(--surface3);border-radius:6px;padding:8px 10px;
+  border-left:2px solid var(--accent);
+}
+.cs-ex strong{color:var(--accent2)}
+.cs-badge{
+  display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;
+  border-radius:4px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;
+}
+.b-sabr{background:rgba(74,158,255,.15);color:var(--accent)}
+.b-basic{background:rgba(34,211,160,.15);color:var(--green)}
+.b-concept{background:rgba(167,139,250,.15);color:var(--purple)}
+.b-number{background:rgba(251,191,36,.15);color:var(--yellow)}
+
 /* MARKET STORY PANEL */
 .market-story{
   background:var(--surface2);border:1px solid rgba(74,158,255,.25);
@@ -293,8 +339,15 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);
   <a href="#pricing">Pricing</a>
   <a href="#scenarios">Scenarios</a>
   <span class="nav-spacer"></span>
-  <a href="#glossary" style="color:var(--accent)">Glossary</a>
+  <a href="#glossary" id="nav-glossary" style="color:var(--accent)">Glossary</a>
 </nav>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('explorer')">Explorer</button>
+  <button class="tab-btn" onclick="switchTab('cheatsheet')">Cheat Sheet</button>
+</div>
+
+<div id="main-explorer">
 
 <!-- ══════════════════════════════════════
      HERO
@@ -650,6 +703,210 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);
 
   </div>
 </div>
+
+</div><!-- /main-explorer -->
+
+<!-- ══════════════════════════════════════
+     CHEAT SHEET
+     ══════════════════════════════════════ -->
+<div id="main-cheatsheet">
+  <h1 style="font-size:clamp(22px,4vw,36px);margin-bottom:6px">Cheat Sheet</h1>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:36px">Every term and input on this page, explained from scratch.</p>
+
+  <!-- SABR PARAMETERS -->
+  <div class="cs-section">
+    <div class="cs-section-title">The four SABR parameters — the sliders you control</div>
+    <div class="cs-grid">
+
+      <div class="cs-card">
+        <span class="cs-badge b-sabr">SABR Parameter</span>
+        <div class="cs-term">σ₀ <span class="cs-sym">sigma-zero — Initial Volatility</span></div>
+        <div class="cs-def">The overall level of the vol surface. Every option price on the surface scales up or down when you move this. Think of it as the "base price of uncertainty" in this market right now.</div>
+        <div class="cs-ex"><strong>In practice:</strong> σ₀ = 15% is a calm stock market (like 2017). σ₀ = 30% is stressed (late 2022 rate shock). σ₀ = 60%+ is a full crisis (March 2020). Moving this slider lifts or drops the entire surface uniformly — every strike, every maturity.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-sabr">SABR Parameter</span>
+        <div class="cs-term">α <span class="cs-sym">alpha — Vol of Vol (curvature)</span></div>
+        <div class="cs-def">How unpredictable volatility itself is. If α is high, vol can spike or collapse suddenly — the uncertainty about uncertainty is large. This lifts both wings of the smile (options far from the current price on either side get more expensive).</div>
+        <div class="cs-ex"><strong>In practice:</strong> Low α (~20%) = vol is fairly stable, smile is nearly flat. High α (~70%) = vol could explode any day, deep OTM options are very expensive. Think of α as: how likely is it that the vol level itself changes dramatically?</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-sabr">SABR Parameter</span>
+        <div class="cs-term">β <span class="cs-sym">beta — Elasticity</span></div>
+        <div class="cs-def">Controls whether ATM vol moves when the price moves. Two extremes: β=1 means vol stays the same percentage wherever the price is (equities). β=0 means vol rises as price falls — typical for interest rates which can go to zero or below.</div>
+        <div class="cs-ex"><strong>In practice:</strong> β=1 → stock falls 30%, ATM vol barely changes. β=0 → interest rates fall from 3% to 1%, ATM vol in % terms roughly triples (same absolute uncertainty, much smaller base). Most FX desks use β=0.5 as a compromise.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-sabr">SABR Parameter</span>
+        <div class="cs-term">ρ <span class="cs-sym">rho — Correlation (skew)</span></div>
+        <div class="cs-def">How strongly price moves and vol moves are linked — and in which direction. Negative ρ means when prices fall, vol spikes (equity markets). Positive ρ means when prices rise, vol spikes (some commodity markets). This tilts the entire surface left or right.</div>
+        <div class="cs-ex"><strong>In practice:</strong> S&P 500 has ρ ≈ −0.70 — crashes come with fear spikes, so put options (crash insurance) are permanently more expensive than calls. EUR/USD has ρ ≈ 0 — either currency can crash, so both sides cost the same. Crude oil can have positive ρ — supply shocks cause prices and vol to spike together.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- OPTION BASICS -->
+  <div class="cs-section">
+    <div class="cs-section-title">Option basics — inputs to the pricing panel</div>
+    <div class="cs-grid">
+
+      <div class="cs-card">
+        <span class="cs-badge b-basic">Option Basics</span>
+        <div class="cs-term">Call Option</div>
+        <div class="cs-def">A contract that pays out if the asset finishes above a certain price (the strike) at expiry. You buy a call when you think the price will rise — or when you want to cap how much you pay for something in the future.</div>
+        <div class="cs-ex"><strong>Example:</strong> You buy a call on a stock at strike K=110, currently trading at 100. If the stock goes to 130 at expiry, you collect 130−110 = $20. If it stays below 110, the call expires worthless and you lose the premium you paid.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-basic">Option Basics</span>
+        <div class="cs-term">Put Option</div>
+        <div class="cs-def">A contract that pays out if the asset finishes below the strike at expiry. You buy a put as insurance against a price fall — or as a direct bet on falling prices.</div>
+        <div class="cs-ex"><strong>Example:</strong> You own a stock at 100 and buy a put with K=85. If the stock crashes to 60, your put pays out 85−60 = $25, cushioning the loss. If the stock stays above 85, the put expires worthless — like an insurance policy you didn't need to claim.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-basic">Option Basics</span>
+        <div class="cs-term">Strike <span class="cs-sym">K</span></div>
+        <div class="cs-def">The specific price level the option bets on. The option only pays out if the asset crosses this level at expiry. Choosing the strike is choosing how far from the current price your bet or insurance kicks in.</div>
+        <div class="cs-ex"><strong>Example:</strong> With the stock at F=100 — K=100 is ATM (no directional bet). K=85 is a put 15% out of the money (needs a 15% crash to pay out). K=115 is a call 15% out of the money (needs a 15% rally to pay out).</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-basic">Option Basics</span>
+        <div class="cs-term">Forward Price <span class="cs-sym">F</span></div>
+        <div class="cs-def">Where the market expects the asset to be at expiry, after accounting for interest rates, dividends, storage costs etc. Options are priced using the forward, not the spot price today.</div>
+        <div class="cs-ex"><strong>Example:</strong> A stock is at $100 today. It pays no dividends, and the risk-free rate is 5%. In one year, the forward is $105 — the "fair" future price after carrying the position. ATM means your strike equals this forward, not today's spot.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-basic">Option Basics</span>
+        <div class="cs-term">Maturity <span class="cs-sym">T</span></div>
+        <div class="cs-def">How long until the option expires, in years. T=1.0 is one year. T=0.083 is one month (1÷12). Longer maturities give the price more time to move — options are more expensive further out, and the vol surface tends to be flatter.</div>
+        <div class="cs-ex"><strong>Example:</strong> A 1-month option on a stock gives you 30 days for the stock to move past your strike. A 2-year swaption gives the swap rate 2 years to move. The same strike that's nearly impossible to hit in 1 month might be very reachable in 2 years.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-basic">Option Basics</span>
+        <div class="cs-term">Black-Scholes</div>
+        <div class="cs-def">The classic formula for pricing options, invented in 1973. It takes a single vol number and prices any option. The problem: it assumes that one vol number applies to every strike — which is never true in real markets. SABR is built to fix this.</div>
+        <div class="cs-ex"><strong>Example:</strong> Black-Scholes would price a K=85 put and a K=115 call using the exact same vol (σ₀=20%). SABR says: no — the K=85 put deserves 23% vol because crashes come with fear spikes (negative ρ). The gap between these two prices is the whole point of this page.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VOL SURFACE CONCEPTS -->
+  <div class="cs-section">
+    <div class="cs-section-title">Vol surface concepts — what you're looking at on the charts</div>
+    <div class="cs-grid">
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Implied Volatility</div>
+        <div class="cs-def">The market's price for uncertainty about future moves, expressed as a percentage. You reverse-engineer it from an option price: "what vol number, plugged into Black-Scholes, gives this price?" It's not a historical measurement — it's forward-looking.</div>
+        <div class="cs-ex"><strong>Example:</strong> A 1-year ATM option on a stock costs $10, stock is at $100. Plugging into BS, the implied vol works out to about 20%. This means the market is pricing in roughly 1.25% typical daily moves (20% ÷ √252 trading days).</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">ATM — At The Money</div>
+        <div class="cs-def">When the strike equals the forward price. The "neutral" option — no directional bet, just pure uncertainty. ATM vol is the anchor of the whole surface. Everything else is described as how much vol differs from ATM at that strike.</div>
+        <div class="cs-ex"><strong>On the smile chart:</strong> The gold dot is ATM. The y-position of that dot is the ATM vol. For a swaption with a 5-year rate at 3.5%, a strike of 3.5% is ATM — you're not betting rates go up or down, just that they move.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">OTM — Out of The Money</div>
+        <div class="cs-def">An option that currently has no intrinsic value — the price hasn't reached the strike yet. OTM puts have K below F. OTM calls have K above F. These are pure bets on a large move, or insurance against one.</div>
+        <div class="cs-ex"><strong>Example:</strong> Stock at 100. A 70-strike put is deep OTM — the stock would need to crash 30% to pay out. These options are cheap in dollar terms but expensive in implied vol terms — especially with negative ρ — because they're essentially tail-risk insurance.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Vol Surface</div>
+        <div class="cs-def">The full 3D map of implied vol across all possible strikes (x-axis) and all maturities (y-axis). The height (z-axis) is the implied vol at each combination. In a Black-Scholes world this would be flat. In reality it's curved, tilted, and changes every day.</div>
+        <div class="cs-ex"><strong>On this page:</strong> The 3D chart in the Explorer tab is the vol surface. Drag it to rotate. Blue = low vol, red = high vol. Moving the sliders reshapes it in real time — σ₀ lifts the whole thing, ρ tilts it left or right, α bows the wings up.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Vol Smile</div>
+        <div class="cs-def">A cross-section of the vol surface at a single maturity — a 2D curve of implied vol vs strike. Named "smile" because in many markets it curves upward on both sides of ATM, like a smile. In equity markets it's more of a "smirk" — left side much higher than right.</div>
+        <div class="cs-ex"><strong>On this page:</strong> The 2D chart in the Smile section shows the smile. The blue curve is SABR; the grey dashed line is flat Black-Scholes. The gap between them at any strike is how much SABR corrects for the market reality that BS ignores.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Skew</div>
+        <div class="cs-def">The tilt of the smile — one side is higher than the other. Negative skew = left side (downside strikes, puts) is higher. Positive skew = right side (upside strikes, calls) is higher. Driven entirely by ρ in SABR.</div>
+        <div class="cs-ex"><strong>Example:</strong> In the smile stats panel, "Skew (left−right) = +6pp" means the K=85 put trades at 6 vol points above the K=115 call. If you wanted to buy crash insurance (K=85 put) and sell upside exposure (K=115 call) to fund it — a "risk reversal" — you'd pay net 6pp of vol.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Curvature</div>
+        <div class="cs-def">How much both wings of the smile bow upward symmetrically above ATM. High curvature = extreme options on both sides (puts and calls) are expensive relative to ATM options. Driven by α (vol of vol) in SABR.</div>
+        <div class="cs-ex"><strong>Measured as butterfly vol:</strong> (vol at K=85 + vol at K=115) ÷ 2 − ATM vol. If this is +4pp, both wings average 4pp above ATM. A trader buying a strangle (one OTM put + one OTM call) pays this premium — they want both wings to be cheap.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Backbone</div>
+        <div class="cs-def">How the ATM vol level shifts when the underlying price moves. If the stock drops 20%, does ATM vol stay the same, rise, or fall? The backbone is the answer, controlled by β.</div>
+        <div class="cs-ex"><strong>β=1 (log-normal backbone):</strong> ATM vol roughly unchanged when price moves. Common in equities. <strong>β=0 (normal backbone):</strong> ATM vol rises as price falls. Common in interest rates — as rates approach zero, a given basis point move feels much larger in relative terms.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Delta</div>
+        <div class="cs-def">How much the option price changes for a $1 move in the forward price. A delta of 0.5 means the option gains $0.50 for every $1 the forward rises. ATM options have delta ≈ 0.5. Deep OTM options have delta close to 0. Deep ITM options have delta close to 1.</div>
+        <div class="cs-ex"><strong>Why SABR changes delta:</strong> Because SABR gives a different implied vol at each strike, it also gives a different delta than Black-Scholes. For a K=85 put, SABR's delta is more negative than BS predicts — the option is more sensitive to price moves because it sits in a higher-vol part of the smile.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- NUMBERS -->
+  <div class="cs-section">
+    <div class="cs-section-title">Numbers and notation — reading the outputs</div>
+    <div class="cs-grid">
+
+      <div class="cs-card">
+        <span class="cs-badge b-number">Numbers</span>
+        <div class="cs-term">pp — Percentage Points</div>
+        <div class="cs-def">A direct difference between two percentages. Not "percent of a percent" — a flat addition. Going from 20% vol to 23.42% vol is a move of +3.42pp. This is how vol differences are always quoted.</div>
+        <div class="cs-ex"><strong>Watch out:</strong> +3.42pp is NOT the same as +3.42%. If vol is at 20%, a 3.42% increase would be 20% × 1.0342 = 20.68%. But +3.42pp means 20% + 3.42 = 23.42%. In vol markets, "pp" always means the absolute addition.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-number">Numbers</span>
+        <div class="cs-term">bps — Basis Points</div>
+        <div class="cs-def">Used mainly for interest rates and credit. 1 basis point = 0.01%. So 100bps = 1%. Central banks move rates in 25bps or 50bps increments. Swaption vol is often quoted in bps/year (normal vol) rather than as a percentage (log-normal vol).</div>
+        <div class="cs-ex"><strong>Example:</strong> A rate moves from 3.50% to 3.75% — that's a 25bp move. A swaption with ATM normal vol of 80bps means the market expects the swap rate to move roughly 5bps per day (80bps ÷ √252). On this page, vol is shown as a percentage — multiply by 100 to get the bps equivalent for a 1% rate.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-number">Numbers</span>
+        <div class="cs-term">Risk Reversal</div>
+        <div class="cs-def">The vol difference between an OTM call and an OTM put of equal distance from ATM. It measures the skew directly as a single number. A negative risk reversal means puts are more expensive than calls — negative skew.</div>
+        <div class="cs-ex"><strong>Example:</strong> "The 1Y 25-delta risk reversal is −4 vols" means the put that has a 25% chance of paying out trades at 4 vol points above the equivalent call. On this page, the "Skew (left−right)" number in the smile stats panel is essentially a risk reversal.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-number">Numbers</span>
+        <div class="cs-term">Butterfly</div>
+        <div class="cs-def">The average extra vol of both OTM wings above ATM. Measures curvature as a single number — how much more expensive it is to own a strangle (OTM put + OTM call) versus an ATM straddle of equal vega.</div>
+        <div class="cs-ex"><strong>Example:</strong> ATM vol = 20%. K=85 put = 23%. K=115 call = 21%. Butterfly = (23+21)/2 − 20 = 2pp. A vol trader would say "the fly is 2 vols." On this page, this is approximated by the left-wing and right-wing elevation numbers shown in the smile stats panel.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /main-cheatsheet -->
 
 <footer>
   Built with Plotly.js · Chart.js · MathJax · Hagan et al. (2002) SABR approximation
@@ -1280,6 +1537,30 @@ function loadScenario(card, key) {
   document.getElementById('sl-rho').value  = s.rho;
   onSlider();
   document.getElementById('surface').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ─── TAB SWITCHER ─────────────────────────────────────────────────────────────
+
+function switchTab(tab) {
+  const explorer   = document.getElementById('main-explorer');
+  const cheatsheet = document.getElementById('main-cheatsheet');
+  const navLinks   = document.querySelectorAll('nav a');
+  const glossaryLink = document.getElementById('nav-glossary');
+  const btns = document.querySelectorAll('.tab-btn');
+
+  btns.forEach(b => b.classList.remove('active'));
+  document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+
+  if (tab === 'explorer') {
+    explorer.style.display   = '';
+    cheatsheet.style.display = 'none';
+    navLinks.forEach(a => a.style.display = '');
+  } else {
+    explorer.style.display   = 'none';
+    cheatsheet.style.display = 'block';
+    navLinks.forEach(a => a.style.display = 'none');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 // ─── COLLAPSIBLES ─────────────────────────────────────────────────────────────
