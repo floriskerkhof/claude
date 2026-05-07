@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Yen → EUR Scanner</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #000; color: #fff; font-family: system-ui, sans-serif; height: 100dvh; overflow: hidden; }
+  #camera { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #ui { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: space-between; }
+  #topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; padding-top: max(12px, env(safe-area-inset-top)); }
+  #rate-pill { background: rgba(0,0,0,.65); border-radius: 20px; padding: 6px 14px; cursor: pointer; }
+  #rate-pill span { color: #FFD700; font-size: 13px; font-weight: 600; }
+  .icon-btn { background: rgba(0,0,0,.55); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; }
+  #rate-input-row { background: rgba(0,0,0,.8); margin: 0 12px; border-radius: 12px; padding: 8px 14px; display: none; align-items: center; gap: 10px; }
+  #rate-input-row.show { display: flex; }
+  #rate-input { background: none; border: none; color: #fff; font-size: 15px; flex: 1; outline: none; }
+  #rate-reset { color: #ff6b6b; font-size: 13px; font-weight: 600; cursor: pointer; background: none; border: none; }
+  #cards { position: fixed; top: 90px; right: 12px; width: 150px; max-height: 45vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+  .card { background: rgba(5,10,40,.88); border: 1px solid rgba(80,140,255,.45); border-radius: 14px; padding: 10px 12px; text-align: center; cursor: pointer; }
+  .card:active, .card.copied { border-color: #3DFFA0; background: rgba(5,40,20,.9); }
+  .card .eur { color: #3DFFA0; font-size: 21px; font-weight: 800; }
+  .card .jpy { color: #888; font-size: 12px; margin-top: 3px; }
+  .card .copied-lbl { color: #3DFFA0; font-size: 10px; margin-top: 3px; display: none; }
+  .card.copied .copied-lbl { display: block; }
+  #bottom { padding: 0 0 max(32px, env(safe-area-inset-bottom)) 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  #status { color: rgba(255,255,255,.7); font-size: 12px; min-height: 16px; text-align: center; padding: 0 20px; }
+  #debug-box { background: rgba(0,0,0,.82); border-radius: 10px; margin: 0 10px; padding: 8px 12px; font-size: 11px; color: #aaa; max-height: 80px; overflow-y: auto; width: calc(100% - 20px); word-break: break-word; display: none; }
+  #debug-box.show { display: block; }
+  #debug-toggle { font-size: 11px; color: rgba(255,255,255,.35); background: none; border: none; cursor: pointer; padding: 2px 0; }
+  #btns { display: flex; gap: 12px; align-items: center; }
+  #snap-btn { background: rgba(60,60,60,.9); border: 1.5px solid rgba(255,255,255,.2); border-radius: 50%; width: 54px; height: 54px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  #scan-btn { background: rgba(20,100,220,.9); border: 1.5px solid rgba(100,160,255,.55); border-radius: 32px; padding: 14px 28px; font-size: 16px; font-weight: 700; color: #fff; cursor: pointer; }
+  #scan-btn.stop { background: rgba(180,30,30,.9); border-color: rgba(255,100,100,.55); }
+</style>
+</head>
+<body>
+<video id="camera" autoplay playsinline muted></video>
+<canvas id="canvas" style="display:none"></canvas>
+
+<div id="ui">
+  <div>
+    <div id="topbar">
+      <button class="icon-btn" id="flash-btn">&#x1F526;</button>
+      <div id="rate-pill"><span id="rate-label">Loading…</span></div>
+      <button class="icon-btn" id="clear-btn">&#x2715;</button>
+    </div>
+    <div id="rate-input-row">
+      <input id="rate-input" type="number" placeholder="JPY per EUR  e.g. 162" inputmode="decimal">
+      <button id="rate-reset">Reset</button>
+    </div>
+  </div>
+
+  <div id="cards"></div>
+
+  <div id="bottom">
+    <div id="status">Ready</div>
+    <div id="debug-box"></div>
+    <button id="debug-toggle">show raw OCR text</button>
+    <div id="btns">
+      <button id="snap-btn">&#x1F4F7;</button>
+      <button id="scan-btn">&#x29BF; Auto Scan</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+const YEN_RE = /(?:[¥￥]\s*([0-9][0-9,]+)|([0-9][0-9,]+)\s*[円H])/g;
+
+let eurPerJpy = 0.0062, customJpyPerEur = null;
+let scanning = false, scanTimer = null;
+let worker = null, workerReady = false;
+let track = null, torchOn = false, showDebug = false;
+
+const activeRate = () => customJpyPerEur ? 1 / customJpyPerEur : eurPerJpy;
+const fmt = eur => eur >= 1000 ? `€${Math.round(eur).toLocaleString()}` : `€${eur.toFixed(2)}`;
+
+function extractPrices(text) {
+  const seen = new Set();
+  let m, re = new RegExp(YEN_RE.source, 'g');
+  while ((m = re.exec(text)) !== null) {
+    const v = parseFloat((m[1] ?? m[2]).replace(/,/g, ''));
+    if (v >= 100 && v < 10000000) seen.add(v);
+  }
+  return [...seen].sort((a, b) => a - b);
+}
+
+function updateRateLabel() {
+  const jpe = Math.round(1 / activeRate());
+  document.getElementById('rate-label').textContent =
+    `1 € = ¥${jpe.toLocaleString()}  (${customJpyPerEur ? 'custom' : 'live'})`;
+}
+
+fetch('https://open.er-api.com/v6/latest/JPY')
+  .then(r => r.json()).then(d => { if (d?.rates?.EUR) { eurPerJpy = d.rates.EUR; updateRateLabel(); } })
+  .catch(() => {});
+
+async function startCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1920 } }, audio: false
+    });
+    document.getElementById('camera').srcObject = stream;
+    track = stream.getVideoTracks()[0];
+  } catch(e) { setStatus('Camera error: ' + e.message); }
+}
+
+async function initOCR() {
+  setStatus('Loading OCR…');
+  worker = await Tesseract.createWorker('jpn+eng', 1, { logger: () => {} });
+  // PSM 11 = sparse text, finds text anywhere without assuming layout
+  await worker.setParameters({ tessedit_pageseg_mode: '11' });
+  workerReady = true;
+  setStatus('Ready — tap 📷 or Auto Scan');
+}
+
+function preprocess(src) {
+  const scale = Math.min(1, 1400 / Math.max(src.videoWidth || src.width, 1));
+  const c = document.createElement('canvas');
+  c.width = (src.videoWidth || src.width) * scale;
+  c.height = (src.videoHeight || src.height) * scale;
+  const ctx = c.getContext('2d');
+  ctx.filter = 'grayscale(1) contrast(2) brightness(1.15)';
+  ctx.drawImage(src, 0, 0, c.width, c.height);
+  return c;
+}
+
+async function scanFrame() {
+  if (!workerReady) return;
+  setStatus('Scanning…');
+  const video = document.getElementById('camera');
+  const processed = preprocess(video);
+  const { data: { text } } = await worker.recognize(processed);
+  if (showDebug) {
+    const box = document.getElementById('debug-box');
+    box.textContent = text.trim() || '(nothing detected)';
+  }
+  const prices = extractPrices(text);
+  if (prices.length) {
+    renderCards(prices);
+    setStatus(`Found ${prices.length} price(s) — tap card to copy`);
+  } else {
+    setStatus('No prices found');
+  }
+}
+
+function renderCards(prices) {
+  const container = document.getElementById('cards');
+  container.innerHTML = '';
+  prices.forEach(jpy => {
+    const eur = fmt(jpy * activeRate());
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<div class="eur">${eur}</div><div class="jpy">¥${jpy.toLocaleString()}</div><div class="copied-lbl">Copied!</div>`;
+    card.onclick = () => {
+      navigator.clipboard?.writeText(`¥${jpy.toLocaleString()} = ${eur}`);
+      card.classList.add('copied');
+      setTimeout(() => card.classList.remove('copied'), 1500);
+    };
+    container.appendChild(card);
+  });
+}
+
+function setStatus(msg) { document.getElementById('status').textContent = msg; }
+
+document.getElementById('snap-btn').onclick = () => scanFrame();
+document.getElementById('scan-btn').onclick = () => {
+  const btn = document.getElementById('scan-btn');
+  scanning = !scanning;
+  if (scanning) { btn.textContent = '⏹ Stop'; btn.classList.add('stop'); scanFrame(); scanTimer = setInterval(scanFrame, 4000); }
+  else { btn.textContent = '⦿ Auto Scan'; btn.classList.remove('stop'); clearInterval(scanTimer); setStatus('Ready'); }
+};
+document.getElementById('clear-btn').onclick = () => { document.getElementById('cards').innerHTML = ''; setStatus('Ready'); };
+document.getElementById('rate-pill').onclick = () => document.getElementById('rate-input-row').classList.toggle('show');
+document.getElementById('rate-input').oninput = e => { customJpyPerEur = parseFloat(e.target.value) || null; updateRateLabel(); };
+document.getElementById('rate-reset').onclick = () => { customJpyPerEur = null; document.getElementById('rate-input').value = ''; document.getElementById('rate-input-row').classList.remove('show'); updateRateLabel(); };
+document.getElementById('flash-btn').onclick = async () => {
+  if (!track) return;
+  try { torchOn = !torchOn; await track.applyConstraints({ advanced: [{ torch: torchOn }] }); document.getElementById('flash-btn').innerHTML = torchOn ? '&#x26A1;' : '&#x1F526;'; }
+  catch { setStatus('Flash not supported'); }
+};
+document.getElementById('debug-toggle').onclick = () => {
+  showDebug = !showDebug;
+  document.getElementById('debug-box').classList.toggle('show', showDebug);
+  document.getElementById('debug-toggle').textContent = showDebug ? 'hide raw OCR text' : 'show raw OCR text';
+};
+
+startCamera(); initOCR(); updateRateLabel();
+</script>
+</body>
+</html>
