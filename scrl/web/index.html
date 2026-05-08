@@ -104,7 +104,7 @@
 
     .cut-spin{width:13px;height:13px;border:2px solid #ccc;border-top-color:#666;border-radius:50%;animation:sp .7s linear infinite}
     #cutout-btn{padding:6px 12px;border-radius:16px;border:1.5px solid #ddd;background:#fff;font-size:12px;font-weight:500;color:#333;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.1);white-space:nowrap;-webkit-tap-highlight-color:transparent}
-    #frame-bar{position:fixed;bottom:calc(76px + max(0px,env(safe-area-inset-bottom)));left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:7px;padding:0 16px 8px;z-index:150;pointer-events:none;opacity:0;transition:opacity .2s}
+    #frame-bar{position:fixed;bottom:calc(136px + max(0px,env(safe-area-inset-bottom)));left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:7px;padding:0 16px 8px;z-index:150;pointer-events:none;opacity:0;transition:opacity .2s}
     #frame-bar.on{opacity:1;pointer-events:all}
 
     /* ── object selection overlay ── */
@@ -156,6 +156,18 @@
     #eraser-size{flex:1;-webkit-appearance:none;height:4px;background:#444;border-radius:2px;outline:none}
     #eraser-size::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;background:#fff;border-radius:50%;cursor:pointer}
     #eraser-size-lbl{color:#888;font-size:12px;min-width:28px;text-align:right}
+
+    /* ── page strip ── */
+    #page-strip{display:flex;align-items:center;gap:7px;padding:7px 14px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;background:var(--bg);border-top:1px solid rgba(0,0,0,.06)}
+    #page-strip::-webkit-scrollbar{display:none}
+    .pg-thumb{width:46px;height:46px;border-radius:8px;border:2.5px solid transparent;cursor:pointer;flex-shrink:0;overflow:hidden;-webkit-tap-highlight-color:transparent;position:relative;background:#e0dbd4;box-shadow:0 1px 6px rgba(0,0,0,.1)}
+    .pg-thumb.active{border-color:var(--ink)}
+    .pg-thumb canvas{width:100%;height:100%;display:block}
+    .pg-del{position:absolute;top:-6px;right:-6px;width:17px;height:17px;background:rgba(220,50,50,.9);color:#fff;border:none;border-radius:50%;font-size:10px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;padding:0;z-index:2}
+    #btn-addpage{width:46px;height:46px;border-radius:8px;border:2px dashed #ccc;background:none;color:#bbb;font-size:24px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+
+    /* ── video element ── */
+    .el video{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none;border-radius:inherit}
   </style>
 </head>
 <body>
@@ -210,8 +222,14 @@
     </div>
   </div>
 
+  <!-- Page strip -->
+  <div id="page-strip">
+    <button id="btn-addpage">+</button>
+  </div>
+
   <div id="toolbar">
     <button class="tb-btn" id="btn-photo"><span class="tb-icon">📷</span><span class="tb-lbl">Photo</span></button>
+    <button class="tb-btn" id="btn-video"><span class="tb-icon">🎬</span><span class="tb-lbl">Video</span></button>
     <button class="tb-btn" id="btn-sticker"><span class="tb-icon">✦</span><span class="tb-lbl">Sticker</span></button>
     <button class="tb-btn" id="btn-text"><span class="tb-icon" style="font-size:20px;font-weight:800">T</span><span class="tb-lbl">Text</span></button>
     <button class="tb-btn" id="btn-bg"><span class="tb-icon">◧</span><span class="tb-lbl">Background</span></button>
@@ -299,6 +317,7 @@
 
 <input type="file" id="inp-photo" accept="image/*" style="display:none">
 <input type="file" id="inp-bg"    accept="image/*" style="display:none">
+<input type="file" id="inp-video" accept="video/*" style="display:none">
 
 <script>
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -325,12 +344,13 @@ const FONT_MAP = {
 };
 
 // ── State ────────────────────────────────────────────────────────────────────
-let els = [];
-let bg = { color: '#f5f0e8', img: null };
+let pages = [{ id: 1, bg: { color: '#f5f0e8', img: null }, els: [] }];
+let currentPageIdx = 0;
+let pageUid = 2;
 let selId = null;
 let uid = 1, uz = 1;
 let txtFont = 'sys', txtColor = '#1a1a1a';
-let gesture = null; // active gesture state
+let gesture = null;
 
 // ── Stage scale ──────────────────────────────────────────────────────────────
 const stage = document.getElementById('stage');
@@ -345,7 +365,9 @@ window.addEventListener('resize', applyScale);
 applyScale();
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-function getEl(id) { return els.find(e => e.id === id); }
+function curEls() { return pages[currentPageIdx].els; }
+function curBg()  { return pages[currentPageIdx].bg; }
+function getEl(id) { return curEls().find(e => e.id === id); }
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function readFile(file) {
@@ -358,19 +380,21 @@ function loadImg(src) {
 
 // ── Element CRUD ─────────────────────────────────────────────────────────────
 function addEl(el) {
-  els.push(el);
+  curEls().push(el);
   mountEl(el);
   select(el.id);
   updateSaveBtn();
   document.getElementById('stage-empty').style.display = 'none';
+  queueStripUpdate();
 }
 
 window.delEl = function(id) {
-  els = els.filter(e => e.id !== id);
+  pages[currentPageIdx].els = curEls().filter(e => e.id !== id);
   document.getElementById('e' + id)?.remove();
   if (selId === id) { selId = null; showFrameBar(false); }
   updateSaveBtn();
-  if (!els.length) document.getElementById('stage-empty').style.display = '';
+  if (!curEls().length) document.getElementById('stage-empty').style.display = '';
+  queueStripUpdate();
 };
 
 window.fwdEl = function(id, ev) {
@@ -383,7 +407,7 @@ window.fwdEl = function(id, ev) {
 window.bkEl = function(id, ev) {
   ev?.stopPropagation();
   const el = getEl(id); if (!el) return;
-  const minZ = els.reduce((m, e) => Math.min(m, e.z), Infinity);
+  const minZ = curEls().reduce((m, e) => Math.min(m, e.z), Infinity);
   el.z = minZ - 1;
   document.getElementById('e' + id).style.zIndex = el.z;
 };
@@ -418,6 +442,8 @@ function buildInner(el) {
   let body = '';
   if (el.type === 'photo') {
     body = `<img src="${el.src}" draggable="false">`;
+  } else if (el.type === 'video') {
+    body = `<video src="${el.src}" autoplay loop muted playsinline></video>`;
   } else if (el.type === 'stk') {
     body = `<div class="stk" style="font-size:${el.w * 0.7}px">${el.emoji}</div>`;
   } else {
@@ -435,7 +461,7 @@ function syncStyle(id) {
   const el = getEl(id);
   const node = document.getElementById('e' + id);
   if (!el || !node) return;
-  node.style.cssText = `left:${el.x}px;top:${el.y}px;width:${el.w}px;height:${el.h}px;transform:translate(-50%,-50%) rotate(${el.rot}deg);z-index:${el.z}`;
+  node.style.cssText = `left:${el.x}px;top:${el.y}px;width:${el.w}px;height:${el.h}px;transform:translate(-50%,-50%) rotate(${el.rot}deg);z-index:${el.z}${el.type==='video'?';overflow:hidden;border-radius:5px':''}`;
   node.classList.remove('fw','fp','fs');
   if (el.type === 'photo' && el.frame && el.frame !== 'none') node.classList.add(el.frame);
   if (el.id === selId) node.classList.add('sel');
@@ -620,47 +646,59 @@ document.getElementById('btn-addtxt').addEventListener('click', () => {
 });
 
 // ── Background ───────────────────────────────────────────────────────────────
-document.getElementById('btn-bg').addEventListener('click', () => openDrawer('drw-bg'));
+document.getElementById('btn-bg').addEventListener('click', () => {
+  updateBgSwatches();
+  document.getElementById('btn-bgclear').style.display = curBg().img ? '' : 'none';
+  openDrawer('drw-bg');
+});
 document.getElementById('btn-bgphoto').addEventListener('click', () => document.getElementById('inp-bg').click());
 document.getElementById('btn-bgclear').addEventListener('click', () => {
-  bg.img = null; renderBg();
+  curBg().img = null; renderBg();
   document.getElementById('btn-bgclear').style.display = 'none';
+  queueStripUpdate();
 });
 
 document.getElementById('inp-bg').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
-  bg.img = await readFile(file);
+  curBg().img = await readFile(file);
   e.target.value = '';
   renderBg();
   document.getElementById('btn-bgclear').style.display = '';
   closeDrawers();
+  queueStripUpdate();
 });
 
 function buildBgSwatches() {
   const cont = document.getElementById('bg-colors');
   BG_COLORS.forEach(c => {
     const sw = document.createElement('button');
-    sw.className = 'bg-sw' + (c === bg.color ? ' on' : '');
+    sw.className = 'bg-sw';
     sw.style.background = c;
     if (c === '#111111' || c === '#2c2c2c') sw.style.border = '3px solid #666';
     sw.dataset.c = c;
-    sw.addEventListener('click', () => { bg.color = c; bg.img = null; renderBg(); document.getElementById('btn-bgclear').style.display = 'none'; updateBgSwatches(); });
+    sw.addEventListener('click', () => {
+      curBg().color = c; curBg().img = null;
+      renderBg();
+      document.getElementById('btn-bgclear').style.display = 'none';
+      updateBgSwatches();
+      queueStripUpdate();
+    });
     cont.appendChild(sw);
   });
 }
 
 function updateBgSwatches() {
-  document.querySelectorAll('.bg-sw').forEach(sw => sw.classList.toggle('on', sw.dataset.c === bg.color && !bg.img));
+  document.querySelectorAll('.bg-sw').forEach(sw => sw.classList.toggle('on', sw.dataset.c === curBg().color && !curBg().img));
 }
 
 function renderBg() {
-  if (bg.img) {
-    stage.style.backgroundImage = `url(${bg.img})`;
+  if (curBg().img) {
+    stage.style.backgroundImage = `url(${curBg().img})`;
     stage.style.backgroundSize = 'cover';
     stage.style.backgroundPosition = 'center';
   } else {
     stage.style.backgroundImage = 'none';
-    stage.style.backgroundColor = bg.color;
+    stage.style.backgroundColor = curBg().color;
   }
 }
 
@@ -683,45 +721,50 @@ overlay.addEventListener('click', closeDrawers);
 
 // ── Save & Share ──────────────────────────────────────────────────────────────
 function updateSaveBtn() {
-  document.getElementById('save-btn').disabled = els.length === 0;
+  const hasContent = pages.some(p => p.els.length > 0) || pages.length > 1;
+  const btn = document.getElementById('save-btn');
+  btn.disabled = !hasContent;
+  btn.innerHTML = pages.length > 1 ? 'Save Slideshow' : 'Save &amp; Share';
 }
 
 document.getElementById('save-btn').addEventListener('click', async () => {
   const btn = document.getElementById('save-btn');
   btn.disabled = true; btn.innerHTML = '<div class="spin"></div>';
   try {
-    const c = await exportCanvas();
-    const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.97));
-    const file = new File([blob], 'scrl.jpg', { type: 'image/jpeg' });
-    if (navigator.share && navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'scrl' });
+    if (pages.length === 1) {
+      const c = await exportPageCanvas(0);
+      const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.97));
+      const file = new File([blob], 'scrl.jpg', { type: 'image/jpeg' });
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'scrl' });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'scrl.jpg'; a.click();
+        URL.revokeObjectURL(url);
+      }
     } else {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = 'scrl.jpg'; a.click();
-      URL.revokeObjectURL(url);
+      await exportSlideshow();
     }
   } catch(err) {
     if (err.name !== 'AbortError') alert('Could not save. Please try again.');
   } finally {
-    btn.innerHTML = 'Save &amp; Share';
     updateSaveBtn();
   }
 });
 
 // ── Export to canvas ─────────────────────────────────────────────────────────
-async function exportCanvas() {
+async function exportPageCanvas(pageIdx) {
+  const page = pages[pageIdx];
   const c = document.createElement('canvas');
   c.width = EXPORT_SIZE; c.height = EXPORT_SIZE;
   const ctx = c.getContext('2d');
 
-  // Background
-  if (bg.img) {
-    const img = await loadImg(bg.img);
+  if (page.bg.img) {
+    const img = await loadImg(page.bg.img);
     coverDraw(ctx, img, 0, 0, EXPORT_SIZE, EXPORT_SIZE);
   } else {
-    ctx.fillStyle = bg.color;
+    ctx.fillStyle = page.bg.color;
     ctx.fillRect(0, 0, EXPORT_SIZE, EXPORT_SIZE);
-    // Paper grain
     ctx.save(); ctx.globalAlpha = 0.018;
     for (let i = 0; i < 12000; i++) {
       const v = Math.random() < .5 ? 255 : 0;
@@ -731,9 +774,7 @@ async function exportCanvas() {
     ctx.restore();
   }
 
-  // Elements by z-order
-  const sorted = [...els].sort((a, b) => a.z - b.z);
-
+  const sorted = [...page.els].sort((a, b) => a.z - b.z);
   for (const el of sorted) {
     ctx.save();
     ctx.translate(el.x * SC, el.y * SC);
@@ -743,6 +784,14 @@ async function exportCanvas() {
     if (el.type === 'photo') {
       const img = await loadImg(el.src);
       drawPhotoExport(ctx, img, w, h, el.frame);
+    } else if (el.type === 'video') {
+      const domVid = pageIdx === currentPageIdx
+        ? document.querySelector(`#e${el.id} video`) : null;
+      if (domVid && domVid.readyState >= 2) {
+        ctx.save(); rrect(ctx, -w/2, -h/2, w, h, 5); ctx.clip();
+        ctx.drawImage(domVid, -w/2, -h/2, w, h);
+        ctx.restore();
+      }
     } else if (el.type === 'stk') {
       ctx.font = `${w * 0.7}px serif`;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -756,11 +805,85 @@ async function exportCanvas() {
       const lines = el.text.split('\n');
       lines.forEach((line, i) => ctx.fillText(line, 0, (i - (lines.length - 1) / 2) * fs * 1.3));
     }
-
     ctx.restore();
   }
-
   return c;
+}
+
+// ── Slideshow export ──────────────────────────────────────────────────────────
+async function exportSlideshow() {
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) {
+    // Fallback: download each page as a JPEG
+    for (let i = 0; i < pages.length; i++) {
+      const c = await exportPageCanvas(i);
+      const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.97));
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `scrl_${i+1}.jpg`; a.click();
+      URL.revokeObjectURL(url);
+      await sleep(200);
+    }
+    return;
+  }
+
+  const recCanvas = document.createElement('canvas');
+  recCanvas.width = EXPORT_SIZE; recCanvas.height = EXPORT_SIZE;
+  const ctx = recCanvas.getContext('2d');
+
+  const mimeType = ['video/mp4','video/webm;codecs=vp9','video/webm']
+    .find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+  const ext = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
+  const stream = recCanvas.captureStream(30);
+  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8_000_000 });
+  const chunks = [];
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+  return new Promise((resolve, reject) => {
+    recorder.onstop = async () => {
+      try {
+        const blob = new Blob(chunks, { type: mimeType });
+        const file = new File([blob], `scrl.${ext}`, { type: mimeType });
+        if (navigator.share && navigator.canShare?.({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'scrl' });
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = `scrl.${ext}`; a.click();
+          URL.revokeObjectURL(url);
+        }
+        resolve();
+      } catch(err) { reject(err); }
+    };
+
+    recorder.start(100);
+
+    (async () => {
+      try {
+        const HOLD_MS = 3000, FADE_MS = 400, FRAME_MS = 33;
+        for (let i = 0; i < pages.length; i++) {
+          const pageCanvas = await exportPageCanvas(i);
+          const holdEnd = Date.now() + HOLD_MS;
+          while (Date.now() < holdEnd) {
+            ctx.drawImage(pageCanvas, 0, 0);
+            await sleep(FRAME_MS);
+          }
+          if (i < pages.length - 1) {
+            const steps = Math.round(FADE_MS / FRAME_MS);
+            for (let s = 0; s <= steps; s++) {
+              ctx.drawImage(pageCanvas, 0, 0);
+              ctx.fillStyle = `rgba(0,0,0,${s / steps})`;
+              ctx.fillRect(0, 0, EXPORT_SIZE, EXPORT_SIZE);
+              await sleep(FRAME_MS);
+            }
+          }
+        }
+        recorder.stop();
+      } catch(err) {
+        try { recorder.stop(); } catch(_) {}
+        reject(err);
+      }
+    })();
+  });
 }
 
 function drawPhotoExport(ctx, img, w, h, frame) {
@@ -816,6 +939,23 @@ function coverDraw(ctx, img, dx, dy, dw, dh) {
   else          { sw = img.naturalWidth;  sh = sw/dr; sx = 0; sy = (img.naturalHeight-sh)/2; }
   ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
 }
+
+// ── Add video ────────────────────────────────────────────────────────────────
+document.getElementById('btn-video').addEventListener('click', () => document.getElementById('inp-video').click());
+
+document.getElementById('inp-video').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const src = URL.createObjectURL(file);
+  e.target.value = '';
+  addEl({
+    id: uid++, type: 'video', src, frame: 'none',
+    x: BASE/2 + (Math.random()-.5)*60,
+    y: BASE/2 + (Math.random()-.5)*60,
+    w: BASE * .62, h: BASE * .46,
+    rot: (Math.random()-.5) * 6,
+    z: uz++,
+  });
+});
 
 // ── Cutout button ─────────────────────────────────────────────────────────────
 const cutoutBtn = document.getElementById('cutout-btn');
@@ -958,6 +1098,7 @@ async function onSelTap(e) {
     const imgNode = document.querySelector('#e' + selTargetId + ' img');
     if (imgNode) { imgNode.src = maskedSrc; imgNode.style.objectFit = 'contain'; }
     syncStyle(selTargetId);
+    queueStripUpdate();
     closeSelectOverlay();
 
   } catch (err) {
@@ -1220,6 +1361,7 @@ function doneEraser() {
     const imgNode = document.querySelector('#e' + eraserTargetId + ' img');
     if (imgNode) { imgNode.src = el.src; imgNode.style.objectFit = 'contain'; }
     syncStyle(eraserTargetId);
+    queueStripUpdate();
   }
   closeEraser();
 }
@@ -1293,10 +1435,132 @@ eraserCanvas.addEventListener('mousemove', e => {
 });
 eraserCanvas.addEventListener('mouseup', () => { eraserCanvas._down = false; eraserLastPt = null; });
 
+// ── Page management ──────────────────────────────────────────────────────────
+function addPage() {
+  const page = { id: pageUid++, bg: { color: '#f5f0e8', img: null }, els: [] };
+  pages.push(page);
+  switchPage(pages.length - 1);
+}
+
+function deletePage(idx) {
+  if (pages.length <= 1) return;
+  pages.splice(idx, 1);
+  const newIdx = Math.max(0, Math.min(idx, pages.length - 1));
+  // Adjust currentPageIdx without triggering switchPage unnecessarily
+  if (currentPageIdx >= pages.length) currentPageIdx = pages.length - 1;
+  switchPage(Math.min(currentPageIdx, pages.length - 1));
+}
+
+function switchPage(idx) {
+  closeDrawers();
+  deselect();
+  currentPageIdx = idx;
+  stage.querySelectorAll('.el').forEach(n => n.remove());
+  curEls().forEach(el => mountEl(el));
+  renderBg();
+  document.getElementById('stage-empty').style.display = curEls().length ? 'none' : '';
+  updateSaveBtn();
+  updatePageStrip();
+}
+
+document.getElementById('btn-addpage').addEventListener('click', addPage);
+
+// ── Page thumbnails ───────────────────────────────────────────────────────────
+const thumbImgCache = new Map();
+
+function loadThumbImg(src, key) {
+  return new Promise(res => {
+    if (thumbImgCache.has(key)) { res(thumbImgCache.get(key)); return; }
+    const img = new Image();
+    img.onload = () => { thumbImgCache.set(key, img); res(img); };
+    img.onerror = () => res(null);
+    img.src = src;
+  });
+}
+
+async function renderThumbnail(page, canvas) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const sc = W / BASE;
+  ctx.clearRect(0, 0, W, H);
+
+  if (page.bg.img) {
+    const img = await loadThumbImg(page.bg.img, 'bg' + page.id);
+    if (img) coverDraw(ctx, img, 0, 0, W, H);
+    else { ctx.fillStyle = page.bg.color; ctx.fillRect(0, 0, W, H); }
+  } else {
+    ctx.fillStyle = page.bg.color;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  const sorted = [...page.els].sort((a, b) => a.z - b.z);
+  for (const el of sorted) {
+    ctx.save();
+    ctx.translate(el.x * sc, el.y * sc);
+    ctx.rotate(el.rot * Math.PI / 180);
+    const w = el.w * sc, h = el.h * sc;
+    if (el.type === 'photo') {
+      const img = await loadThumbImg(el.src, 'el' + el.id);
+      if (img) {
+        ctx.save(); ctx.beginPath(); ctx.rect(-w/2, -h/2, w, h); ctx.clip();
+        coverDraw(ctx, img, -w/2, -h/2, w, h); ctx.restore();
+      }
+    } else if (el.type === 'video') {
+      const domVid = document.querySelector(`#e${el.id} video`);
+      if (domVid && domVid.readyState >= 2) {
+        ctx.save(); ctx.beginPath(); ctx.rect(-w/2, -h/2, w, h); ctx.clip();
+        ctx.drawImage(domVid, -w/2, -h/2, w, h); ctx.restore();
+      } else {
+        ctx.fillStyle = '#2a2a2a'; ctx.fillRect(-w/2, -h/2, w, h);
+        ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.font = `${Math.max(8,w*.4)}px serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('▶', 0, 0);
+      }
+    } else if (el.type === 'stk') {
+      ctx.font = `${Math.max(6, w * 0.7)}px serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(el.emoji, 0, 0);
+    }
+    ctx.restore();
+  }
+}
+
+let stripDebounce = null;
+function queueStripUpdate() {
+  clearTimeout(stripDebounce);
+  stripDebounce = setTimeout(updatePageStrip, 350);
+}
+
+function updatePageStrip() {
+  const strip = document.getElementById('page-strip');
+  const addBtn = document.getElementById('btn-addpage');
+  strip.querySelectorAll('.pg-thumb').forEach(n => n.remove());
+
+  pages.forEach((page, idx) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'pg-thumb' + (idx === currentPageIdx ? ' active' : '');
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 120; canvas.height = 120;
+    thumb.appendChild(canvas);
+
+    if (pages.length > 1) {
+      const del = document.createElement('button');
+      del.className = 'pg-del'; del.textContent = '×';
+      del.addEventListener('click', e => { e.stopPropagation(); deletePage(idx); });
+      thumb.appendChild(del);
+    }
+
+    thumb.addEventListener('click', () => { if (idx !== currentPageIdx) switchPage(idx); });
+    strip.insertBefore(thumb, addBtn);
+    renderThumbnail(page, canvas);
+  });
+}
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 renderBg();
 buildStickerGrid();
 buildBgSwatches();
+updatePageStrip();
 </script>
 </body>
 </html>
