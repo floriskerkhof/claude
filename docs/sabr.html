@@ -220,6 +220,167 @@ select:focus{border-color:var(--accent)}
 
 footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);
   border-top:1px solid var(--border)}
+
+/* TAB BAR */
+.tab-bar{
+  background:rgba(7,9,15,.95);border-bottom:1px solid var(--border);
+  display:flex;padding:0 20px;gap:4px;
+}
+.tab-btn{
+  padding:10px 18px;font-size:13px;font-weight:600;
+  background:none;border:none;border-bottom:2px solid transparent;
+  color:var(--muted);cursor:pointer;transition:color .15s,border-color .15s;
+  white-space:nowrap;
+}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* CHEAT SHEET */
+#main-cheatsheet{display:none;max-width:1080px;margin:0 auto;padding:40px 20px}
+.cs-section{margin-bottom:44px}
+.cs-section-title{
+  font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--accent);margin-bottom:16px;padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+}
+.cs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.cs-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px 18px;
+}
+.cs-card:hover{border-color:rgba(74,158,255,.35)}
+.cs-term{font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px;display:flex;align-items:baseline;gap:8px}
+.cs-sym{font-size:13px;color:var(--accent2);font-weight:400}
+.cs-def{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:8px}
+.cs-ex{
+  font-size:12px;color:var(--text);line-height:1.5;
+  background:var(--surface3);border-radius:6px;padding:8px 10px;
+  border-left:2px solid var(--accent);
+}
+.cs-ex strong{color:var(--accent2)}
+.cs-badge{
+  display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;
+  border-radius:4px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;
+}
+.b-sabr{background:rgba(74,158,255,.15);color:var(--accent)}
+.b-basic{background:rgba(34,211,160,.15);color:var(--green)}
+.b-concept{background:rgba(167,139,250,.15);color:var(--purple)}
+.b-number{background:rgba(251,191,36,.15);color:var(--yellow)}
+
+/* VOL MATRIX */
+.vm-wrap{overflow-x:auto;margin-bottom:14px}
+.vm-table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.vm-table th{
+  padding:9px 14px;text-align:center;font-size:11px;font-weight:700;
+  letter-spacing:.6px;text-transform:uppercase;color:var(--muted);
+  border-bottom:2px solid var(--border);white-space:nowrap;
+}
+.vm-table th.th-exp{text-align:left}
+.vm-table th.th-atm{color:var(--yellow);border-bottom-color:var(--yellow)}
+.vm-table th.th-rr{color:var(--red)}
+.vm-table th.th-fly{color:var(--purple)}
+.vm-table td{
+  padding:9px 14px;text-align:center;border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background .12s;white-space:nowrap;
+}
+.vm-table td.td-exp{
+  text-align:left;font-weight:700;color:var(--muted);font-size:12px;
+  cursor:default;letter-spacing:.5px;
+}
+.vm-table td.td-atm{border-left:1px solid rgba(251,191,36,.25);border-right:1px solid rgba(251,191,36,.25)}
+.vm-table td.td-rr{color:var(--red);font-weight:600}
+.vm-table td.td-fly{color:var(--purple);font-weight:600}
+.vm-table tr:hover td:not(.td-exp){background:rgba(74,158,255,.06)}
+.vm-table td.vm-selected{background:rgba(74,158,255,.18) !important;outline:2px solid var(--accent);outline-offset:-2px;border-radius:3px}
+.vm-cell-val{font-size:14px;font-weight:700;display:block}
+.vm-cell-sub{font-size:10px;color:var(--muted);display:block;margin-top:1px}
+
+/* KEY METRICS STRIP */
+.km-strip{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:10px;margin-bottom:20px;
+}
+.km-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r);padding:12px 16px;
+}
+.km-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.km-val{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.km-sub{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* CONTEXT PANEL */
+.vm-ctx{
+  background:var(--surface2);border:1px solid var(--accent);
+  border-radius:var(--r);padding:18px 20px;margin-top:12px;
+  display:none;
+}
+.vm-ctx-title{font-size:15px;font-weight:800;color:var(--accent2);margin-bottom:4px}
+.vm-ctx-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+.vm-ctx-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.vm-ctx-grid{grid-template-columns:1fr}}
+.vm-ctx-block{background:var(--surface3);border-radius:8px;padding:12px 14px}
+.vm-ctx-block-label{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.vm-ctx-block-text{font-size:13px;color:var(--text);line-height:1.55}
+
+/* MARKET STORY PANEL */
+.market-story{
+  background:var(--surface2);border:1px solid rgba(74,158,255,.25);
+  border-radius:var(--r);margin-bottom:20px;overflow:hidden;
+}
+.ms-header{
+  padding:12px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:700;color:var(--accent2);
+  background:rgba(74,158,255,.05);
+}
+.ms-header .ms-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--green);
+  animation:pulse 2s infinite;flex-shrink:0;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ms-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+@media(max-width:640px){.ms-grid{grid-template-columns:1fr}}
+.ms-cell{
+  padding:14px 18px;border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.ms-cell:nth-child(2n){border-right:none}
+.ms-cell:nth-last-child(-n+2){border-bottom:none}
+@media(max-width:640px){
+  .ms-cell{border-right:none}
+  .ms-cell:last-child{border-bottom:none}
+}
+.ms-label{
+  font-size:10px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;
+}
+.ms-text{font-size:13px;color:var(--text);line-height:1.55}
+.ms-text strong{font-weight:600}
+
+/* SHAPE INTERPRETER */
+.shape-interp{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r);margin-top:12px;padding:16px 20px;
+}
+.si-title{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;}
+#si-text{font-size:13px;color:var(--text);line-height:1.6}
+
+/* SMILE LIVE READ */
+.smile-live{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r);margin-top:14px;padding:16px 20px;
+}
+.smile-live-title{font-size:12px;font-weight:700;letter-spacing:.8px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.smile-stats{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.sstat{
+  background:var(--surface3);border:1px solid var(--border);
+  border-radius:6px;padding:7px 12px;font-size:12px;
+}
+.sstat .sv{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;display:block;margin-bottom:1px}
+.sstat .sl{color:var(--muted);font-size:11px}
+#smile-narrative{font-size:13px;color:var(--text);line-height:1.6}
 </style>
 </head>
 <body>
@@ -229,12 +390,20 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);
   <span class="nav-logo">SABR Explorer</span>
   <a href="#hero">Overview</a>
   <a href="#surface">Surface</a>
+  <a href="#matrix">Matrix</a>
   <a href="#smile">Smile</a>
   <a href="#pricing">Pricing</a>
   <a href="#scenarios">Scenarios</a>
   <span class="nav-spacer"></span>
-  <a href="#glossary" style="color:var(--accent)">Glossary</a>
+  <a href="#glossary" id="nav-glossary" style="color:var(--accent)">Glossary</a>
 </nav>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('explorer')">Explorer</button>
+  <button class="tab-btn" onclick="switchTab('cheatsheet')">Cheat Sheet</button>
+</div>
+
+<div id="main-explorer">
 
 <!-- ══════════════════════════════════════
      HERO
@@ -332,9 +501,42 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);
 
   </div>
 
+  <!-- LIVE MARKET STORY -->
+  <div class="market-story">
+    <div class="ms-header">
+      <span class="ms-dot"></span>
+      Live Market Reading — what these parameters mean right now
+      <button id="mode-btn" onclick="toggleMode()" style="margin-left:auto;background:var(--surface3);border:1px solid var(--border);color:var(--accent2);font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;white-space:nowrap;flex-shrink:0">Plain English</button>
+    </div>
+    <div class="ms-grid">
+      <div class="ms-cell">
+        <div class="ms-label">Market Regime</div>
+        <div class="ms-text" id="ms-regime">—</div>
+      </div>
+      <div class="ms-cell">
+        <div class="ms-label">Vol Level — what σ₀ tells you</div>
+        <div class="ms-text" id="ms-vol">—</div>
+      </div>
+      <div class="ms-cell">
+        <div class="ms-label">Skew — what ρ tells you</div>
+        <div class="ms-text" id="ms-skew">—</div>
+      </div>
+      <div class="ms-cell">
+        <div class="ms-label">Curvature — what α tells you</div>
+        <div class="ms-text" id="ms-curv">—</div>
+      </div>
+    </div>
+  </div>
+
   <div id="surface-plot" style="height:460px"></div>
 
-  <div class="coll">
+  <!-- SHAPE INTERPRETER -->
+  <div class="shape-interp">
+    <div class="si-title">What a trader sees in this surface shape</div>
+    <div id="si-text">—</div>
+  </div>
+
+  <div class="coll" style="margin-top:12px">
     <button class="coll-btn" onclick="toggleColl(this)">
       The Hagan 2002 closed-form formula <span class="coll-arrow">▼</span>
     </button>
@@ -351,6 +553,94 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);
 </section>
 
 <!-- ══════════════════════════════════════
+     VOL MATRIX
+     ══════════════════════════════════════ -->
+<section id="matrix">
+  <div class="section-intro">
+    <h2>Vol Matrix</h2>
+    <p class="lead">The surface as a table of numbers — exactly what a trader sees on their screen. Each row is a maturity, each column is a strike quoted as delta. <strong style="color:var(--accent2)">Click any cell</strong> to understand what that number means.</p>
+  </div>
+
+  <!-- KEY METRICS -->
+  <div class="km-strip">
+    <div class="km-card">
+      <div class="km-label">ATM Vol — 1Y</div>
+      <div class="km-val" id="km-atm" style="color:var(--yellow)">—</div>
+      <div class="km-sub" id="km-atm-sub">The anchor of the surface</div>
+    </div>
+    <div class="km-card">
+      <div class="km-label">1Y Risk Reversal</div>
+      <div class="km-val" id="km-rr" style="color:var(--red)">—</div>
+      <div class="km-sub" id="km-rr-sub">25ΔP − 25ΔC · skew in one number</div>
+    </div>
+    <div class="km-card">
+      <div class="km-label">1Y Butterfly</div>
+      <div class="km-val" id="km-fly" style="color:var(--purple)">—</div>
+      <div class="km-sub" id="km-fly-sub">avg wings − ATM · curvature in one number</div>
+    </div>
+    <div class="km-card">
+      <div class="km-label">Term Structure</div>
+      <div class="km-val" id="km-ts" style="color:var(--accent2)">—</div>
+      <div class="km-sub" id="km-ts-sub">2Y ATM minus 1M ATM</div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="vm-wrap">
+    <table class="vm-table">
+      <thead>
+        <tr>
+          <th class="th-exp">Expiry</th>
+          <th>10Δ Put</th>
+          <th>25Δ Put</th>
+          <th class="th-atm">ATM</th>
+          <th>25Δ Call</th>
+          <th>10Δ Call</th>
+          <th class="th-rr">Risk Rev.</th>
+          <th class="th-fly">Butterfly</th>
+        </tr>
+      </thead>
+      <tbody id="vm-body"></tbody>
+    </table>
+  </div>
+
+  <!-- CONTEXT PANEL -->
+  <div class="vm-ctx" id="vm-ctx">
+    <div class="vm-ctx-title" id="vm-ctx-title">—</div>
+    <div class="vm-ctx-sub" id="vm-ctx-sub">—</div>
+    <div class="vm-ctx-grid">
+      <div class="vm-ctx-block">
+        <div class="vm-ctx-block-label">What this number is</div>
+        <div class="vm-ctx-block-text" id="vm-ctx-what">—</div>
+      </div>
+      <div class="vm-ctx-block">
+        <div class="vm-ctx-block-label">What a trader does with it</div>
+        <div class="vm-ctx-block-text" id="vm-ctx-trade">—</div>
+      </div>
+      <div class="vm-ctx-block">
+        <div class="vm-ctx-block-label">Why it's different from ATM</div>
+        <div class="vm-ctx-block-text" id="vm-ctx-diff">—</div>
+      </div>
+      <div class="vm-ctx-block">
+        <div class="vm-ctx-block-label">Which slider drives this</div>
+        <div class="vm-ctx-block-text" id="vm-ctx-driver">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="coll" style="margin-top:14px">
+    <button class="coll-btn" onclick="toggleColl(this)">How to read the columns — plain English <span class="coll-arrow">▼</span></button>
+    <div class="coll-body">
+      <p><strong style="color:var(--yellow)">ATM column:</strong> The pure uncertainty price — no directional bet. This is your baseline. Everything else is described as "X vol points above or below ATM."</p>
+      <p><strong style="color:var(--red)">25Δ Put / 10Δ Put:</strong> Downside strikes. A 25Δ put has roughly a 25% chance of paying out — it requires a moderate-to-large fall. A 10Δ put is deep crash territory, only ~10% chance. In equity markets these are always more expensive than the equivalent calls (negative skew).</p>
+      <p><strong style="color:var(--accent)">25Δ Call / 10Δ Call:</strong> Upside strikes. Same distances above ATM as the puts are below. In equity markets these are cheaper than puts. In commodity markets they can be more expensive.</p>
+      <p><strong style="color:var(--red)">Risk Reversal (RR):</strong> 25Δ Put vol minus 25Δ Call vol. Positive means puts are more expensive = negative skew = crash fear. A typical S&P 500 1Y risk reversal is around +3 to +6 vol points.</p>
+      <p><strong style="color:var(--purple)">Butterfly (Fly):</strong> Average of 25Δ Put and 25Δ Call, minus ATM. Positive means both wings are elevated above ATM = curvature = high vol-of-vol. A trader buying a strangle (OTM put + OTM call) pays this premium.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
      SMILE CROSS-SECTION
      ══════════════════════════════════════ -->
 <section id="smile">
@@ -361,7 +651,7 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);
 
   <div class="smile-ctrl">
     <label>Maturity:</label>
-    <select id="smile-T" onchange="updateSmile()">
+    <select id="smile-T" onchange="updateSmile();updateSmileNarrative();updateShapeInterp()">
       <option value="0.083">1 Month</option>
       <option value="0.25">3 Months</option>
       <option value="0.5">6 Months</option>
@@ -371,20 +661,20 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);
     <span style="font-size:13px;color:var(--muted)">Forward = <span class="hl">100</span></span>
   </div>
 
-  <div class="smile-wrap">
-    <canvas id="smile-chart" style="max-height:320px"></canvas>
+  <div class="smile-wrap" style="position:relative;height:320px">
+    <canvas id="smile-chart"></canvas>
   </div>
 
-  <div class="coll" style="margin-top:14px">
-    <button class="coll-btn" onclick="toggleColl(this)">
-      Reading the smile — plain English <span class="coll-arrow">▼</span>
-    </button>
-    <div class="coll-body">
-      <p><strong style="color:var(--yellow)">ATM (K = 100):</strong> Where both curves meet. The SABR ATM vol equals σ₀ at T=0 and drifts slightly with the correction terms over time.</p>
-      <p><strong style="color:var(--red)">Left wing (K &lt; 100 — downside strikes):</strong> Negative ρ pushes this higher. A trader paying more for a 90-strike put than BS suggests is buying crash insurance.</p>
-      <p><strong style="color:var(--accent)">Right wing (K &gt; 100 — upside strikes):</strong> Mostly shaped by α (vol of vol). High α lifts both wings roughly symmetrically before the ρ skew tilts the whole shape.</p>
-      <p><strong style="color:var(--muted)">Maturity effect:</strong> Shorter maturities show sharper, more dramatic smiles. Longer maturities are flatter — vol uncertainty has more time to mean-revert.</p>
+  <!-- LIVE SMILE READING -->
+  <div class="smile-live">
+    <div class="smile-live-title">Reading this smile right now</div>
+    <div class="smile-stats">
+      <div class="sstat"><span class="sv" id="ss-atm">—</span><span class="sl">ATM vol</span></div>
+      <div class="sstat"><span class="sv" id="ss-lw">—</span><span class="sl">Left wing (K=85) vs ATM</span></div>
+      <div class="sstat"><span class="sv" id="ss-rw">—</span><span class="sl">Right wing (K=115) vs ATM</span></div>
+      <div class="sstat"><span class="sv" id="ss-skew">—</span><span class="sl">Skew (left − right)</span></div>
     </div>
+    <div id="smile-narrative">—</div>
   </div>
 </section>
 
@@ -557,6 +847,210 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);
 
   </div>
 </div>
+
+</div><!-- /main-explorer -->
+
+<!-- ══════════════════════════════════════
+     CHEAT SHEET
+     ══════════════════════════════════════ -->
+<div id="main-cheatsheet">
+  <h1 style="font-size:clamp(22px,4vw,36px);margin-bottom:6px">Cheat Sheet</h1>
+  <p style="color:var(--muted);font-size:14px;margin-bottom:36px">Every term and input on this page, explained from scratch.</p>
+
+  <!-- SABR PARAMETERS -->
+  <div class="cs-section">
+    <div class="cs-section-title">The four SABR parameters — the sliders you control</div>
+    <div class="cs-grid">
+
+      <div class="cs-card">
+        <span class="cs-badge b-sabr">SABR Parameter</span>
+        <div class="cs-term">σ₀ <span class="cs-sym">sigma-zero — Initial Volatility</span></div>
+        <div class="cs-def">The overall level of the vol surface. Every option price on the surface scales up or down when you move this. Think of it as the "base price of uncertainty" in this market right now.</div>
+        <div class="cs-ex"><strong>In practice:</strong> σ₀ = 15% is a calm stock market (like 2017). σ₀ = 30% is stressed (late 2022 rate shock). σ₀ = 60%+ is a full crisis (March 2020). Moving this slider lifts or drops the entire surface uniformly — every strike, every maturity.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-sabr">SABR Parameter</span>
+        <div class="cs-term">α <span class="cs-sym">alpha — Vol of Vol (curvature)</span></div>
+        <div class="cs-def">How unpredictable volatility itself is. If α is high, vol can spike or collapse suddenly — the uncertainty about uncertainty is large. This lifts both wings of the smile (options far from the current price on either side get more expensive).</div>
+        <div class="cs-ex"><strong>In practice:</strong> Low α (~20%) = vol is fairly stable, smile is nearly flat. High α (~70%) = vol could explode any day, deep OTM options are very expensive. Think of α as: how likely is it that the vol level itself changes dramatically?</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-sabr">SABR Parameter</span>
+        <div class="cs-term">β <span class="cs-sym">beta — Elasticity</span></div>
+        <div class="cs-def">Controls whether ATM vol moves when the price moves. Two extremes: β=1 means vol stays the same percentage wherever the price is (equities). β=0 means vol rises as price falls — typical for interest rates which can go to zero or below.</div>
+        <div class="cs-ex"><strong>In practice:</strong> β=1 → stock falls 30%, ATM vol barely changes. β=0 → interest rates fall from 3% to 1%, ATM vol in % terms roughly triples (same absolute uncertainty, much smaller base). Most FX desks use β=0.5 as a compromise.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-sabr">SABR Parameter</span>
+        <div class="cs-term">ρ <span class="cs-sym">rho — Correlation (skew)</span></div>
+        <div class="cs-def">How strongly price moves and vol moves are linked — and in which direction. Negative ρ means when prices fall, vol spikes (equity markets). Positive ρ means when prices rise, vol spikes (some commodity markets). This tilts the entire surface left or right.</div>
+        <div class="cs-ex"><strong>In practice:</strong> S&P 500 has ρ ≈ −0.70 — crashes come with fear spikes, so put options (crash insurance) are permanently more expensive than calls. EUR/USD has ρ ≈ 0 — either currency can crash, so both sides cost the same. Crude oil can have positive ρ — supply shocks cause prices and vol to spike together.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- OPTION BASICS -->
+  <div class="cs-section">
+    <div class="cs-section-title">Option basics — inputs to the pricing panel</div>
+    <div class="cs-grid">
+
+      <div class="cs-card">
+        <span class="cs-badge b-basic">Option Basics</span>
+        <div class="cs-term">Call Option</div>
+        <div class="cs-def">A contract that pays out if the asset finishes above a certain price (the strike) at expiry. You buy a call when you think the price will rise — or when you want to cap how much you pay for something in the future.</div>
+        <div class="cs-ex"><strong>Example:</strong> You buy a call on a stock at strike K=110, currently trading at 100. If the stock goes to 130 at expiry, you collect 130−110 = $20. If it stays below 110, the call expires worthless and you lose the premium you paid.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-basic">Option Basics</span>
+        <div class="cs-term">Put Option</div>
+        <div class="cs-def">A contract that pays out if the asset finishes below the strike at expiry. You buy a put as insurance against a price fall — or as a direct bet on falling prices.</div>
+        <div class="cs-ex"><strong>Example:</strong> You own a stock at 100 and buy a put with K=85. If the stock crashes to 60, your put pays out 85−60 = $25, cushioning the loss. If the stock stays above 85, the put expires worthless — like an insurance policy you didn't need to claim.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-basic">Option Basics</span>
+        <div class="cs-term">Strike <span class="cs-sym">K</span></div>
+        <div class="cs-def">The specific price level the option bets on. The option only pays out if the asset crosses this level at expiry. Choosing the strike is choosing how far from the current price your bet or insurance kicks in.</div>
+        <div class="cs-ex"><strong>Example:</strong> With the stock at F=100 — K=100 is ATM (no directional bet). K=85 is a put 15% out of the money (needs a 15% crash to pay out). K=115 is a call 15% out of the money (needs a 15% rally to pay out).</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-basic">Option Basics</span>
+        <div class="cs-term">Forward Price <span class="cs-sym">F</span></div>
+        <div class="cs-def">Where the market expects the asset to be at expiry, after accounting for interest rates, dividends, storage costs etc. Options are priced using the forward, not the spot price today.</div>
+        <div class="cs-ex"><strong>Example:</strong> A stock is at $100 today. It pays no dividends, and the risk-free rate is 5%. In one year, the forward is $105 — the "fair" future price after carrying the position. ATM means your strike equals this forward, not today's spot.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-basic">Option Basics</span>
+        <div class="cs-term">Maturity <span class="cs-sym">T</span></div>
+        <div class="cs-def">How long until the option expires, in years. T=1.0 is one year. T=0.083 is one month (1÷12). Longer maturities give the price more time to move — options are more expensive further out, and the vol surface tends to be flatter.</div>
+        <div class="cs-ex"><strong>Example:</strong> A 1-month option on a stock gives you 30 days for the stock to move past your strike. A 2-year swaption gives the swap rate 2 years to move. The same strike that's nearly impossible to hit in 1 month might be very reachable in 2 years.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-basic">Option Basics</span>
+        <div class="cs-term">Black-Scholes</div>
+        <div class="cs-def">The classic formula for pricing options, invented in 1973. It takes a single vol number and prices any option. The problem: it assumes that one vol number applies to every strike — which is never true in real markets. SABR is built to fix this.</div>
+        <div class="cs-ex"><strong>Example:</strong> Black-Scholes would price a K=85 put and a K=115 call using the exact same vol (σ₀=20%). SABR says: no — the K=85 put deserves 23% vol because crashes come with fear spikes (negative ρ). The gap between these two prices is the whole point of this page.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VOL SURFACE CONCEPTS -->
+  <div class="cs-section">
+    <div class="cs-section-title">Vol surface concepts — what you're looking at on the charts</div>
+    <div class="cs-grid">
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Implied Volatility</div>
+        <div class="cs-def">The market's price for uncertainty about future moves, expressed as a percentage. You reverse-engineer it from an option price: "what vol number, plugged into Black-Scholes, gives this price?" It's not a historical measurement — it's forward-looking.</div>
+        <div class="cs-ex"><strong>Example:</strong> A 1-year ATM option on a stock costs $10, stock is at $100. Plugging into BS, the implied vol works out to about 20%. This means the market is pricing in roughly 1.25% typical daily moves (20% ÷ √252 trading days).</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">ATM — At The Money</div>
+        <div class="cs-def">When the strike equals the forward price. The "neutral" option — no directional bet, just pure uncertainty. ATM vol is the anchor of the whole surface. Everything else is described as how much vol differs from ATM at that strike.</div>
+        <div class="cs-ex"><strong>On the smile chart:</strong> The gold dot is ATM. The y-position of that dot is the ATM vol. For a swaption with a 5-year rate at 3.5%, a strike of 3.5% is ATM — you're not betting rates go up or down, just that they move.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">OTM — Out of The Money</div>
+        <div class="cs-def">An option that currently has no intrinsic value — the price hasn't reached the strike yet. OTM puts have K below F. OTM calls have K above F. These are pure bets on a large move, or insurance against one.</div>
+        <div class="cs-ex"><strong>Example:</strong> Stock at 100. A 70-strike put is deep OTM — the stock would need to crash 30% to pay out. These options are cheap in dollar terms but expensive in implied vol terms — especially with negative ρ — because they're essentially tail-risk insurance.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Vol Surface</div>
+        <div class="cs-def">The full 3D map of implied vol across all possible strikes (x-axis) and all maturities (y-axis). The height (z-axis) is the implied vol at each combination. In a Black-Scholes world this would be flat. In reality it's curved, tilted, and changes every day.</div>
+        <div class="cs-ex"><strong>On this page:</strong> The 3D chart in the Explorer tab is the vol surface. Drag it to rotate. Blue = low vol, red = high vol. Moving the sliders reshapes it in real time — σ₀ lifts the whole thing, ρ tilts it left or right, α bows the wings up.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Vol Smile</div>
+        <div class="cs-def">A cross-section of the vol surface at a single maturity — a 2D curve of implied vol vs strike. Named "smile" because in many markets it curves upward on both sides of ATM, like a smile. In equity markets it's more of a "smirk" — left side much higher than right.</div>
+        <div class="cs-ex"><strong>On this page:</strong> The 2D chart in the Smile section shows the smile. The blue curve is SABR; the grey dashed line is flat Black-Scholes. The gap between them at any strike is how much SABR corrects for the market reality that BS ignores.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Skew</div>
+        <div class="cs-def">The tilt of the smile — one side is higher than the other. Negative skew = left side (downside strikes, puts) is higher. Positive skew = right side (upside strikes, calls) is higher. Driven entirely by ρ in SABR.</div>
+        <div class="cs-ex"><strong>Example:</strong> In the smile stats panel, "Skew (left−right) = +6pp" means the K=85 put trades at 6 vol points above the K=115 call. If you wanted to buy crash insurance (K=85 put) and sell upside exposure (K=115 call) to fund it — a "risk reversal" — you'd pay net 6pp of vol.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Curvature</div>
+        <div class="cs-def">How much both wings of the smile bow upward symmetrically above ATM. High curvature = extreme options on both sides (puts and calls) are expensive relative to ATM options. Driven by α (vol of vol) in SABR.</div>
+        <div class="cs-ex"><strong>Measured as butterfly vol:</strong> (vol at K=85 + vol at K=115) ÷ 2 − ATM vol. If this is +4pp, both wings average 4pp above ATM. A trader buying a strangle (one OTM put + one OTM call) pays this premium — they want both wings to be cheap.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Backbone</div>
+        <div class="cs-def">How the ATM vol level shifts when the underlying price moves. If the stock drops 20%, does ATM vol stay the same, rise, or fall? The backbone is the answer, controlled by β.</div>
+        <div class="cs-ex"><strong>β=1 (log-normal backbone):</strong> ATM vol roughly unchanged when price moves. Common in equities. <strong>β=0 (normal backbone):</strong> ATM vol rises as price falls. Common in interest rates — as rates approach zero, a given basis point move feels much larger in relative terms.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-concept">Concept</span>
+        <div class="cs-term">Delta</div>
+        <div class="cs-def">How much the option price changes for a $1 move in the forward price. A delta of 0.5 means the option gains $0.50 for every $1 the forward rises. ATM options have delta ≈ 0.5. Deep OTM options have delta close to 0. Deep ITM options have delta close to 1.</div>
+        <div class="cs-ex"><strong>Why SABR changes delta:</strong> Because SABR gives a different implied vol at each strike, it also gives a different delta than Black-Scholes. For a K=85 put, SABR's delta is more negative than BS predicts — the option is more sensitive to price moves because it sits in a higher-vol part of the smile.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- NUMBERS -->
+  <div class="cs-section">
+    <div class="cs-section-title">Numbers and notation — reading the outputs</div>
+    <div class="cs-grid">
+
+      <div class="cs-card">
+        <span class="cs-badge b-number">Numbers</span>
+        <div class="cs-term">pp — Percentage Points</div>
+        <div class="cs-def">A direct difference between two percentages. Not "percent of a percent" — a flat addition. Going from 20% vol to 23.42% vol is a move of +3.42pp. This is how vol differences are always quoted.</div>
+        <div class="cs-ex"><strong>Watch out:</strong> +3.42pp is NOT the same as +3.42%. If vol is at 20%, a 3.42% increase would be 20% × 1.0342 = 20.68%. But +3.42pp means 20% + 3.42 = 23.42%. In vol markets, "pp" always means the absolute addition.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-number">Numbers</span>
+        <div class="cs-term">bps — Basis Points</div>
+        <div class="cs-def">Used mainly for interest rates and credit. 1 basis point = 0.01%. So 100bps = 1%. Central banks move rates in 25bps or 50bps increments. Swaption vol is often quoted in bps/year (normal vol) rather than as a percentage (log-normal vol).</div>
+        <div class="cs-ex"><strong>Example:</strong> A rate moves from 3.50% to 3.75% — that's a 25bp move. A swaption with ATM normal vol of 80bps means the market expects the swap rate to move roughly 5bps per day (80bps ÷ √252). On this page, vol is shown as a percentage — multiply by 100 to get the bps equivalent for a 1% rate.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-number">Numbers</span>
+        <div class="cs-term">Risk Reversal</div>
+        <div class="cs-def">The vol difference between an OTM call and an OTM put of equal distance from ATM. It measures the skew directly as a single number. A negative risk reversal means puts are more expensive than calls — negative skew.</div>
+        <div class="cs-ex"><strong>Example:</strong> "The 1Y 25-delta risk reversal is −4 vols" means the put that has a 25% chance of paying out trades at 4 vol points above the equivalent call. On this page, the "Skew (left−right)" number in the smile stats panel is essentially a risk reversal.</div>
+      </div>
+
+      <div class="cs-card">
+        <span class="cs-badge b-number">Numbers</span>
+        <div class="cs-term">Butterfly</div>
+        <div class="cs-def">The average extra vol of both OTM wings above ATM. Measures curvature as a single number — how much more expensive it is to own a strangle (OTM put + OTM call) versus an ATM straddle of equal vega.</div>
+        <div class="cs-ex"><strong>Example:</strong> ATM vol = 20%. K=85 put = 23%. K=115 call = 21%. Butterfly = (23+21)/2 − 20 = 2pp. A vol trader would say "the fly is 2 vols." On this page, this is approximated by the left-wing and right-wing elevation numbers shown in the smile stats panel.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /main-cheatsheet -->
 
 <footer>
   Built with Plotly.js · Chart.js · MathJax · Hagan et al. (2002) SABR approximation
@@ -756,7 +1250,7 @@ function initSmileChart() {
         pointRadius:[], borderWidth:0, showLine:false },
     ]},
     options:{
-      responsive:true, maintainAspectRatio:true, animation:{ duration:180 },
+      responsive:true, maintainAspectRatio:false, animation:false,
       plugins:{
         legend:{ labels:{ color:'#7a8faa', font:{ size:12 } } },
         tooltip:{
@@ -870,51 +1364,272 @@ function updateAnnotations() {
 
   const rhoEl = document.getElementById('ann-rho');
   if (p.rho < -0.25) {
-    rhoEl.textContent = '↑ Put-side smile rises — left skew (crash fear)';
+    rhoEl.textContent = '↑ Left (put) side of smile rises relative to right';
     rhoEl.style.color = 'var(--red)';
   } else if (p.rho > 0.25) {
-    rhoEl.textContent = '↑ Call-side smile rises — right skew (squeeze fear)';
+    rhoEl.textContent = '↑ Right (call) side of smile rises relative to left';
     rhoEl.style.color = 'var(--green)';
   } else {
-    rhoEl.textContent = '≈ Symmetric smile — equal fear of up/down moves';
+    rhoEl.textContent = '≈ Both sides roughly equal — symmetric smile';
     rhoEl.style.color = 'var(--muted)';
   }
 
   const vvEl = document.getElementById('ann-vv');
   if (p.vv > 0.55) {
-    vvEl.textContent = '↑ High vol-of-vol → fat wings, dramatic curvature';
+    vvEl.textContent = '↑ Both wings bow sharply upward from ATM';
     vvEl.style.color = 'var(--red)';
   } else if (p.vv > 0.25) {
-    vvEl.textContent = '↑ Moderate curvature — typical equity index smile';
+    vvEl.textContent = '↑ Moderate wing elevation — gentle smile curvature';
     vvEl.style.color = 'var(--yellow)';
   } else {
-    vvEl.textContent = '↓ Low curvature → smile nearly flat';
+    vvEl.textContent = '↓ Wings barely lift — surface nearly flat in strike';
     vvEl.style.color = 'var(--green)';
   }
 
   const betaEl = document.getElementById('ann-beta');
   if (p.beta < 0.1) {
-    betaEl.textContent = 'Normal backbone — ATM vol rises as forward falls';
+    betaEl.textContent = 'If forward falls, ATM vol rises (normal backbone)';
     betaEl.style.color = 'var(--purple)';
   } else if (p.beta > 0.9) {
-    betaEl.textContent = 'Log-normal backbone — ATM vol roughly constant';
+    betaEl.textContent = 'ATM vol stays roughly constant as forward moves';
     betaEl.style.color = 'var(--accent)';
   } else {
-    betaEl.textContent = `Mixed backbone β=${p.beta.toFixed(2)} — partial CEV adjustment`;
+    betaEl.textContent = `Mixed: ATM vol partially moves with the forward`;
     betaEl.style.color = 'var(--muted)';
   }
 
   const s0El = document.getElementById('ann-s0');
   if (p.s0 > 0.40) {
-    s0El.textContent = 'High vol — all options expensive, stressed regime';
+    s0El.textContent = '↑ Entire surface lifts — every option is expensive';
     s0El.style.color = 'var(--red)';
   } else if (p.s0 < 0.12) {
-    s0El.textContent = 'Low vol — calm market, options cheap';
+    s0El.textContent = '↓ Entire surface drops — options are cheap';
     s0El.style.color = 'var(--green)';
   } else {
-    s0El.textContent = 'Normal vol range';
+    s0El.textContent = 'Surface at normal level';
     s0El.style.color = 'var(--muted)';
   }
+}
+
+// ─── MARKET STORY ─────────────────────────────────────────────────────────────
+
+let plainMode = false;
+
+function toggleMode() {
+  plainMode = !plainMode;
+  const btn = document.getElementById('mode-btn');
+  btn.textContent     = plainMode ? 'Finance Terms' : 'Plain English';
+  btn.style.color     = plainMode ? 'var(--yellow)'  : 'var(--accent2)';
+  btn.style.borderColor = plainMode ? 'rgba(251,191,36,.4)' : 'var(--border)';
+  updateMarketStory();
+}
+
+function updateMarketStory() {
+  const p     = getP();
+  const s0pct = (p.s0 * 100).toFixed(0);
+  const vvpct = (p.vv * 100).toFixed(0);
+  const dailyMove = (p.s0 * 100 / Math.sqrt(252)).toFixed(1);
+
+  // ── REGIME ──────────────────────────────────────────────────────────────────
+  let regimeF, regimeP;
+  if (p.beta > 0.8 && p.rho < -0.2) {
+    regimeF = `<strong>Equity market</strong> (S&P 500, single stocks). Log-normal backbone (β≈1) with negative skew. Standard setup for equity index options desks.`;
+    regimeP = `<strong>This looks like a stock market.</strong> Stocks tend to crash faster than they rise — a 30% drop can happen in weeks, while a 30% gain takes months. The shape of this surface reflects that asymmetry being priced in.`;
+  } else if (p.beta < 0.15) {
+    regimeF = `<strong>Interest rate market</strong> (swaptions, Treasuries). Normal backbone (β≈0) because rates can go negative and behave additively.`;
+    regimeP = `<strong>This looks like a bond/interest rate market.</strong> Unlike stock prices, interest rates can go below zero (as we saw in Europe). So the model treats them like a thermometer — not a stock multiplier. A move from 2% to 1% is the same "size" as 1% to 0%.`;
+  } else if (Math.abs(p.rho) < 0.12) {
+    regimeF = `<strong>FX market</strong> (EUR/USD, USD/JPY). Symmetric smile — either currency can crash. Intermediate β reflects FX isn't purely log-normal.`;
+    regimeP = `<strong>This looks like a currency market.</strong> When EUR/USD moves, either the dollar or the euro could be crashing — so the market prices fear of big moves equally in both directions. Neither side of the surface is consistently more expensive.`;
+  } else if (p.rho < -0.65) {
+    regimeF = `<strong>Stressed equity or credit market.</strong> Extreme negative skew — a crash scenario or high-leverage single stock with serious downside risk priced in.`;
+    regimeP = `<strong>This looks like a market in fear.</strong> Think: a bank in 2008, a company facing a lawsuit, or the whole S&P 500 during COVID. People are rushing to buy crash insurance and the price of that insurance has surged far above what a simple model would predict.`;
+  } else if (p.rho > 0.4) {
+    regimeF = `<strong>Commodity market</strong> (crude oil, natural gas). Positive ρ — prices spike upward on supply shocks, so call options command a premium over puts.`;
+    regimeP = `<strong>This looks like an oil or gas market.</strong> Commodity prices can spike violently upward when supply is cut — a war, an embargo, a cold winter. So the market charges more for bets on prices going up than bets on them falling. The opposite of stocks.`;
+  } else {
+    regimeF = `<strong>Mixed market.</strong> Parameters don't map cleanly to one asset class — could be a structured product, cross-asset, or mid-skew situation.`;
+    regimeP = `<strong>A mixed picture.</strong> The parameters don't point clearly at one type of market. Try one of the scenario cards below to see a clean real-world example.`;
+  }
+
+  // ── VOL LEVEL ────────────────────────────────────────────────────────────────
+  let volF, volP;
+  if (p.s0 >= 0.50) {
+    volF = `<strong>${s0pct}% implied vol — extreme.</strong> S&P 500 in March 2020 (VIX hit 80), or 2008. Every option is very expensive. Selling options at this level feels terrifying.`;
+    volP = `<strong>Full panic mode.</strong> At ${s0pct}%, the market expects the price to swing about ${dailyMove}% on a typical day. Buying insurance for your portfolio right now is like buying flood insurance after the river has already burst — the premium is enormous. This is what happened in March 2020 and in 2008.`;
+  } else if (p.s0 >= 0.30) {
+    volF = `<strong>${s0pct}% implied vol — elevated.</strong> VIX around 30–40. Mid-2022 rate shock, late-2018 selloff. Hedging is expensive, markets are risk-off.`;
+    volP = `<strong>The market is scared.</strong> At ${s0pct}%, expect ~${dailyMove}% typical daily swings. It's like everyone is nervously reading the news every morning. If you own stocks and want to protect them, that protection is expensive — but many people still have to buy it.`;
+  } else if (p.s0 >= 0.18) {
+    volF = `<strong>${s0pct}% implied vol — normal.</strong> Typical S&P 500 or EUR/USD baseline. VIX around 15–22. Reasonable option time value, no extreme fear or complacency.`;
+    volP = `<strong>Normal market conditions.</strong> At ${s0pct}%, expect roughly ${dailyMove}% daily moves. Options cost a fair amount — not cheap, not alarming. This is roughly what markets looked like in 2018–2019. Nothing unusual to report.`;
+  } else if (p.s0 >= 0.10) {
+    volF = `<strong>${s0pct}% implied vol — low.</strong> "Sell vol" environment (2017, early 2020 pre-COVID). Options are cheap. Some traders sell OTM options to collect premium.`;
+    volP = `<strong>Very calm market.</strong> At ${s0pct}%, expect only ~${dailyMove}% daily moves. Insurance (options) is cheap. Some traders actually make money by selling that cheap insurance to nervous people and pocketing the premium — a strategy that works great until the market suddenly blows up.`;
+  } else {
+    volF = `<strong>${s0pct}% implied vol — extremely low.</strong> Artificially suppressed. Options are nearly free. Historically precedes sudden vol spikes.`;
+    volP = `<strong>Eerily quiet.</strong> At ${s0pct}%, options are almost free. This is like early January 2020 — nothing seemed wrong. The danger is that cheap insurance means people stop buying it, and then when something does blow up, everyone is exposed at once.`;
+  }
+
+  // ── SKEW ────────────────────────────────────────────────────────────────────
+  let skewF, skewP;
+  if (p.rho <= -0.70) {
+    skewF = `<strong>Extreme negative skew (ρ=${p.rho.toFixed(2)}).</strong> Downside puts trade 5–8 vol pts above ATM. Pension funds and risk managers are paying heavily for crash protection — the "equity tail risk" premium.`;
+    skewP = `<strong>Everyone is buying crash insurance.</strong> ρ=${p.rho.toFixed(2)} means when prices fall, fear explodes. Imagine a neighborhood that floods every few years — flood insurance is much pricier than the pure probability would suggest because everyone wants it at once. Here, the option that pays out if the market crashes (a put) costs dramatically more than the option that pays out if it rallies by the same amount (a call). Big institutions — pension funds, banks — are constantly competing to buy that crash insurance.`;
+  } else if (p.rho <= -0.30) {
+    skewF = `<strong>Moderate negative skew (ρ=${p.rho.toFixed(2)}).</strong> Standard equity index skew. Put options cost more than equidistant calls. The classic negative risk premium for downside hedges.`;
+    skewP = `<strong>Falling is feared more than rising.</strong> ρ=${p.rho.toFixed(2)} means: when prices drop, volatility spikes — the typical stock market pattern. If you wanted to insure against a 20% drop in your portfolio, you'd pay noticeably more than for a bet the portfolio rises 20%. This is normal in stock markets — crashes happen fast and scare everyone at once, so crash insurance always carries a premium.`;
+  } else if (p.rho <= -0.05) {
+    skewF = `<strong>Mild negative skew (ρ=${p.rho.toFixed(2)}).</strong> Slight put premium over calls. Markets not particularly fearful of a crash.`;
+    skewP = `<strong>A small tilt toward crash fear, but barely.</strong> ρ=${p.rho.toFixed(2)} is close to zero. Insuring against a 20% drop costs only marginally more than betting on a 20% rise. The market is relaxed — no one is rushing to buy crash protection.`;
+  } else if (p.rho <= 0.05) {
+    skewF = `<strong>Near-zero skew (ρ≈0).</strong> Symmetric smile — the market prices up and down moves equally. Typical of G10 FX pairs.`;
+    skewP = `<strong>Totally balanced fear.</strong> ρ≈0 means the market is equally worried about big moves in either direction. Think EUR/USD: the dollar could crash (US debt crisis) or the euro could crash (EU breakup). Either way, protection costs the same regardless of direction.`;
+  } else {
+    skewF = `<strong>Positive skew (ρ=${p.rho.toFixed(2)}).</strong> Call options pricier than equidistant puts. Fear of violent upside spikes — crude oil, natural gas, gold.`;
+    skewP = `<strong>Rising is feared more than falling.</strong> ρ=${p.rho.toFixed(2)} means when prices surge, volatility surges with it. Think oil during a supply war — the price can double overnight if a pipeline is bombed. Bets on prices going up (calls) cost more than bets on them falling (puts). This is rare in stock markets but common in energy.`;
+  }
+
+  // ── CURVATURE ────────────────────────────────────────────────────────────────
+  let curvF, curvP;
+  if (p.vv >= 0.65) {
+    curvF = `<strong>Very high vol-of-vol (α=${vvpct}%).</strong> Deep OTM options are dramatically expensive. Market is pricing "regime uncertainty" — not just big moves, but unpredictability about how volatile things will be. March 2020, Lehman week.`;
+    curvP = `<strong>Uncertainty about uncertainty itself.</strong> α=${vvpct}% means it's not just that things are volatile — it's that we don't even know how volatile they'll get. Imagine forecasting a hurricane: you know it's bad, but you have no idea if it'll be Category 2 or Category 5. Options that only pay out in extreme moves (deep OTM) are very expensive because a vol spike could suddenly make those extreme outcomes likely.`;
+  } else if (p.vv >= 0.35) {
+    curvF = `<strong>Moderate vol-of-vol (α=${vvpct}%).</strong> Noticeable smile curvature. OTM strangles cost more than ATM straddles. Convexity (volga) risk is real. Typical for equity indices.`;
+    curvP = `<strong>Extreme bets are priced up.</strong> α=${vvpct}% means options far from today's price — either way — cost more than a simple model predicts. It's like buying a lottery ticket: the pure math says it's overpriced, but people still pay because if vol spikes, those extreme outcomes suddenly become realistic.`;
+  } else if (p.vv >= 0.15) {
+    curvF = `<strong>Low vol-of-vol (α=${vvpct}%).</strong> Nearly flat smile curvature. OTM options barely more expensive than ATM. Black-Scholes would only slightly misprice OTM strikes.`;
+    curvP = `<strong>Volatility is fairly predictable.</strong> α=${vvpct}% means: we're not sure where the price will go, but we're fairly confident about the range of outcomes. Options that only pay off in extreme scenarios don't cost much more than the math predicts — the market doesn't think those extremes are likely.`;
+  } else {
+    curvF = `<strong>Near-zero vol-of-vol (α=${vvpct}%).</strong> SABR approaches a deterministic CEV model. Smile driven by β and ρ only. Unrealistic in practice.`;
+    curvP = `<strong>Volatility is treated as almost fixed.</strong> α=${vvpct}% — so low it's almost academic. The model says we know almost exactly how volatile things will be going forward. This never really happens — vol always has some randomness. Raise α to see a more realistic picture.`;
+  }
+
+  const f = plainMode;
+  document.getElementById('ms-regime').innerHTML = f ? regimeP : regimeF;
+  document.getElementById('ms-vol').innerHTML    = f ? volP    : volF;
+  document.getElementById('ms-skew').innerHTML   = f ? skewP   : skewF;
+  document.getElementById('ms-curv').innerHTML   = f ? curvP   : curvF;
+}
+
+// ─── SHAPE INTERPRETER ───────────────────────────────────────────────────────
+
+function updateShapeInterp() {
+  const p = getP();
+  const T = parseFloat(document.getElementById('smile-T').value) || 1;
+
+  const atmVol  = sabrVol(F0, F0,      T, p.s0, p.vv, p.beta, p.rho);
+  const lowVol  = sabrVol(F0, F0*0.85, T, p.s0, p.vv, p.beta, p.rho);
+  const highVol = sabrVol(F0, F0*1.15, T, p.s0, p.vv, p.beta, p.rho);
+  const leftUp  = (lowVol  - atmVol) * 100;
+  const rightUp = (highVol - atmVol) * 100;
+
+  let text = '';
+
+  // Overall level
+  text += `The surface sits at roughly <strong>${(atmVol*100).toFixed(1)}% ATM vol</strong>. `;
+
+  // Tilt / skew — fix wording when right wing is below ATM
+  if (leftUp > rightUp + 0.5) {
+    const diff = (leftUp - rightUp).toFixed(1);
+    const rightDesc = rightUp < 0
+      ? `${Math.abs(rightUp.toFixed(1))}pp <em>below</em> ATM`
+      : `${rightUp.toFixed(1)}pp above ATM`;
+    text += `It tilts <strong>left (put-heavy)</strong>: K=85 is ${leftUp.toFixed(1)}pp above ATM while K=115 is ${rightDesc} — a ${diff}pp skew gap. `;
+    if (rightUp < 0) {
+      text += `Notice the call side is actually <em>cheaper</em> than ATM vol — this is a pure skew (tilted ramp), not a flat surface. `;
+    }
+    text += `A portfolio manager buying a K=85 put pays ${diff}pp extra vol vs what a flat model would assume — that is the market's "crash insurance premium." `;
+  } else if (rightUp > leftUp + 0.5) {
+    const diff = (rightUp - leftUp).toFixed(1);
+    const leftDesc = leftUp < 0
+      ? `${Math.abs(leftUp.toFixed(1))}pp <em>below</em> ATM`
+      : `${leftUp.toFixed(1)}pp above ATM`;
+    text += `It tilts <strong>right (call-heavy)</strong>: K=115 is ${rightUp.toFixed(1)}pp above ATM while K=85 is ${leftDesc} — a ${diff}pp reverse-skew gap. `;
+    text += `The market fears a violent upside spike more than a crash — typical in supply-constrained commodities. `;
+  } else {
+    text += `It is <strong>roughly symmetric</strong> — both OTM sides elevated by similar amounts (left +${leftUp.toFixed(1)}pp, right +${rightUp.toFixed(1)}pp). `;
+    text += `Neither direction is feared more than the other — classic FX smile structure. `;
+  }
+
+  // Curvature = butterfly vol (symmetric bow above ATM).
+  // Use butterfly = (leftUp + rightUp)/2 — this is the correct convexity measure,
+  // BUT don't say "flat" when there is clearly a large skew gap.
+  const butterfly = (leftUp + rightUp) / 2;
+  const skewGap   = Math.abs(leftUp - rightUp);
+
+  if (butterfly > 6) {
+    text += `<strong>Wings are very elevated</strong> on top of the skew (+${butterfly.toFixed(1)}pp butterfly). An OTM strangle is dramatically more expensive than an ATM straddle — sellers face large gap risk.`;
+  } else if (butterfly > 2.5) {
+    text += `<strong>Moderate wing convexity</strong> (+${butterfly.toFixed(1)}pp butterfly). OTM strangles cost meaningfully more than ATM straddles. Structured desks must account for this in barrier and digital pricing.`;
+  } else if (butterfly > 0.5) {
+    text += `<strong>Mild wing convexity</strong> (+${butterfly.toFixed(1)}pp butterfly). Some symmetric elevation above ATM, but not dramatic.`;
+  } else if (skewGap > 2) {
+    // Significant tilt but low butterfly — a ramp, not a bowl
+    text += `<strong>Low convexity (+${butterfly.toFixed(1)}pp butterfly)</strong> — this is a tilted ramp, not a bowl. The skew dominates: one side is expensive, the other is cheap, but OTM strangles aren't dramatically overpriced versus ATM straddles.`;
+  } else {
+    text += `<strong>Almost no curvature or skew</strong> — SABR and Black-Scholes give nearly the same answer for all strikes. Increase α (vol-of-vol) or push ρ away from zero to see the surface shape emerge.`;
+  }
+
+  document.getElementById('si-text').innerHTML = text;
+}
+
+// ─── SMILE NARRATIVE ─────────────────────────────────────────────────────────
+
+function updateSmileNarrative() {
+  const p = getP();
+  const T = parseFloat(document.getElementById('smile-T').value) || 1;
+  const tLabel = document.getElementById('smile-T').options[document.getElementById('smile-T').selectedIndex].text;
+
+  const atmV  = sabrVol(F0, F0,        T, p.s0, p.vv, p.beta, p.rho) * 100;
+  const lw85  = sabrVol(F0, F0 * 0.85, T, p.s0, p.vv, p.beta, p.rho) * 100;
+  const rw115 = sabrVol(F0, F0 * 1.15, T, p.s0, p.vv, p.beta, p.rho) * 100;
+  const skewGap = lw85 - rw115;
+
+  document.getElementById('ss-atm').textContent  = atmV.toFixed(2) + '%';
+  document.getElementById('ss-lw').textContent   = (lw85 - atmV >= 0 ? '+' : '') + (lw85 - atmV).toFixed(2) + 'pp';
+  document.getElementById('ss-rw').textContent   = (rw115 - atmV >= 0 ? '+' : '') + (rw115 - atmV).toFixed(2) + 'pp';
+  document.getElementById('ss-skew').textContent = (skewGap >= 0 ? '+' : '') + skewGap.toFixed(2) + 'pp';
+
+  const lwEl  = document.getElementById('ss-lw');
+  const rwEl  = document.getElementById('ss-rw');
+  const skEl  = document.getElementById('ss-skew');
+  lwEl.style.color  = (lw85  - atmV) > 0.5 ? 'var(--red)'    : 'var(--muted)';
+  rwEl.style.color  = (rw115 - atmV) > 0.5 ? 'var(--accent)' : 'var(--muted)';
+  skEl.style.color  = skewGap > 1 ? 'var(--red)' : skewGap < -1 ? 'var(--green)' : 'var(--muted)';
+
+  let text = `At <strong>${tLabel}</strong> maturity: `;
+
+  if (Math.abs(skewGap) < 0.3 && (lw85 - atmV) < 0.5) {
+    text += `The smile is almost flat — SABR and Black-Scholes give nearly the same answer for all strikes. `;
+    text += `With very low vol-of-vol (α=${(p.vv*100).toFixed(0)}%) and near-zero skew, the model barely departs from a simple flat-vol assumption.`;
+  } else {
+    if (skewGap > 1.5) {
+      text += `A trader sees a <strong>clear put skew</strong>: buying a K=85 put costs ${(lw85 - atmV).toFixed(1)}pp more vol than ATM, while a K=115 call costs only ${(rw115 - atmV).toFixed(1)}pp more. `;
+      text += `This ${skewGap.toFixed(1)}pp left–right gap means <em>put spreads are relatively more expensive</em> than call spreads of equal width. `;
+      text += `A vol trader would say the "risk-reversal" is ${skewGap.toFixed(1)} vols — they'd sell it if they thought the skew was too rich.`;
+    } else if (skewGap < -1.5) {
+      text += `A reverse skew: call side is ${(rw115 - atmV).toFixed(1)}pp above ATM, put side only ${(lw85 - atmV).toFixed(1)}pp — unusually positive skew. `;
+      text += `A ${Math.abs(skewGap).toFixed(1)}pp "positive risk-reversal" suggests the market fears an upside spike more than a crash.`;
+    } else {
+      text += `Skew is mild (${skewGap.toFixed(1)}pp left–right gap). `;
+    }
+    const avgWing = ((lw85 - atmV) + (rw115 - atmV)) / 2;
+    if (avgWing > 3) {
+      text += ` Both wings are substantially elevated (avg +${avgWing.toFixed(1)}pp). An OTM <em>strangle</em> (buying both the put and call wing) is expensive — the market is pricing tail risk on both sides. This is "volga" — the option's sensitivity to changes in vol-of-vol.`;
+    } else if (avgWing > 1) {
+      text += ` Wings are moderately elevated (avg +${avgWing.toFixed(1)}pp). OTM options cost more than a flat model implies, but not dramatically so.`;
+    }
+  }
+
+  if (T <= 0.1) {
+    text += ` At very short maturities, the smile is often steeper because there's less time for vol to mean-revert — near-term event risk (earnings, central bank) is concentrated.`;
+  } else if (T >= 1.5) {
+    text += ` At longer maturities the smile flattens because uncertainty has more time to diversify — long-dated vol is more stable.`;
+  }
+
+  document.getElementById('smile-narrative').innerHTML = text;
 }
 
 // ─── SLIDER LABELS ───────────────────────────────────────────────────────────
@@ -938,7 +1653,11 @@ let debounce = null;
 function onSlider() {
   updateLabels();
   updateAnnotations();
+  updateMarketStory();
+  renderVolMatrix();
   updateSmile();
+  updateSmileNarrative();
+  updateShapeInterp();
   updatePricing();
   clearTimeout(debounce);
   debounce = setTimeout(updateMainSurface, 90);
@@ -965,6 +1684,250 @@ function loadScenario(card, key) {
   document.getElementById('surface').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
+// ─── INVERSE NORMAL CDF ──────────────────────────────────────────────────────
+
+function normInv(p) {
+  // Rational approximation (Beasley-Springer-Moro)
+  p = Math.max(1e-10, Math.min(1 - 1e-10, p));
+  const a = [2.50662823884, -18.61500062529, 41.39119773534, -25.44106049637];
+  const b = [-8.47351093090, 23.08336743743, -21.06224101826, 3.13082909833];
+  const c = [0.3374754822726147,0.9761690190917186,0.1607979714918209,
+             0.0276438810333863,0.0038405729373609,0.0003951896511349,
+             0.0000321767881768,0.0000002888167364,0.0000003960315187];
+  const y = p - 0.5;
+  if (Math.abs(y) < 0.42) {
+    const r = y * y;
+    return y * (((a[3]*r+a[2])*r+a[1])*r+a[0]) / ((((b[3]*r+b[2])*r+b[1])*r+b[0])*r+1);
+  }
+  let r = p < 0.5 ? p : 1 - p;
+  r = Math.sqrt(-Math.log(r));
+  let x = c[0]; for (let i=1;i<9;i++) x = x*r+c[i];
+  return p < 0.5 ? -x : x;
+}
+
+// ─── DELTA → STRIKE ──────────────────────────────────────────────────────────
+
+function deltaToStrike(F, T, vol, absDelta, type) {
+  // type: 'put' or 'call'. absDelta: 0.10 or 0.25
+  // For call: Δ = N(d1), so d1 = N⁻¹(Δ)
+  // For put:  Δ = N(d1)-1, so d1 = N⁻¹(Δ+1)
+  const sqrtT = Math.sqrt(T);
+  const d1 = type === 'call' ? normInv(absDelta) : normInv(1 - absDelta);
+  // K = F * exp( -(d1 - 0.5*vol*sqrtT) * vol*sqrtT )
+  return F * Math.exp(-(d1 - 0.5 * vol * sqrtT) * vol * sqrtT);
+}
+
+// ─── VOL MATRIX ──────────────────────────────────────────────────────────────
+
+const VM_MATS = [
+  { label:'1M',  T:1/12  },
+  { label:'3M',  T:0.25  },
+  { label:'6M',  T:0.5   },
+  { label:'1Y',  T:1.0   },
+  { label:'2Y',  T:2.0   },
+];
+
+let vmSelected = null;   // { row, col }
+
+function computeMatrix(p) {
+  return VM_MATS.map(({ T }) => {
+    const s0 = p.s0;
+    const K10p  = deltaToStrike(F0, T, s0, 0.10, 'put');
+    const K25p  = deltaToStrike(F0, T, s0, 0.25, 'put');
+    const Katm  = F0;
+    const K25c  = deltaToStrike(F0, T, s0, 0.25, 'call');
+    const K10c  = deltaToStrike(F0, T, s0, 0.10, 'call');
+    const v10p  = sabrVol(F0, K10p, T, p.s0, p.vv, p.beta, p.rho) * 100;
+    const v25p  = sabrVol(F0, K25p, T, p.s0, p.vv, p.beta, p.rho) * 100;
+    const vatm  = sabrVol(F0, Katm, T, p.s0, p.vv, p.beta, p.rho) * 100;
+    const v25c  = sabrVol(F0, K25c, T, p.s0, p.vv, p.beta, p.rho) * 100;
+    const v10c  = sabrVol(F0, K10c, T, p.s0, p.vv, p.beta, p.rho) * 100;
+    const rr    = v25p - v25c;
+    const fly   = (v25p + v25c) / 2 - vatm;
+    return { T, v10p, v25p, vatm, v25c, v10c, rr, fly,
+             K10p, K25p, K25c, K10c };
+  });
+}
+
+function volColor(vol, atm) {
+  const diff = vol - atm;
+  if (diff > 4)  return 'rgba(248,113,113,.22)';
+  if (diff > 2)  return 'rgba(248,113,113,.12)';
+  if (diff > 0.5) return 'rgba(248,113,113,.06)';
+  if (diff < -2) return 'rgba(74,158,255,.12)';
+  if (diff < -0.5) return 'rgba(74,158,255,.06)';
+  return '';
+}
+
+function renderVolMatrix() {
+  const p    = getP();
+  const rows = computeMatrix(p);
+  const tbody = document.getElementById('vm-body');
+
+  tbody.innerHTML = rows.map((r, ri) => {
+    const cols = [
+      { val: r.v10p, K: r.K10p, col: 0, cls: '' },
+      { val: r.v25p, K: r.K25p, col: 1, cls: '' },
+      { val: r.vatm, K: F0,     col: 2, cls: 'td-atm' },
+      { val: r.v25c, K: r.K25c, col: 3, cls: '' },
+      { val: r.v10c, K: r.K10c, col: 4, cls: '' },
+    ];
+    const cells = cols.map(({ val, K, col, cls }) => {
+      const bg    = volColor(val, r.vatm);
+      const diff  = val - r.vatm;
+      const diffStr = (diff >= 0 ? '+' : '') + diff.toFixed(2) + 'pp';
+      const sel   = vmSelected && vmSelected.row === ri && vmSelected.col === col ? ' vm-selected' : '';
+      return `<td class="${cls}${sel}" style="${bg?'background:'+bg:''}" onclick="vmClick(${ri},${col})">
+        <span class="vm-cell-val">${val.toFixed(2)}%</span>
+        <span class="vm-cell-sub">${col===2 ? 'K='+F0 : 'K='+K.toFixed(1)}</span>
+      </td>`;
+    }).join('');
+    const rrCls = r.rr > 0 ? 'color:var(--red)' : 'color:var(--green)';
+    return `<tr>
+      <td class="td-exp">${VM_MATS[ri].label}</td>
+      ${cells}
+      <td class="td-rr" style="${rrCls}">${r.rr >= 0?'+':''}${r.rr.toFixed(2)}</td>
+      <td class="td-fly">${r.fly >= 0?'+':''}${r.fly.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+
+  // Key metrics (1Y row = index 3)
+  const y1 = rows[3];
+  const m1 = rows[0];
+  const m24 = rows[4];
+  document.getElementById('km-atm').textContent  = y1.vatm.toFixed(2) + '%';
+  document.getElementById('km-rr').textContent   = (y1.rr >= 0?'+':'') + y1.rr.toFixed(2) + ' vols';
+  document.getElementById('km-fly').textContent  = (y1.fly >= 0?'+':'') + y1.fly.toFixed(2) + ' vols';
+  const ts = m24.vatm - m1.vatm;
+  document.getElementById('km-ts').textContent   = (ts >= 0?'+':'') + ts.toFixed(2) + 'pp';
+
+  // RR sub-text
+  const rrEl = document.getElementById('km-rr-sub');
+  if (y1.rr > 3)       rrEl.textContent = 'Strong put skew — crash fear dominant';
+  else if (y1.rr > 1)  rrEl.textContent = 'Moderate put skew — normal equity regime';
+  else if (y1.rr > 0)  rrEl.textContent = 'Mild put skew — calm market';
+  else if (y1.rr > -1) rrEl.textContent = 'Near-zero skew — symmetric smile';
+  else                  rrEl.textContent = 'Positive skew — call side more expensive';
+
+  // Fly sub-text
+  const flyEl = document.getElementById('km-fly-sub');
+  if (y1.fly > 2)      flyEl.textContent = 'High curvature — tail risk well bid';
+  else if (y1.fly > 1) flyEl.textContent = 'Moderate curvature — normal smile bow';
+  else                  flyEl.textContent = 'Low curvature — smile nearly linear';
+
+  // TS sub-text
+  const tsEl = document.getElementById('km-ts-sub');
+  if (ts > 1)          tsEl.textContent = 'Upward sloping — long-dated vol expensive';
+  else if (ts < -1)    tsEl.textContent = 'Inverted — near-term fear elevated';
+  else                 tsEl.textContent = 'Flat — vol roughly stable across time';
+
+  // Refresh context if a cell is selected
+  if (vmSelected) vmClick(vmSelected.row, vmSelected.col, true);
+}
+
+function vmClick(ri, col, silent) {
+  vmSelected = { row: ri, col };
+  if (!silent) renderVolMatrix();   // re-render to update selection highlight
+
+  const p    = getP();
+  const rows = computeMatrix(p);
+  const r    = rows[ri];
+  const mat  = VM_MATS[ri];
+
+  const cols = [
+    { label:'10Δ Put', vol:r.v10p, K:r.K10p, delta:'10%', type:'put',  side:'downside' },
+    { label:'25Δ Put', vol:r.v25p, K:r.K25p, delta:'25%', type:'put',  side:'downside' },
+    { label:'ATM',     vol:r.vatm, K:F0,     delta:'50%', type:'both', side:'neutral'  },
+    { label:'25Δ Call',vol:r.v25c, K:r.K25c, delta:'25%', type:'call', side:'upside'   },
+    { label:'10Δ Call',vol:r.v10c, K:r.K10c, delta:'10%', type:'call', side:'upside'   },
+  ];
+  const c    = cols[col];
+  const diff = c.vol - r.vatm;
+  const diffStr = (diff >= 0 ? '+' : '') + diff.toFixed(2) + 'pp';
+
+  document.getElementById('vm-ctx-title').textContent =
+    `${mat.label} ${c.label}   →   ${c.vol.toFixed(2)}% implied vol`;
+  document.getElementById('vm-ctx-sub').textContent =
+    `Strike K = ${c.K.toFixed(1)}  ·  ${diff >= 0 ? diffStr + ' above ATM' : Math.abs(diff).toFixed(2)+'pp below ATM'}  ·  ${mat.T*12 < 1.5 ? mat.T*12+'–month' : mat.T+'-year'} expiry`;
+
+  // WHAT
+  let what = '';
+  if (col === 2) {
+    what = `The anchor of the entire surface at ${mat.label} maturity. Every other vol in this row is described relative to this number. It represents the price of pure uncertainty — no directional bet, just "will the market move a lot or a little?"`;
+  } else if (col === 0 || col === 1) {
+    what = `An option that pays out if the price falls below K=${c.K.toFixed(1)} at expiry. It currently has a ~${c.delta} probability of finishing in the money. ${col===0?'This is deep crash territory — rarely pays out, but very valuable when it does.':'This is moderate downside — a real hedge for someone who owns the underlying and fears a correction.'}`;
+  } else {
+    what = `An option that pays out if the price rises above K=${c.K.toFixed(1)} at expiry. It has a ~${c.delta} probability of finishing in the money. ${col===4?'Deep upside — rarely pays out in most markets.':'Moderate upside — used to participate in rallies or hedge short positions.'}`;
+  }
+
+  // TRADE
+  let trade = '';
+  if (col === 2) {
+    trade = `A straddle (buying both a call and put at ATM) costs roughly 2× this vol in dollar terms. Portfolio managers look at ATM vol to decide if options are cheap or expensive in general. If ATM vol is high relative to realised vol, they may sell options.`;
+  } else if (col === 1) {
+    trade = `Portfolio managers buying equity protection typically buy the 25Δ put. The difference between this and ATM vol (currently ${diffStr}) is the standard "skew" measure. If this feels expensive, they might buy a put spread instead — buying the 25Δ put and selling the 10Δ put to cap the premium.`;
+  } else if (col === 0) {
+    trade = `Tail-risk buyers and structured product desks focus here. A ${diffStr} premium over ATM means extreme crash protection costs significantly more than a simple model would predict. Hedge funds sometimes sell these when the premium seems too rich.`;
+  } else if (col === 3) {
+    trade = `The 25Δ call vs 25Δ put spread is the risk-reversal — currently ${(r.rr>=0?'+':'')+r.rr.toFixed(2)} vols. A trader who thinks the skew is too steep might buy this call and sell that put (a "risk reversal trade"), betting the tilt will normalise.`;
+  } else {
+    trade = `Deep OTM calls are cheap in equity markets but can pay off spectacularly in short squeezes or takeover scenarios. Commodity traders watch 10Δ calls carefully for supply-shock premium.`;
+  }
+
+  // WHY DIFFERENT FROM ATM
+  let diffExp = '';
+  if (col === 2) {
+    diffExp = `This IS ATM — it's the reference point. The ${diffStr} is zero by definition. All other cells in this row show how far they deviate from here.`;
+  } else if (diff > 0.5) {
+    diffExp = `This cell is ${diffStr} above ATM. ${(col<2)?`Negative ρ (currently ${p.rho.toFixed(2)}) is the primary driver — when prices fall, vol spikes, making downside options cost more. Higher α (vol-of-vol) amplifies this further.`:`Positive ρ or high α lifts this side. Check the ρ slider.`}`;
+  } else if (diff < -0.5) {
+    diffExp = `This cell is ${Math.abs(diff).toFixed(2)}pp below ATM. ${(col>2)?`With negative ρ (${p.rho.toFixed(2)}), the call side is discounted — when prices rise, vol tends to fall, making upside options relatively cheaper.`:`Unusual for puts to be cheaper than ATM. Try moving ρ positive.`}`;
+  } else {
+    diffExp = `This cell is very close to ATM (${diffStr}). Either the skew and curvature are both low, or they happen to cancel out at this particular strike/maturity combination.`;
+  }
+
+  // DRIVER
+  const drivers = [
+    `Primarily <strong>ρ (skew slider)</strong> — a more negative ρ lifts this cell most. Also <strong>α (vol-of-vol)</strong> — higher α lifts it further. σ₀ shifts the whole row up/down uniformly.`,
+    `Primarily <strong>ρ (skew slider)</strong> — the standard skew measure. Also sensitive to <strong>α</strong>. Traders quote the 1Y 25Δ risk reversal as the headline skew number.`,
+    `Driven purely by <strong>σ₀ (initial vol slider)</strong> and the small correction terms. ρ and α have very little effect exactly at ATM — by design.`,
+    `Driven by both <strong>ρ</strong> (negative ρ discounts call side) and <strong>α</strong> (lifts it back up). The net of these two effects determines whether calls are above or below ATM.`,
+    `Primarily <strong>α (vol-of-vol)</strong> — deep OTM calls are the most sensitive to how uncertain vol itself is. Also affected by <strong>ρ</strong> if ρ is positive.`,
+  ];
+
+  document.getElementById('vm-ctx-what').innerHTML   = what;
+  document.getElementById('vm-ctx-trade').innerHTML  = trade;
+  document.getElementById('vm-ctx-diff').innerHTML   = diffExp;
+  document.getElementById('vm-ctx-driver').innerHTML = drivers[col];
+
+  document.getElementById('vm-ctx').style.display = 'block';
+  if (!silent) document.getElementById('vm-ctx').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// ─── TAB SWITCHER ─────────────────────────────────────────────────────────────
+
+function switchTab(tab) {
+  const explorer   = document.getElementById('main-explorer');
+  const cheatsheet = document.getElementById('main-cheatsheet');
+  const navLinks   = document.querySelectorAll('nav a');
+  const glossaryLink = document.getElementById('nav-glossary');
+  const btns = document.querySelectorAll('.tab-btn');
+
+  btns.forEach(b => b.classList.remove('active'));
+  document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+
+  if (tab === 'explorer') {
+    explorer.style.display   = '';
+    cheatsheet.style.display = 'none';
+    navLinks.forEach(a => a.style.display = '');
+  } else {
+    explorer.style.display   = 'none';
+    cheatsheet.style.display = 'block';
+    navLinks.forEach(a => a.style.display = 'none');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
 // ─── COLLAPSIBLES ─────────────────────────────────────────────────────────────
 
 function toggleColl(btn) {
@@ -977,10 +1940,14 @@ function toggleColl(btn) {
 window.addEventListener('DOMContentLoaded', () => {
   updateLabels();
   updateAnnotations();
+  updateMarketStory();
+  renderVolMatrix();
   initHeroPlots();
   initMainSurface();
   initSmileChart();
   updateSmile();
+  updateSmileNarrative();
+  updateShapeInterp();
   updatePricing();
 });
 </script>
