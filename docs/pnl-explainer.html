@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PnL Explain – Interactive Rates Explorer</title>
+<script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--surface:#0d1117;--surface2:#161b27;--surface3:#1e2637;
+  --border:#2a3347;--text:#e2e8f0;--muted:#7a8faa;
+  --accent:#4a9eff;--accent2:#7bc4ff;--green:#22d3a0;--red:#f87171;
+  --yellow:#fbbf24;--purple:#a78bfa;--orange:#fb923c;--r:10px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;line-height:1.65;overflow-x:hidden}
+nav{position:sticky;top:0;z-index:100;background:rgba(7,9,15,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:20px;height:50px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+.nav-logo{font-weight:800;font-size:14px;color:var(--accent);white-space:nowrap;flex-shrink:0}
+nav a{color:var(--muted);font-size:13px;text-decoration:none;white-space:nowrap;flex-shrink:0;transition:color .15s}
+nav a:hover{color:var(--text)}
+.nav-spacer{flex:1}
+section{padding:60px 20px;max-width:1080px;margin:0 auto}
+section+section{border-top:1px solid var(--border)}
+h1{font-size:clamp(28px,5vw,46px);font-weight:900;line-height:1.15;margin-bottom:14px;background:linear-gradient(135deg,#e2e8f0 30%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+h2{font-size:clamp(19px,3vw,26px);font-weight:700;color:var(--accent2);margin-bottom:18px}
+h3{font-size:16px;font-weight:600;color:var(--text);margin-bottom:10px}
+p{color:var(--muted);margin-bottom:10px}
+p.lead{color:var(--text);font-size:16px;margin-bottom:22px}
+.section-intro{max-width:680px;margin-bottom:28px}
+.hl{color:var(--accent2);font-weight:600}
+.badge{display:inline-block;background:rgba(74,158,255,.12);border:1px solid rgba(74,158,255,.28);color:var(--accent);font-size:11px;font-weight:700;letter-spacing:1.2px;padding:4px 14px;border-radius:20px;margin-bottom:22px;text-transform:uppercase}
+#hero{padding-top:72px;text-align:center}
+.hero-sub{color:var(--muted);font-size:clamp(14px,2vw,17px);max-width:600px;margin:0 auto 32px}
+.tri-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:760px;margin:0 auto 28px}
+@media(max-width:580px){.tri-grid{grid-template-columns:1fr}}
+.tri-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:18px;text-align:left}
+.tri-card.actual{border-color:rgba(74,158,255,.4)}
+.tri-card.predicted{border-color:rgba(34,211,160,.4)}
+.tri-card.unexplained{border-color:rgba(251,191,36,.4)}
+.tri-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.tri-label.actual{color:var(--accent)}
+.tri-label.predicted{color:var(--green)}
+.tri-label.unexplained{color:var(--yellow)}
+.tri-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:5px}
+.tri-desc{font-size:12px;color:var(--muted);line-height:1.5}
+/* sliders */
+.ctrl-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:600px){.ctrl-grid{grid-template-columns:1fr}}
+.sl-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.sl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.sl-name{font-size:14px;font-weight:700;color:var(--accent2)}
+.sl-val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+.sl-tip{font-size:12px;color:var(--muted);margin-bottom:9px;line-height:1.45}
+input[type=range]{width:100%;height:4px;-webkit-appearance:none;background:var(--border);border-radius:2px;cursor:pointer;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:0 0 6px rgba(74,158,255,.45)}
+.sl-ann{margin-top:7px;font-size:12px;color:var(--green);min-height:14px;transition:color .2s}
+/* inputs */
+.igroup{margin-bottom:14px}
+.igroup label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.igroup input,.igroup select{width:100%;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:6px;font-size:14px;outline:none}
+.igroup input:focus,.igroup select:focus{border-color:var(--accent)}
+select{background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:7px 11px;border-radius:6px;font-size:13px;cursor:pointer;outline:none}
+/* toggle */
+.toggle-bar{display:flex;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:4px;gap:4px;width:fit-content;margin-bottom:24px}
+.toggle-btn{padding:7px 20px;border-radius:5px;border:none;background:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .18s}
+.toggle-btn.active{background:var(--accent);color:#fff}
+/* panels */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:660px){.two-col{grid-template-columns:1fr}}
+.panel{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+/* greeks table */
+.greeks-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+@media(max-width:520px){.greeks-grid{grid-template-columns:1fr 1fr}}
+.greek-chip{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.greek-sym{font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:2px}
+.greek-val{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+.greek-unit{font-size:10px;color:var(--muted);margin-top:1px}
+/* hessian */
+.hess-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+/* attribution */
+.attr-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.attr-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--border)}
+.attr-row:last-child{border:none}
+.attr-lbl{font-size:13px;color:var(--muted)}
+.attr-val{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+/* deep dive tabs */
+.tab-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.tab-btn{padding:7px 16px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .18s}
+.tab-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(74,158,255,.08)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+/* scenarios */
+.sc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.sc-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;cursor:pointer;transition:border-color .18s,background .18s,transform .12s;user-select:none}
+.sc-card:hover{border-color:var(--accent);background:var(--surface3);transform:translateY(-2px)}
+.sc-card.active{border-color:var(--accent);background:rgba(74,158,255,.09)}
+.sc-icon{font-size:22px;margin-bottom:8px}
+.sc-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px}
+.sc-desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.sc-chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:11px;background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--muted);font-variant-numeric:tabular-nums}
+/* collapsible */
+.coll{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin-top:14px;overflow:hidden}
+.coll-btn{width:100%;text-align:left;padding:11px 16px;background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.coll-btn:hover{color:var(--text)}
+.coll-arrow{transition:transform .25s;display:inline-block}
+.coll-btn.open .coll-arrow{transform:rotate(180deg)}
+.coll-body{display:none;padding:14px 16px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);line-height:1.6}
+.coll-body.open{display:block}
+.coll-body p{margin-bottom:8px}
+.coll-body p:last-child{margin:0}
+.formula-box{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:10px 0;overflow-x:auto;font-size:13px;text-align:center}
+/* glossary */
+#glossary{padding:36px 20px;max-width:1080px;margin:0 auto;border-top:1px solid var(--border)}
+.gloss-strip{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.gt{position:relative;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 13px;cursor:default;font-size:13px;transition:border-color .15s}
+.gt:hover{border-color:var(--accent)}
+.gt-word{color:var(--accent2);font-weight:600}
+.gt-tip{display:none;position:absolute;bottom:calc(100% + 8px);left:0;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:12px;color:var(--text);line-height:1.5;width:240px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.55)}
+.gt:hover .gt-tip{display:block}
+footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-top:1px solid var(--border)}
+/* tenor slider row */
+.tenor-row{display:grid;grid-template-columns:60px 1fr 52px;align-items:center;gap:10px;margin-bottom:10px}
+.tenor-lbl{font-size:12px;font-weight:700;color:var(--accent2);text-align:right}
+.tenor-num{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text);text-align:right}
+/* summary bar */
+.summary-bar{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;padding:14px 18px;background:var(--surface3);border:1px solid var(--border);border-radius:var(--r)}
+.sum-item{display:flex;flex-direction:column;gap:2px}
+.sum-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted)}
+.sum-val{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+/* linear vs nonlinear */
+.lnl-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:620px){.lnl-grid{grid-template-columns:1fr}}
+.lnl-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.lnl-card.linear{border-top:3px solid var(--muted)}
+.lnl-card.nonlinear{border-top:3px solid var(--accent)}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">PnL Explain</span>
+  <a href="#hero">Overview</a>
+  <a href="#taylor">Taylor</a>
+  <a href="#position">Position</a>
+  <a href="#hessian">Hessian</a>
+  <a href="#deepdive">Greeks</a>
+  <a href="#attribution">Attribution</a>
+  <a href="#scenarios">Scenarios</a>
+  <span class="nav-spacer"></span>
+  <a href="#glossary" style="color:var(--accent)">Glossary</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="badge">Rates Focus · Interactive Learning</div>
+  <h1>PnL Explain</h1>
+  <p class="hero-sub">Break down exactly why a rates position made or lost money — first-order DV01, second-order gamma and convexity, vega, volga, vanna, and the residual the Taylor expansion misses.</p>
+
+  <div class="tri-grid">
+    <div class="tri-card actual">
+      <div class="tri-label actual">Actual PnL</div>
+      <div class="tri-title">Full Revaluation</div>
+      <div class="tri-desc">Mark the position at today's market levels. The truth — no approximation.</div>
+    </div>
+    <div class="tri-card predicted">
+      <div class="tri-label predicted">Predicted PnL</div>
+      <div class="tri-title">Greeks × Market Moves</div>
+      <div class="tri-desc">Taylor-expand the pricing function. Sum DV01, gamma, vega, volga, vanna, theta.</div>
+    </div>
+    <div class="tri-card unexplained">
+      <div class="tri-label unexplained">Unexplained</div>
+      <div class="tri-title">Actual − Predicted</div>
+      <div class="tri-desc">Higher-order terms the Taylor truncates. Small for small moves; grows with large shocks.</div>
+    </div>
+  </div>
+
+  <div class="coll" style="text-align:left;max-width:760px;margin:0 auto">
+    <button class="coll-btn" onclick="toggleColl(this)">Why decompose PnL? <span class="coll-arrow">▼</span></button>
+    <div class="coll-body">
+      <p>Every trading desk runs a daily PnL explain. The goal: if risk systems said you had $500k DV01, and rates moved 10bp, you should have made roughly $5M. Did you? If actual PnL is $6.2M, the extra $1.2M came from somewhere — gamma, vol moves, or unexplained model residual.</p>
+      <p>Small unexplained PnL = model is working well. Large unexplained = higher-order risks not captured, or a model/data issue. Under FRTB, regulators require the unexplained to stay below a threshold as a condition for using an internal model.</p>
+      <p>For <strong style="color:var(--accent)">linear instruments</strong> (swaps, bonds): PnL is almost entirely DV01 × ΔR. Gamma is negligible. Vega is zero.<br>
+      For <strong style="color:var(--green)">non-linear instruments</strong> (swaptions, caps, floors): gamma, vega, volga, and vanna all contribute meaningfully — especially in large or vol-rich moves.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TAYLOR EXPANSION -->
+<section id="taylor">
+  <div class="section-intro">
+    <h2>The Taylor Expansion</h2>
+    <p class="lead">PnL is approximated by expanding the pricing function around today's greeks. Each term is a greek multiplied by a market move.</p>
+  </div>
+
+  <div class="formula-box">
+    \[\Delta P \;\approx\; \underbrace{\sum_i \text{DV01}_i \cdot \Delta R_i}_{\text{DV01 PnL}} \;+\; \underbrace{\tfrac{1}{2}\sum_{i,j}\Gamma_{ij}\cdot\Delta R_i\Delta R_j}_{\text{Gamma PnL (Hessian)}} \;+\; \underbrace{\nu\cdot\Delta\sigma}_{\text{Vega PnL}} \;+\; \underbrace{\tfrac{1}{2}\,\mathcal{V}\cdot(\Delta\sigma)^2}_{\text{Volga PnL}} \;+\; \underbrace{\mathcal{A}\cdot\Delta R\cdot\Delta\sigma}_{\text{Vanna PnL}} \;+\; \underbrace{\Theta\cdot\Delta t}_{\text{Theta PnL}}\]
+  </div>
+
+  <div style="margin-top:28px">
+    <h3>Convexity in action — drag the rate move</h3>
+    <p style="font-size:13px;margin-bottom:14px">The grey line is the linear (DV01-only) estimate. The green curve adds gamma. The blue dots are full revaluation. Position uses current settings from the <a href="#position" style="color:var(--accent)">Position Setup</a> section.</p>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px">
+      <canvas id="convexity-chart" style="max-height:280px"></canvas>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:240px">
+        <div class="sl-head"><span class="sl-name">ΔR — Rate Move</span><span class="sl-val" id="val-conv-dr">+50 bp</span></div>
+        <input type="range" id="sl-conv-dr" min="-150" max="150" step="5" value="50" oninput="onConvSlider()">
+      </div>
+      <div style="display:flex;gap:24px">
+        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">Linear est.</div><div style="font-size:17px;font-weight:800;color:var(--muted)" id="conv-linear">—</div></div>
+        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">+Gamma</div><div style="font-size:17px;font-weight:800;color:var(--green)" id="conv-quad">—</div></div>
+        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">Actual</div><div style="font-size:17px;font-weight:800;color:var(--accent)" id="conv-actual">—</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POSITION SETUP -->
+<section id="position">
+  <div class="section-intro">
+    <h2>Position Setup</h2>
+    <p class="lead">Configure a swaption to derive all greeks automatically, or enter them directly in manual mode.</p>
+  </div>
+
+  <div class="toggle-bar">
+    <button class="toggle-btn active" id="btn-derived" onclick="setMode('derived')">Derived from Swaption</button>
+    <button class="toggle-btn" id="btn-manual" onclick="setMode('manual')">Manual Input</button>
+  </div>
+
+  <!-- DERIVED MODE -->
+  <div id="panel-derived">
+    <div class="two-col">
+      <div class="panel">
+        <h3>Swaption Parameters</h3>
+        <div style="margin-top:14px">
+          <div class="igroup">
+            <label>Option Expiry</label>
+            <select id="d-expiry" onchange="onDerivedChange()">
+              <option value="0.25">3 Months</option>
+              <option value="0.5">6 Months</option>
+              <option value="1" selected>1 Year</option>
+              <option value="2">2 Years</option>
+              <option value="3">3 Years</option>
+              <option value="5">5 Years</option>
+            </select>
+          </div>
+          <div class="igroup">
+            <label>Underlying Swap Tenor</label>
+            <select id="d-tenor" onchange="onDerivedChange()">
+              <option value="1">1 Year</option>
+              <option value="2">2 Years</option>
+              <option value="5">5 Years</option>
+              <option value="7">7 Years</option>
+              <option value="10" selected>10 Years</option>
+              <option value="15">15 Years</option>
+              <option value="20">20 Years</option>
+              <option value="30">30 Years</option>
+            </select>
+          </div>
+          <div class="igroup">
+            <label>Type</label>
+            <select id="d-type" onchange="onDerivedChange()">
+              <option value="payer" selected>Payer (long rates)</option>
+              <option value="receiver">Receiver (short rates)</option>
+            </select>
+          </div>
+          <div class="igroup">
+            <label>Notional</label>
+            <select id="d-notional" onchange="onDerivedChange()">
+              <option value="1000000">$1M</option>
+              <option value="10000000" selected>$10M</option>
+              <option value="100000000">$100M</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Market Inputs</h3>
+        <div style="margin-top:14px">
+          <div class="sl-card" style="margin-bottom:12px">
+            <div class="sl-head"><span class="sl-name">ATM / Forward Rate</span><span class="sl-val" id="val-atm">350 bp</span></div>
+            <p class="sl-tip">The current forward swap rate (ATM strike). Rates are in basis points (100bp = 1%).</p>
+            <input type="range" id="sl-atm" min="10" max="700" step="5" value="350" oninput="onDerivedChange()">
+          </div>
+          <div class="sl-card" style="margin-bottom:12px">
+            <div class="sl-head"><span class="sl-name">Strike</span><span class="sl-val" id="val-strike">350 bp</span></div>
+            <p class="sl-tip">Option strike in bp. ATM = strike equals forward rate. Adjust for OTM/ITM.</p>
+            <input type="range" id="sl-strike" min="10" max="700" step="5" value="350" oninput="onDerivedChange()">
+          </div>
+          <div class="sl-card">
+            <div class="sl-head"><span class="sl-name">Normal Vol (σ_N)</span><span class="sl-val" id="val-nvol">80 bp</span></div>
+            <p class="sl-tip">Implied normal (Bachelier) vol in basis points per year. Typical range: 40–120bp. Spikes in crises.</p>
+            <input type="range" id="sl-nvol" min="10" max="250" step="5" value="80" oninput="onDerivedChange()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="coll">
+      <button class="coll-btn" onclick="toggleColl(this)">Bachelier (Normal) model formula <span class="coll-arrow">▼</span></button>
+      <div class="coll-body">
+        <p>For rates that can go negative, the <strong style="color:var(--accent2)">Normal (Bachelier) model</strong> treats rates as an arithmetic Brownian motion. A payer swaption price is:</p>
+        <div class="formula-box">\[V = A \cdot \left[(F-K)\,\mathcal{N}(d) + \sigma_N\sqrt{T}\,\mathcal{n}(d)\right], \quad d = \frac{F-K}{\sigma_N\sqrt{T}}\]</div>
+        <p>where \(A\) is the swap annuity, \(F\) the forward swap rate, \(K\) the strike, \(\sigma_N\) the normal vol, \(\mathcal{N}\) and \(\mathcal{n}\) the normal CDF and PDF. The model is standard for EUR/GBP rates desks and any environment where rates trade near zero or negative.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANUAL MODE -->
+  <div id="panel-manual" style="display:none">
+    <div class="ctrl-grid">
+      <div class="sl-card">
+        <div class="sl-head"><span class="sl-name">DV01 ($/bp)</span><span class="sl-val" id="val-m-dv01">$5,000</span></div>
+        <p class="sl-tip">Dollar value of a 1bp parallel rate move. Positive = long rates (gains when rates rise for receiver, falls for payer).</p>
+        <input type="range" id="sl-m-dv01" min="-50000" max="50000" step="500" value="5000" oninput="onManualChange()">
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span class="sl-name">Gamma ($/bp²)</span><span class="sl-val" id="val-m-gamma">$50</span></div>
+        <p class="sl-tip">Curvature — how DV01 changes per bp move. Long options: positive. Short options: negative.</p>
+        <input type="range" id="sl-m-gamma" min="-2000" max="2000" step="10" value="50" oninput="onManualChange()">
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span class="sl-name">Vega ($/bp vol)</span><span class="sl-val" id="val-m-vega">$8,000</span></div>
+        <p class="sl-tip">Sensitivity to 1bp change in normal vol. Long options: positive vega (benefits from vol increase).</p>
+        <input type="range" id="sl-m-vega" min="-100000" max="100000" step="500" value="8000" oninput="onManualChange()">
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span class="sl-name">Volga ($/bp² vol)</span><span class="sl-val" id="val-m-volga">$20</span></div>
+        <p class="sl-tip">Vol convexity — second derivative of price to vol. OTM options have large positive volga.</p>
+        <input type="range" id="sl-m-volga" min="-500" max="500" step="5" value="20" oninput="onManualChange()">
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span class="sl-name">Vanna ($/bp/bp_vol)</span><span class="sl-val" id="val-m-vanna">$0</span></div>
+        <p class="sl-tip">Cross-term: how DV01 changes with vol (and how vega changes with rates). Key in skew-rich environments.</p>
+        <input type="range" id="sl-m-vanna" min="-300" max="300" step="5" value="0" oninput="onManualChange()">
+      </div>
+      <div class="sl-card">
+        <div class="sl-head"><span class="sl-name">Theta ($/day)</span><span class="sl-val" id="val-m-theta">-$800</span></div>
+        <p class="sl-tip">Daily time decay. Long options lose theta. Short options gain it. Offsets gamma/vega for short positions.</p>
+        <input type="range" id="sl-m-theta" min="-20000" max="5000" step="100" value="-800" oninput="onManualChange()">
+      </div>
+    </div>
+  </div>
+
+  <!-- GREEKS OUTPUT -->
+  <div style="margin-top:24px">
+    <h3>Current Greeks</h3>
+    <div class="greeks-grid" style="margin-top:12px">
+      <div class="greek-chip"><div class="greek-sym">DV01</div><div class="greek-val" id="gk-dv01">—</div><div class="greek-unit">$ per bp</div></div>
+      <div class="greek-chip"><div class="greek-sym">Gamma (Γ)</div><div class="greek-val" id="gk-gamma">—</div><div class="greek-unit">$ per bp²</div></div>
+      <div class="greek-chip"><div class="greek-sym">Vega (ν)</div><div class="greek-val" id="gk-vega">—</div><div class="greek-unit">$ per bp vol</div></div>
+      <div class="greek-chip"><div class="greek-sym">Volga (𝒱)</div><div class="greek-val" id="gk-volga">—</div><div class="greek-unit">$ per bp² vol</div></div>
+      <div class="greek-chip"><div class="greek-sym">Vanna (𝒜)</div><div class="greek-val" id="gk-vanna">—</div><div class="greek-unit">$ per bp·bp_vol</div></div>
+      <div class="greek-chip"><div class="greek-sym">Theta (Θ)</div><div class="greek-val" id="gk-theta">—</div><div class="greek-unit">$ per day</div></div>
+    </div>
+    <div style="margin-top:10px;font-size:13px;padding:10px 14px;background:rgba(74,158,255,.07);border:1px solid rgba(74,158,255,.15);border-radius:8px" id="gk-explain">—</div>
+  </div>
+</section>
+
+<!-- HESSIAN -->
+<section id="hessian">
+  <div class="section-intro">
+    <h2>The Hessian — Curve Cross-Gamma</h2>
+    <p class="lead">In rates, gamma is not scalar. It is a matrix Γᵢⱼ across the 5 tenor nodes of the curve. Off-diagonal entries capture how PnL responds when two different tenors move simultaneously.</p>
+  </div>
+
+  <div class="formula-box">
+    \[H = \begin{pmatrix} \Gamma_{1Y,1Y} & \Gamma_{1Y,2Y} & \cdots & \Gamma_{1Y,30Y} \\ \Gamma_{2Y,1Y} & \Gamma_{2Y,2Y} & \cdots & \Gamma_{2Y,30Y} \\ \vdots & & \ddots & \vdots \\ \Gamma_{30Y,1Y} & \cdots & \cdots & \Gamma_{30Y,30Y} \end{pmatrix} \qquad \text{Gamma PnL} = \tfrac{1}{2}\,\Delta\mathbf{R}^\top H\,\Delta\mathbf{R}\]
+  </div>
+
+  <div style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+    <div>
+      <h3>Hessian Heatmap</h3>
+      <p style="font-size:12px;margin-bottom:10px">Built from current position. Colour = $/bp² contribution. Hot cells = tenors with large cross-gamma.</p>
+      <div class="hess-wrap" style="height:320px" id="hessian-plot"></div>
+    </div>
+    <div>
+      <h3>Quadratic Form — Gamma PnL</h3>
+      <p style="font-size:12px;margin-bottom:14px">Set a curve scenario and compute ½ ΔRᵀ H ΔR — the total gamma PnL contribution.</p>
+      <div class="panel">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.6px">Rate Move per Tenor (bp)</div>
+        <div id="hess-tenor-inputs"></div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+          <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">½ ΔRᵀ H ΔR</div>
+          <div style="font-size:28px;font-weight:900;font-variant-numeric:tabular-nums" id="hess-qf-val">—</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px" id="hess-qf-note">—</div>
+        </div>
+      </div>
+      <div class="coll" style="margin-top:12px">
+        <button class="coll-btn" onclick="toggleColl(this)">What cross-gamma means <span class="coll-arrow">▼</span></button>
+        <div class="coll-body">
+          <p><strong style="color:var(--accent2)">Diagonal (own-gamma):</strong> Γᵢᵢ tells you how the DV01 at tenor i changes when rate i moves. A 10Y swaption has large Γ₁₀ᵧ,₁₀ᵧ.</p>
+          <p><strong style="color:var(--green)">Off-diagonal (cross-gamma):</strong> Γᵢⱼ (i≠j) tells you how the DV01 at tenor i changes when rate j moves. A 2y10y swaption has significant Γ₂ᵧ,₁₀ᵧ — a parallel shift hits both legs.</p>
+          <p>A <strong style="color:var(--yellow)">flattener</strong> (short rates up, long rates down) can have zero or negative gamma PnL even with long-gamma positions, because the cross-gamma terms cancel the diagonal terms. This is why a Hessian — not a single gamma number — is needed for a rate book.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECOND ORDER DEEP DIVE -->
+<section id="deepdive">
+  <div class="section-intro">
+    <h2>Second-Order Greeks</h2>
+    <p class="lead">Gamma, Volga, and Vanna each tell a different story about how your risk profile changes with markets. These charts use the current position.</p>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="setTab('gamma')">Gamma</button>
+    <button class="tab-btn" onclick="setTab('volga')">Volga</button>
+    <button class="tab-btn" onclick="setTab('vanna')">Vanna</button>
+  </div>
+
+  <!-- GAMMA TAB -->
+  <div class="tab-pane active" id="tab-gamma">
+    <div class="two-col">
+      <div>
+        <div class="formula-box" style="margin-bottom:14px">\[\Gamma = \frac{\partial^2 P}{\partial F^2} = A\,\frac{\mathcal{n}(d)}{\sigma_N\sqrt{T}}\]<div style="font-size:11px;color:var(--muted);margin-top:8px">Gamma PnL = ½ Γ (ΔR)² — always positive for long options regardless of move direction</div></div>
+        <p style="font-size:13px">The <span class="hl">convexity benefit</span> of long options: a 50bp move up or down both generate positive PnL for a gamma-long position. Short gamma positions bleed on every large move.</p>
+        <p style="font-size:13px">Gamma is largest <strong style="color:var(--accent2)">ATM near expiry</strong> and shrinks OTM or far from expiry.</p>
+        <div style="margin-top:12px;padding:12px 14px;background:var(--surface3);border:1px solid var(--border);border-radius:8px;font-size:13px">
+          <div style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Gamma PnL at current ΔR</div>
+          <div style="font-size:22px;font-weight:800;color:var(--green)" id="gamma-pnl-display">—</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px" id="gamma-ann">—</div>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px">
+          <canvas id="gamma-chart" style="max-height:260px"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOLGA TAB -->
+  <div class="tab-pane" id="tab-volga">
+    <div class="two-col">
+      <div>
+        <div class="formula-box" style="margin-bottom:14px">\[\mathcal{V} = \frac{\partial^2 P}{\partial\sigma^2} = A\,\sqrt{T}\,\mathcal{n}(d)\,\frac{d^2}{\sigma_N}\]<div style="font-size:11px;color:var(--muted);margin-top:8px">Volga PnL = ½ 𝒱 (Δσ)² — "vol of vega" — how vega itself changes with vol</div></div>
+        <p style="font-size:13px"><span class="hl">Volga</span> (also called Vomma) measures the curvature of the option price in vol space. An ATM option has low Volga — its vega barely changes as vol moves. An OTM option has high Volga — vol spikes dramatically increase its value.</p>
+        <p style="font-size:13px">For a vol spike from 80bp to 110bp: linear vega gives one estimate; adding ½ Volga (Δσ)² improves the prediction significantly for deep OTM structures.</p>
+        <div style="margin-top:12px;padding:12px 14px;background:var(--surface3);border:1px solid var(--border);border-radius:8px;font-size:13px">
+          <div style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Volga PnL at current Δσ</div>
+          <div style="font-size:22px;font-weight:800;color:var(--purple)" id="volga-pnl-display">—</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px" id="volga-ann">—</div>
+        </div>
+      </div>
+      <div>
+        <div style="margin-bottom:10px;display:flex;align-items:center;gap:14px">
+          <div class="sl-head" style="flex:1"><span class="sl-name" style="font-size:13px">Δσ (vol move, bp)</span><span class="sl-val" id="val-dv-dsig" style="font-size:16px">+20 bp</span></div>
+          <input type="range" id="sl-dv-dsig" min="-100" max="100" step="5" value="20" style="width:160px" oninput="onVolgaSlider()">
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px">
+          <canvas id="volga-chart" style="max-height:260px"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VANNA TAB -->
+  <div class="tab-pane" id="tab-vanna">
+    <div class="two-col">
+      <div>
+        <div class="formula-box" style="margin-bottom:14px">\[\mathcal{A} = \frac{\partial^2 P}{\partial F\,\partial\sigma} = -A\,\frac{\mathcal{n}(d)\,d}{\sigma_N}\]<div style="font-size:11px;color:var(--muted);margin-top:8px">Vanna = ∂(DV01)/∂σ = ∂(Vega)/∂F — the skew cross-term</div></div>
+        <p style="font-size:13px"><span class="hl">Vanna</span> tells you two things simultaneously: (1) how your DV01 changes when vol moves, and (2) how your vega changes when rates move.</p>
+        <p style="font-size:13px">For a payer swaption, Vanna is negative when d &gt; 0 (ITM). When rates rise and vol rises simultaneously — a rate crisis — the Vanna cross-term adds negative PnL even if both rate and vol moves individually were favourable.</p>
+        <div style="margin-top:12px;padding:12px 14px;background:var(--surface3);border:1px solid var(--border);border-radius:8px;font-size:13px">
+          <div style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Vanna PnL (ΔR × Δσ)</div>
+          <div style="font-size:22px;font-weight:800;color:var(--orange)" id="vanna-pnl-display">—</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px" id="vanna-ann">—</div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px">DV01 (hedge ratio) at different vol levels — the gap between lines is the Vanna effect.</p>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px">
+          <canvas id="vanna-chart" style="max-height:260px"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PNL ATTRIBUTION -->
+<section id="attribution">
+  <div class="section-intro">
+    <h2>PnL Attribution</h2>
+    <p class="lead">Set today's market moves and see how each greek contributes to total PnL — and how much the Taylor expansion misses.</p>
+  </div>
+
+  <div class="two-col" style="align-items:start">
+    <div>
+      <div class="panel">
+        <h3>Market Moves</h3>
+        <div style="margin-top:14px">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Rate move per tenor (bp)</div>
+          <div id="attr-tenor-sliders"></div>
+          <div class="sl-card" style="margin-top:12px">
+            <div class="sl-head"><span class="sl-name">Δσ — Vol Move</span><span class="sl-val" id="val-attr-dsig">+10 bp</span></div>
+            <input type="range" id="sl-attr-dsig" min="-100" max="100" step="5" value="10" oninput="onAttrChange()">
+          </div>
+          <div class="sl-card" style="margin-top:12px">
+            <div class="sl-head"><span class="sl-name">Δt — Days Elapsed</span><span class="sl-val" id="val-attr-dt">1 day</span></div>
+            <input type="range" id="sl-attr-dt" min="0" max="30" step="1" value="1" oninput="onAttrChange()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="attr-wrap">
+        <h3 style="margin-bottom:14px">PnL Attribution</h3>
+        <canvas id="attribution-chart" style="max-height:300px"></canvas>
+      </div>
+      <div class="summary-bar" style="margin-top:12px">
+        <div class="sum-item"><span class="sum-lbl">Predicted</span><span class="sum-val" id="sum-predicted" style="color:var(--green)">—</span></div>
+        <div class="sum-item"><span class="sum-lbl">Actual</span><span class="sum-val" id="sum-actual" style="color:var(--accent)">—</span></div>
+        <div class="sum-item"><span class="sum-lbl">Unexplained</span><span class="sum-val" id="sum-unexplained" style="color:var(--yellow)">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LINEAR vs NON-LINEAR -->
+  <div style="margin-top:32px">
+    <h3>Linear vs Non-linear — same DV01, different instrument</h3>
+    <p style="font-size:13px;margin-bottom:16px">A swap and a swaption with identical DV01 behave very differently in large moves. The swaption's gamma adds convexity the swap doesn't have.</p>
+    <div class="lnl-grid">
+      <div class="lnl-card linear">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Swap (Linear)</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px">DV01-only. Zero gamma, zero vega. PnL is a straight line.</div>
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted)">DV01 PnL</span><span style="font-size:16px;font-weight:800;color:var(--text)" id="lnl-swap-dv01">—</span></div>
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted)">Gamma PnL</span><span style="font-size:16px;font-weight:800;color:var(--muted)">$0</span></div>
+        <div style="display:flex;justify-content:space-between;padding:7px 0"><span style="font-size:13px;color:var(--muted)">Total PnL</span><span style="font-size:16px;font-weight:800;color:var(--text)" id="lnl-swap-total">—</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px" id="lnl-swap-note">—</div>
+      </div>
+      <div class="lnl-card nonlinear">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);margin-bottom:8px">Swaption (Non-linear)</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Same DV01. Positive gamma adds convexity — wins more on big moves, costs theta.</div>
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted)">DV01 PnL</span><span style="font-size:16px;font-weight:800;color:var(--text)" id="lnl-swpt-dv01">—</span></div>
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted)">Gamma PnL</span><span style="font-size:16px;font-weight:800;color:var(--green)" id="lnl-swpt-gamma">—</span></div>
+        <div style="display:flex;justify-content:space-between;padding:7px 0"><span style="font-size:13px;color:var(--muted)">Total (full reval)</span><span style="font-size:16px;font-weight:800;color:var(--accent)" id="lnl-swpt-total">—</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px" id="lnl-swpt-note">—</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCENARIOS -->
+<section id="scenarios">
+  <div class="section-intro">
+    <h2>Market Scenarios</h2>
+    <p class="lead">Click a card to load a real rates scenario. Market moves update the attribution and all charts instantly.</p>
+  </div>
+  <div class="sc-grid">
+    <div class="sc-card" onclick="loadScenario(this,'parallel')">
+      <div class="sc-icon">↑</div>
+      <div class="sc-name">Parallel Shift +50bp</div>
+      <div class="sc-desc">All tenors rise 50bp simultaneously. DV01 dominates. For long-gamma swaptions, gamma adds a convexity benefit on top of the linear DV01 gain.</div>
+      <div class="sc-chips"><span class="chip">ΔR: +50bp all</span><span class="chip">Δσ: 0</span></div>
+    </div>
+    <div class="sc-card" onclick="loadScenario(this,'steepener')">
+      <div class="sc-icon">📐</div>
+      <div class="sc-name">Bear Steepener</div>
+      <div class="sc-desc">Short end lags, long end leads higher. Cross-gamma between 5Y and 30Y nodes is decisive. A short 2y30y swaption is especially exposed.</div>
+      <div class="sc-chips"><span class="chip">1Y:+15</span><span class="chip">10Y:+55</span><span class="chip">30Y:+80bp</span></div>
+    </div>
+    <div class="sc-card" onclick="loadScenario(this,'flattener')">
+      <div class="sc-icon">📉</div>
+      <div class="sc-name">Bull Flattener</div>
+      <div class="sc-desc">Rally led by long end. Short end barely moves. Cross-gamma can produce surprising gamma PnL from competing tenor contributions.</div>
+      <div class="sc-chips"><span class="chip">1Y:-5</span><span class="chip">10Y:-45</span><span class="chip">30Y:-60bp</span></div>
+    </div>
+    <div class="sc-card" onclick="loadScenario(this,'volspike')">
+      <div class="sc-icon">⚡</div>
+      <div class="sc-name">Vol Spike (flat rates)</div>
+      <div class="sc-desc">Rates unchanged, swaption vol surges +30bp. Pure vega and volga PnL. Demonstrates why OTM swaptions benefit disproportionately from vol explosions.</div>
+      <div class="sc-chips"><span class="chip">ΔR: 0bp all</span><span class="chip">Δσ: +30bp</span></div>
+    </div>
+    <div class="sc-card" onclick="loadScenario(this,'crisis')">
+      <div class="sc-icon">🔥</div>
+      <div class="sc-name">Rate Crisis</div>
+      <div class="sc-desc">Parallel +100bp shock alongside a +50bp vol spike. All second-order terms matter simultaneously. Vanna cross-term can be surprisingly large.</div>
+      <div class="sc-chips"><span class="chip">ΔR: +100bp all</span><span class="chip">Δσ: +50bp</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<div id="glossary">
+  <h2>Glossary</h2>
+  <p style="font-size:13px;color:var(--muted)">Hover any term for a definition.</p>
+  <div class="gloss-strip">
+    <div class="gt"><span class="gt-word">DV01</span><div class="gt-tip">Dollar Value of 01 (basis point). The PnL impact of a 1bp parallel shift in the rate curve. The primary first-order risk measure for rate instruments.</div></div>
+    <div class="gt"><span class="gt-word">Gamma</span><div class="gt-tip">Second derivative of price with respect to the underlying rate. For options, always positive if long (convexity benefit). Negative if short. $/bp² — how DV01 changes per bp of rate move.</div></div>
+    <div class="gt"><span class="gt-word">Vega</span><div class="gt-tip">Sensitivity of option price to a change in implied vol. For normal vol, Vega = A·√T·n(d). Measured in $/bp of normal vol change.</div></div>
+    <div class="gt"><span class="gt-word">Volga</span><div class="gt-tip">Also called Vomma. Second derivative of price with respect to vol — the "gamma of vega." OTM swaptions have large Volga: vol spikes amplify their value super-linearly.</div></div>
+    <div class="gt"><span class="gt-word">Vanna</span><div class="gt-tip">Mixed partial ∂²P/∂F∂σ. Tells you simultaneously how delta changes with vol and how vega changes with rates. Key in crisis scenarios where rates and vol move together.</div></div>
+    <div class="gt"><span class="gt-word">Theta</span><div class="gt-tip">Time decay — the daily erosion of option premium. Long options pay theta (negative). Short options collect it. Theta and gamma always work in opposite directions for the same position.</div></div>
+    <div class="gt"><span class="gt-word">Hessian</span><div class="gt-tip">The matrix of second partial derivatives. In rates, the 5×5 matrix of cross-gammas between tenor nodes. Required for accurate PnL explain on curve positions like steepeners or fly positions.</div></div>
+    <div class="gt"><span class="gt-word">Normal Vol</span><div class="gt-tip">Implied vol from the Bachelier (Normal) model — quoted in basis points. Unlike log-normal vol, it applies even when rates are near zero or negative. Standard for EUR and GBP rate markets.</div></div>
+    <div class="gt"><span class="gt-word">Payer Swaption</span><div class="gt-tip">Option to enter a swap paying fixed / receiving floating. Profits when rates rise. The rates equivalent of a call option on rates (or a put on bond prices).</div></div>
+    <div class="gt"><span class="gt-word">Unexplained PnL</span><div class="gt-tip">Actual PnL minus predicted (Taylor-expanded) PnL. In FRTB, this must stay below a regulatory threshold to use an internal model. Large unexplained indicates higher-order risk or model error.</div></div>
+    <div class="gt"><span class="gt-word">Convexity</span><div class="gt-tip">The benefit of positive gamma: large moves always help a long-gamma position. The option makes more on a 100bp move than twice what it makes on a 50bp move. This benefit is paid via theta.</div></div>
+    <div class="gt"><span class="gt-word">Cross-Gamma</span><div class="gt-tip">Γᵢⱼ = ∂²P/∂Rᵢ∂Rⱼ for i≠j. Non-zero whenever an instrument spans two tenor buckets. A 2y10y swaption has cross-gamma between the 2Y and 10Y nodes of the curve.</div></div>
+  </div>
+</div>
+
+<footer>
+  Built with Plotly.js · Chart.js · MathJax · Bachelier (1900) Normal model
+  <br style="margin-bottom:4px">
+  All mathematics runs in your browser — no server required.
+  <br><a href="sabr.html" style="color:var(--accent);text-decoration:none;font-size:12px">← SABR Volatility Explorer</a>
+</footer>
+
+<script>
+// ─── MATH ────────────────────────────────────────────────────────────────────
+function normCDF(x){
+  const a=[0.319381530,-0.356563782,1.781477937,-1.821255978,1.330274429];
+  const t=1/(1+0.2316419*Math.abs(x));
+  let p=0,tn=t; for(let i=0;i<5;i++){p+=a[i]*tn;tn*=t;}
+  const v=1-Math.exp(-0.5*x*x)/Math.sqrt(2*Math.PI)*p;
+  return x>=0?v:1-v;
+}
+function normPDF(x){return Math.exp(-0.5*x*x)/Math.sqrt(2*Math.PI);}
+
+// F,K in decimal (0.035), sigmaN in decimal (0.008=80bp), T years, tau swap tenor years
+function bachelierPrice(F,K,T,sigmaN,tau,type){
+  if(T<=0||sigmaN<=0) return tau*Math.max(type==='payer'?F-K:K-F,0);
+  const sqT=Math.sqrt(T), d=(F-K)/(sigmaN*sqT), nd=normPDF(d);
+  return tau*((F-K)*(type==='payer'?normCDF(d):normCDF(-d))+sigmaN*sqT*nd);
+}
+
+// Raw rate-space Greeks (per unit notional), returns object
+function rawGreeks(F,K,T,sigmaN,tau){
+  if(T<=0||sigmaN<=0) return null;
+  const sqT=Math.sqrt(T), d=(F-K)/(sigmaN*sqT), nd=normPDF(d), Nd=normCDF(d);
+  return{
+    delta: tau*Nd,
+    gamma: tau*nd/(sigmaN*sqT),
+    vega:  tau*sqT*nd,
+    theta: -tau*sigmaN*nd/(2*sqT),
+    volga: tau*sqT*nd*d*d/sigmaN,
+    vanna: -tau*nd*d/sigmaN,
+    d, Nd, nd, sqT
+  };
+}
+
+const BP=0.0001;
+// Scale raw Greeks to dollar Greeks
+function dollarGreeks(rg,N){
+  if(!rg) return null;
+  return{
+    dv01:  rg.delta*N*BP,
+    gamma: rg.gamma*N*BP*BP,
+    vega:  rg.vega*N*BP,
+    theta: rg.theta*N/365,
+    volga: rg.volga*N*BP*BP,
+    vanna: rg.vanna*N*BP*BP,
+  };
+}
+
+const TENORS=[1,2,5,10,30];
+const TENOR_LABELS=['1Y','2Y','5Y','10Y','30Y'];
+
+function tenorWeights(t){
+  const w=[0,0,0,0,0];
+  if(t<=TENORS[0]){w[0]=1;return w;}
+  if(t>=TENORS[4]){w[4]=1;return w;}
+  for(let i=0;i<4;i++){
+    if(t>=TENORS[i]&&t<=TENORS[i+1]){
+      const f=(t-TENORS[i])/(TENORS[i+1]-TENORS[i]);
+      w[i]=1-f;w[i+1]=f;return w;
+    }
+  }
+  return w;
+}
+
+function buildHessian(expiry,swapTenor,dgamma){
+  // dgamma in $/bp²
+  const endT=expiry+swapTenor;
+  const wExp=tenorWeights(expiry), wEnd=tenorWeights(endT);
+  // front weight scales with expiry/end ratio
+  const frac=Math.min(expiry/endT,0.45);
+  const w=wExp.map((a,i)=>frac*a+(1-frac)*wEnd[i]);
+  const s=w.reduce((a,b)=>a+b,0);
+  const wn=s>0?w.map(x=>x/s):w;
+  return Array.from({length:5},(_,i)=>Array.from({length:5},(_,j)=>dgamma*wn[i]*wn[j]));
+}
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let inputMode='derived';
+let currentDG=null; // dollar greeks
+let currentRG=null; // raw greeks
+let currentF=0.035, currentK=0.035, currentT=1, currentSigmaN=0.008, currentTau=10, currentN=10e6, currentType='payer';
+let hessianMatrix=null;
+
+// Tenor move arrays
+const attrDR=[50,50,50,50,50]; // bp per tenor node
+const hessDR=[50,50,50,50,50];
+
+function fmtDollar(v,decimals=0){
+  if(v===null||isNaN(v)) return '—';
+  const a=Math.abs(v), s=v<0?'-':'';
+  if(a>=1e6) return s+'$'+(a/1e6).toFixed(decimals>0?decimals:2)+'M';
+  if(a>=1e3) return s+'$'+(a/1e3).toFixed(decimals>0?decimals:1)+'k';
+  return s+'$'+a.toFixed(0);
+}
+function fmtDollar2(v){
+  if(v===null||isNaN(v)) return '—';
+  const a=Math.abs(v), s=v<0?'-':'', sign=v>=0?'+':'';
+  if(a>=1e6) return (v>=0?'+':'-')+'$'+(a/1e6).toFixed(2)+'M';
+  if(a>=1e3) return (v>=0?'+':'-')+'$'+(a/1e3).toFixed(1)+'k';
+  return (v>=0?'+':'-')+'$'+a.toFixed(0);
+}
+
+// ─── DERIVED MODE ─────────────────────────────────────────────────────────────
+function readDerived(){
+  currentT     = parseFloat(document.getElementById('d-expiry').value);
+  currentTau   = parseFloat(document.getElementById('d-tenor').value);
+  currentN     = parseFloat(document.getElementById('d-notional').value);
+  currentType  = document.getElementById('d-type').value;
+  currentF     = parseInt(document.getElementById('sl-atm').value)*BP;
+  currentK     = parseInt(document.getElementById('sl-strike').value)*BP;
+  currentSigmaN= parseInt(document.getElementById('sl-nvol').value)*BP;
+  document.getElementById('val-atm').textContent    = parseInt(document.getElementById('sl-atm').value)+' bp';
+  document.getElementById('val-strike').textContent = parseInt(document.getElementById('sl-strike').value)+' bp';
+  document.getElementById('val-nvol').textContent   = parseInt(document.getElementById('sl-nvol').value)+' bp';
+  currentRG=rawGreeks(currentF,currentK,currentT,currentSigmaN,currentTau);
+  currentDG=dollarGreeks(currentRG,currentN);
+}
+
+function onDerivedChange(){
+  readDerived();
+  updateAll();
+}
+
+// ─── MANUAL MODE ──────────────────────────────────────────────────────────────
+function readManual(){
+  const dv01 =parseInt(document.getElementById('sl-m-dv01').value);
+  const gamma=parseInt(document.getElementById('sl-m-gamma').value);
+  const vega =parseInt(document.getElementById('sl-m-vega').value);
+  const volga=parseInt(document.getElementById('sl-m-volga').value);
+  const vanna=parseInt(document.getElementById('sl-m-vanna').value);
+  const theta=parseInt(document.getElementById('sl-m-theta').value);
+  document.getElementById('val-m-dv01').textContent ='$'+dv01.toLocaleString();
+  document.getElementById('val-m-gamma').textContent='$'+gamma.toLocaleString();
+  document.getElementById('val-m-vega').textContent ='$'+vega.toLocaleString();
+  document.getElementById('val-m-volga').textContent='$'+volga.toLocaleString();
+  document.getElementById('val-m-vanna').textContent='$'+vanna.toLocaleString();
+  document.getElementById('val-m-theta').textContent='$'+theta.toLocaleString();
+  currentDG={dv01,gamma,vega,volga,vanna,theta};
+  currentRG=null;
+}
+
+function onManualChange(){
+  readManual();
+  updateAll();
+}
+
+// ─── GREEKS DISPLAY ───────────────────────────────────────────────────────────
+function updateGreeksDisplay(){
+  const g=currentDG;
+  if(!g){
+    ['dv01','gamma','vega','volga','vanna','theta'].forEach(k=>document.getElementById('gk-'+k).textContent='—');
+    return;
+  }
+  document.getElementById('gk-dv01').textContent  = fmtDollar(g.dv01);
+  document.getElementById('gk-gamma').textContent = '$'+g.gamma.toFixed(1);
+  document.getElementById('gk-vega').textContent  = fmtDollar(g.vega);
+  document.getElementById('gk-volga').textContent = '$'+g.volga.toFixed(1);
+  document.getElementById('gk-vanna').textContent = '$'+g.vanna.toFixed(1);
+  document.getElementById('gk-theta').textContent = fmtDollar(g.theta);
+
+  let expl='';
+  if(inputMode==='derived'&&currentRG){
+    const d=currentRG.d, T=currentT, tau=currentTau;
+    const expStr=currentT<1?Math.round(currentT*12)+'m':currentT+'y';
+    expl=`${expStr} × ${tau}y ${currentType} swaption. d = ${d.toFixed(3)} (${Math.abs(d)<0.1?'near ATM':d>0?'OTM payer / ITM receiver':'ITM payer / OTM receiver'}). `;
+    expl+=`DV01 = ${fmtDollar(g.dv01)} per bp. Gamma = $${g.gamma.toFixed(2)} per bp². `;
+    expl+=`Vol convexity (Volga) = $${g.volga.toFixed(2)} per bp²_vol — ${Math.abs(d)>1?'elevated (OTM)':'low (ATM)'}.`;
+  }else{
+    expl='Manual greeks mode. Adjust sliders above to set position risk.';
+  }
+  document.getElementById('gk-explain').textContent=expl;
+}
+
+// ─── HESSIAN ─────────────────────────────────────────────────────────────────
+function initHessianTenorInputs(){
+  const c=document.getElementById('hess-tenor-inputs');
+  c.innerHTML='';
+  TENOR_LABELS.forEach((lbl,i)=>{
+    c.innerHTML+=`<div class="tenor-row">
+      <span class="tenor-lbl">${lbl}</span>
+      <input type="range" id="hdr-${i}" min="-150" max="150" step="5" value="${hessDR[i]}" oninput="onHessDRChange(${i})">
+      <span class="tenor-num" id="hdn-${i}">${hessDR[i]>0?'+':''}${hessDR[i]}bp</span>
+    </div>`;
+  });
+}
+
+function onHessDRChange(i){
+  hessDR[i]=parseInt(document.getElementById('hdr-'+i).value);
+  document.getElementById('hdn-'+i).textContent=(hessDR[i]>=0?'+':'')+hessDR[i]+'bp';
+  updateHessianQF();
+}
+
+function updateHessianPlot(){
+  if(!currentDG) return;
+  hessianMatrix=buildHessian(currentT,currentTau,currentDG.gamma);
+  const z=hessianMatrix;
+  const data=[{
+    type:'heatmap',
+    z:z,
+    x:TENOR_LABELS,
+    y:TENOR_LABELS,
+    colorscale:[[0,'#1d4ed8'],[0.5,'#1e2637'],[1,'#16a34a']],
+    zmid:0,
+    showscale:true,
+    colorbar:{tickfont:{color:'#7a8faa',size:10},thickness:12,len:0.9},
+    hovertemplate:'%{y} × %{x}: $%{z:.2f}/bp²<extra></extra>',
+  }];
+  const layout={
+    paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',
+    font:{color:'#7a8faa',size:11},
+    margin:{l:40,r:40,t:20,b:40},
+    xaxis:{tickfont:{color:'#7a8faa'},gridcolor:'#2a3347'},
+    yaxis:{tickfont:{color:'#7a8faa'},gridcolor:'#2a3347'},
+  };
+  Plotly.react('hessian-plot',data,layout,{responsive:true,displayModeBar:false});
+  updateHessianQF();
+}
+
+function updateHessianQF(){
+  if(!hessianMatrix) return;
+  const dr=hessDR.map(x=>x); // bp
+  let qf=0;
+  for(let i=0;i<5;i++) for(let j=0;j<5;j++) qf+=hessianMatrix[i][j]*dr[i]*dr[j];
+  qf*=0.5;
+  const el=document.getElementById('hess-qf-val');
+  el.textContent=fmtDollar(qf);
+  el.style.color=qf>=0?'var(--green)':'var(--red)';
+  const note=document.getElementById('hess-qf-note');
+  const sumDR=hessDR.reduce((a,b)=>a+b,0);
+  note.textContent=`Curve move: avg ${(sumDR/5).toFixed(0)}bp. ${qf>0?'Long gamma — benefits from this curve shape.':'Short gamma or opposing cross-gamma — loses on this curve shape.'}`;
+}
+
+// ─── CONVEXITY CHART ──────────────────────────────────────────────────────────
+let convChart=null;
+
+function initConvexityChart(){
+  const ctx=document.getElementById('convexity-chart').getContext('2d');
+  convChart=new Chart(ctx,{
+    type:'line',
+    data:{labels:[],datasets:[
+      {label:'Linear (DV01 only)',data:[],borderColor:'#4a5568',borderDash:[6,4],borderWidth:1.5,pointRadius:0,tension:0},
+      {label:'Quadratic (+Gamma)',data:[],borderColor:'#22d3a0',borderWidth:2,pointRadius:0,tension:0.2},
+      {label:'Full Revaluation',data:[],borderColor:'#4a9eff',borderWidth:2,pointRadius:2,pointBackgroundColor:'#4a9eff',tension:0},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:true,animation:{duration:150},
+      plugins:{legend:{labels:{color:'#7a8faa',font:{size:12}}},tooltip:{mode:'index',intersect:false,backgroundColor:'#1e2637',borderColor:'#2a3347',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#7a8faa'}},
+      scales:{
+        x:{ticks:{color:'#7a8faa',maxTicksLimit:9,callback:(v,i,arr)=>{const lbl=convChart.data.labels[i];return lbl?parseInt(lbl)+'bp':'';}},grid:{color:'#2a3347'},title:{display:true,text:'Rate Move ΔR (bp)',color:'#7a8faa'}},
+        y:{ticks:{color:'#7a8faa',callback:v=>fmtDollar(v)},grid:{color:'#2a3347'},title:{display:true,text:'PnL ($)',color:'#7a8faa'}}
+      }
+    }
+  });
+}
+
+function updateConvexityChart(){
+  if(!convChart||!currentDG) return;
+  const g=currentDG;
+  const pts=[];
+  for(let dr=-150;dr<=150;dr+=10) pts.push(dr);
+  const linPnL=pts.map(dr=>g.dv01*dr);
+  const quadPnL=pts.map(dr=>g.dv01*dr+0.5*g.gamma*dr*dr);
+  let actualPnL;
+  if(inputMode==='derived'&&currentRG){
+    actualPnL=pts.map(dr=>{
+      const F2=currentF+dr*BP;
+      const p2=bachelierPrice(F2,currentK,currentT,currentSigmaN,currentTau,currentType);
+      const p1=bachelierPrice(currentF,currentK,currentT,currentSigmaN,currentTau,currentType);
+      return (p2-p1)*currentN;
+    });
+  }else{
+    actualPnL=quadPnL.map((q,i)=>q+0.5*0.01*g.gamma*pts[i]*pts[i]); // approximate
+  }
+  convChart.data.labels=pts.map(x=>x.toString());
+  convChart.data.datasets[0].data=linPnL;
+  convChart.data.datasets[1].data=quadPnL;
+  convChart.data.datasets[2].data=actualPnL;
+  convChart.update('none');
+  updateConvSlider();
+}
+
+function onConvSlider(){
+  const dr=parseInt(document.getElementById('sl-conv-dr').value);
+  document.getElementById('val-conv-dr').textContent=(dr>=0?'+':'')+dr+' bp';
+  updateConvSlider();
+}
+
+function updateConvSlider(){
+  if(!currentDG) return;
+  const g=currentDG;
+  const dr=parseInt(document.getElementById('sl-conv-dr').value);
+  const lin=g.dv01*dr;
+  const quad=g.dv01*dr+0.5*g.gamma*dr*dr;
+  let actual=quad;
+  if(inputMode==='derived'&&currentRG){
+    const p2=bachelierPrice(currentF+dr*BP,currentK,currentT,currentSigmaN,currentTau,currentType);
+    const p1=bachelierPrice(currentF,currentK,currentT,currentSigmaN,currentTau,currentType);
+    actual=(p2-p1)*currentN;
+  }
+  document.getElementById('conv-linear').textContent=fmtDollar(lin);
+  document.getElementById('conv-quad').textContent  =fmtDollar(quad);
+  document.getElementById('conv-actual').textContent=fmtDollar(actual);
+}
+
+// ─── GAMMA DEEP DIVE ──────────────────────────────────────────────────────────
+let gammaChart=null;
+
+function initGammaChart(){
+  const ctx=document.getElementById('gamma-chart').getContext('2d');
+  gammaChart=new Chart(ctx,{
+    type:'line',
+    data:{labels:[],datasets:[
+      {label:'Gamma PnL (½Γ·ΔR²)',data:[],borderColor:'#22d3a0',backgroundColor:'rgba(34,211,160,0.08)',borderWidth:2,pointRadius:0,tension:0.2,fill:true},
+      {label:'DV01 PnL (linear)',data:[],borderColor:'#4a5568',borderDash:[5,4],borderWidth:1.5,pointRadius:0,tension:0},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:true,animation:{duration:150},
+      plugins:{legend:{labels:{color:'#7a8faa',font:{size:11}}},tooltip:{mode:'index',intersect:false,backgroundColor:'#1e2637',borderColor:'#2a3347',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#7a8faa'}},
+      scales:{
+        x:{ticks:{color:'#7a8faa',maxTicksLimit:9,callback:(v,i)=>{const l=gammaChart.data.labels[i];return l?parseInt(l)+'bp':'';}},grid:{color:'#2a3347'},title:{display:true,text:'ΔR (bp)',color:'#7a8faa'}},
+        y:{ticks:{color:'#7a8faa',callback:v=>fmtDollar(v)},grid:{color:'#2a3347'},title:{display:true,text:'PnL ($)',color:'#7a8faa'}}
+      }
+    }
+  });
+}
+
+function updateGammaChart(){
+  if(!gammaChart||!currentDG) return;
+  const g=currentDG;
+  const pts=[]; for(let dr=-120;dr<=120;dr+=10) pts.push(dr);
+  const gamPnL=pts.map(dr=>0.5*g.gamma*dr*dr);
+  const linPnL=pts.map(dr=>g.dv01*dr);
+  gammaChart.data.labels=pts.map(x=>x.toString());
+  gammaChart.data.datasets[0].data=gamPnL;
+  gammaChart.data.datasets[1].data=linPnL;
+  gammaChart.update('none');
+  const dr=parseInt(document.getElementById('sl-conv-dr').value);
+  const gpnl=0.5*g.gamma*dr*dr;
+  document.getElementById('gamma-pnl-display').textContent=fmtDollar(gpnl);
+  document.getElementById('gamma-ann').textContent=`At ΔR=${dr>0?'+':''}${dr}bp: gamma adds ${fmtDollar(gpnl)} on top of DV01 PnL. ${g.gamma>0?'Long gamma — profitable regardless of direction.':'Short gamma — loss regardless of direction.'}`;
+}
+
+// ─── VOLGA CHART ──────────────────────────────────────────────────────────────
+let volgaChart=null;
+
+function initVolgaChart(){
+  const ctx=document.getElementById('volga-chart').getContext('2d');
+  volgaChart=new Chart(ctx,{
+    type:'line',
+    data:{labels:[],datasets:[
+      {label:'Linear Vega est.',data:[],borderColor:'#4a5568',borderDash:[5,4],borderWidth:1.5,pointRadius:0,tension:0},
+      {label:'Vega + Volga (quadratic)',data:[],borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,0.08)',borderWidth:2,pointRadius:0,tension:0.2,fill:true},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:true,animation:{duration:150},
+      plugins:{legend:{labels:{color:'#7a8faa',font:{size:11}}},tooltip:{mode:'index',intersect:false,backgroundColor:'#1e2637',borderColor:'#2a3347',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#7a8faa'}},
+      scales:{
+        x:{ticks:{color:'#7a8faa',maxTicksLimit:9,callback:(v,i)=>{const l=volgaChart.data.labels[i];return l?parseInt(l)+'bp':'';}},grid:{color:'#2a3347'},title:{display:true,text:'Δσ (bp vol)',color:'#7a8faa'}},
+        y:{ticks:{color:'#7a8faa',callback:v=>fmtDollar(v)},grid:{color:'#2a3347'},title:{display:true,text:'Vol PnL ($)',color:'#7a8faa'}}
+      }
+    }
+  });
+}
+
+function updateVolgaChart(){
+  if(!volgaChart||!currentDG) return;
+  const g=currentDG;
+  const pts=[]; for(let ds=-80;ds<=80;ds+=5) pts.push(ds);
+  volgaChart.data.labels=pts.map(x=>x.toString());
+  volgaChart.data.datasets[0].data=pts.map(ds=>g.vega*ds);
+  volgaChart.data.datasets[1].data=pts.map(ds=>g.vega*ds+0.5*g.volga*ds*ds);
+  volgaChart.update('none');
+  onVolgaSlider();
+}
+
+function onVolgaSlider(){
+  if(!currentDG) return;
+  const g=currentDG;
+  const ds=parseInt(document.getElementById('sl-dv-dsig').value);
+  document.getElementById('val-dv-dsig').textContent=(ds>=0?'+':'')+ds+' bp';
+  const vpp=0.5*g.volga*ds*ds;
+  document.getElementById('volga-pnl-display').textContent=fmtDollar(vpp);
+  document.getElementById('volga-ann').textContent=`Volga adds ${fmtDollar(vpp)} on top of linear vega for Δσ=${ds>=0?'+':''}${ds}bp. ${Math.abs(ds)>40?'Large vol move — volga term is significant.':'Small vol move — volga negligible vs linear vega.'}`;
+}
+
+// ─── VANNA CHART ──────────────────────────────────────────────────────────────
+let vannaChart=null;
+
+function initVannaChart(){
+  const ctx=document.getElementById('vanna-chart').getContext('2d');
+  vannaChart=new Chart(ctx,{
+    type:'line',
+    data:{labels:[],datasets:[
+      {label:'DV01 at current vol',data:[],borderColor:'#7a8faa',borderDash:[5,4],borderWidth:1.5,pointRadius:0,tension:0},
+      {label:'DV01 at vol +30bp',data:[],borderColor:'#fb923c',borderWidth:2,pointRadius:0,tension:0.2},
+      {label:'DV01 at vol -30bp',data:[],borderColor:'#4a9eff',borderWidth:2,pointRadius:0,tension:0.2},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:true,animation:{duration:150},
+      plugins:{legend:{labels:{color:'#7a8faa',font:{size:11}}},tooltip:{mode:'index',intersect:false,backgroundColor:'#1e2637',borderColor:'#2a3347',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#7a8faa'}},
+      scales:{
+        x:{ticks:{color:'#7a8faa',maxTicksLimit:9,callback:(v,i)=>{const l=vannaChart.data.labels[i];return l?parseFloat(l).toFixed(1)+'%':'';}},grid:{color:'#2a3347'},title:{display:true,text:'Forward Rate (F)',color:'#7a8faa'}},
+        y:{ticks:{color:'#7a8faa',callback:v=>fmtDollar(v)},grid:{color:'#2a3347'},title:{display:true,text:'DV01 ($)',color:'#7a8faa'}}
+      }
+    }
+  });
+}
+
+function updateVannaChart(){
+  if(!vannaChart) return;
+  const T=inputMode==='derived'?currentT:1;
+  const tau=inputMode==='derived'?currentTau:10;
+  const K=inputMode==='derived'?currentK:0.035;
+  const sBase=inputMode==='derived'?currentSigmaN:0.008;
+  const N=inputMode==='derived'?currentN:10e6;
+  const rates=[];
+  for(let r=100;r<=700;r+=20) rates.push(r);
+  const base=rates.map(r=>{
+    const F=r*BP, rg=rawGreeks(F,K,T,sBase,tau);
+    return rg?dollarGreeks(rg,N).dv01:0;
+  });
+  const up=rates.map(r=>{
+    const F=r*BP, rg=rawGreeks(F,K,T,sBase+30*BP,tau);
+    return rg?dollarGreeks(rg,N).dv01:0;
+  });
+  const dn=rates.map(r=>{
+    const F=r*BP, rg=rawGreeks(F,K,T,Math.max(sBase-30*BP,5*BP),tau);
+    return rg?dollarGreeks(rg,N).dv01:0;
+  });
+  vannaChart.data.labels=rates.map(r=>(r/100).toFixed(2));
+  vannaChart.data.datasets[0].data=base;
+  vannaChart.data.datasets[1].data=up;
+  vannaChart.data.datasets[2].data=dn;
+  vannaChart.update('none');
+  // Vanna PnL
+  if(currentDG){
+    const dr=parseInt(document.getElementById('sl-conv-dr').value);
+    const ds=parseInt((document.getElementById('sl-attr-dsig')||{value:'10'}).value);
+    const vpnl=currentDG.vanna*dr*ds;
+    document.getElementById('vanna-pnl-display').textContent=fmtDollar(vpnl);
+    document.getElementById('vanna-ann').textContent=`Vanna PnL = ${fmtDollar(currentDG.vanna)}×${dr>0?'+':''}${dr}bp×${ds>0?'+':''}${ds}bp_vol = ${fmtDollar(vpnl)}. ${Math.abs(vpnl)>Math.abs(currentDG.dv01*dr)*0.1?'Material — Vanna is >10% of DV01 PnL.':'Small relative to DV01 PnL.'}`;
+  }
+}
+
+// ─── ATTRIBUTION SLIDERS ──────────────────────────────────────────────────────
+function initAttrSliders(){
+  const c=document.getElementById('attr-tenor-sliders');
+  c.innerHTML='';
+  TENOR_LABELS.forEach((lbl,i)=>{
+    c.innerHTML+=`<div class="tenor-row">
+      <span class="tenor-lbl">${lbl}</span>
+      <input type="range" id="adr-${i}" min="-150" max="150" step="5" value="${attrDR[i]}" oninput="onAttrTenorChange(${i})">
+      <span class="tenor-num" id="adn-${i}">${attrDR[i]>0?'+':''}${attrDR[i]}bp</span>
+    </div>`;
+  });
+}
+
+function onAttrTenorChange(i){
+  attrDR[i]=parseInt(document.getElementById('adr-'+i).value);
+  document.getElementById('adn-'+i).textContent=(attrDR[i]>=0?'+':'')+attrDR[i]+'bp';
+  onAttrChange();
+}
+
+// ─── ATTRIBUTION CHART ────────────────────────────────────────────────────────
+let attrChart=null;
+
+function initAttributionChart(){
+  const ctx=document.getElementById('attribution-chart').getContext('2d');
+  attrChart=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['DV01','Gamma','Vega','Volga','Vanna','Theta','Unexplained'],
+      datasets:[{label:'PnL ($)',data:[0,0,0,0,0,0,0],
+        backgroundColor:['#4a9eff','#22d3a0','#fbbf24','#a78bfa','#fb923c','#f87171','#6b7280'],
+        borderRadius:4,borderWidth:0}]
+    },
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:true,animation:{duration:200},
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:item=>' '+fmtDollar(item.raw)},backgroundColor:'#1e2637',borderColor:'#2a3347',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#7a8faa'}
+      },
+      scales:{
+        x:{ticks:{color:'#7a8faa',callback:v=>fmtDollar(v)},grid:{color:'#2a3347'}},
+        y:{ticks:{color:'#e2e8f0',font:{size:12}},grid:{color:'#2a3347'}}
+      }
+    }
+  });
+}
+
+function computeAttribution(){
+  if(!currentDG) return null;
+  const g=currentDG;
+  const dsig=parseInt(document.getElementById('sl-attr-dsig').value);
+  const dt  =parseInt(document.getElementById('sl-attr-dt').value);
+  const sumDR=attrDR.reduce((a,b)=>a+b,0);
+
+  const dv01PnL  = g.dv01  * sumDR;
+  const gammaPnL = 0.5*g.gamma * sumDR*sumDR;
+  const vegaPnL  = g.vega  * dsig;
+  const volgaPnL = 0.5*g.volga * dsig*dsig;
+  const vannaPnL = g.vanna * sumDR * dsig;
+  const thetaPnL = g.theta * dt;
+  const predicted= dv01PnL+gammaPnL+vegaPnL+volgaPnL+vannaPnL+thetaPnL;
+
+  let actual=predicted;
+  let unexplained=0;
+  if(inputMode==='derived'&&currentRG){
+    const F2=currentF+sumDR*BP, sig2=currentSigmaN+dsig*BP, T2=Math.max(currentT-dt/365,0.001);
+    const p1=bachelierPrice(currentF,currentK,currentT,currentSigmaN,currentTau,currentType);
+    const p2=bachelierPrice(F2,currentK,T2,sig2,currentTau,currentType);
+    actual=(p2-p1)*currentN;
+    unexplained=actual-predicted;
+  }
+  return{dv01PnL,gammaPnL,vegaPnL,volgaPnL,vannaPnL,thetaPnL,predicted,actual,unexplained};
+}
+
+function updateAttrChart(){
+  if(!attrChart) return;
+  const a=computeAttribution();
+  if(!a) return;
+  attrChart.data.datasets[0].data=[a.dv01PnL,a.gammaPnL,a.vegaPnL,a.volgaPnL,a.vannaPnL,a.thetaPnL,a.unexplained];
+  attrChart.data.datasets[0].backgroundColor=['#4a9eff','#22d3a0','#fbbf24','#a78bfa','#fb923c','#f87171',a.unexplained>=0?'#6b7280':'#ef4444'];
+  attrChart.update('none');
+  document.getElementById('sum-predicted').textContent=fmtDollar(a.predicted);
+  document.getElementById('sum-predicted').style.color=a.predicted>=0?'var(--green)':'var(--red)';
+  document.getElementById('sum-actual').textContent=fmtDollar(a.actual);
+  document.getElementById('sum-actual').style.color=a.actual>=0?'var(--accent)':'var(--red)';
+  document.getElementById('sum-unexplained').textContent=fmtDollar(a.unexplained);
+  document.getElementById('sum-unexplained').style.color=Math.abs(a.unexplained)>Math.abs(a.actual)*0.05?'var(--yellow)':'var(--muted)';
+}
+
+function onAttrChange(){
+  const dsig=parseInt(document.getElementById('sl-attr-dsig').value);
+  const dt  =parseInt(document.getElementById('sl-attr-dt').value);
+  document.getElementById('val-attr-dsig').textContent=(dsig>=0?'+':'')+dsig+' bp';
+  document.getElementById('val-attr-dt').textContent=dt+' day'+(dt!==1?'s':'');
+  updateAttrChart();
+  updateLnlComparison();
+  updateVannaDisplay();
+}
+
+// ─── LNL COMPARISON ───────────────────────────────────────────────────────────
+function updateLnlComparison(){
+  if(!currentDG) return;
+  const g=currentDG;
+  const sumDR=attrDR.reduce((a,b)=>a+b,0);
+  // Swap: same DV01, no gamma
+  const swapDv01PnL=g.dv01*sumDR;
+  document.getElementById('lnl-swap-dv01').textContent=fmtDollar(swapDv01PnL);
+  document.getElementById('lnl-swap-total').textContent=fmtDollar(swapDv01PnL);
+  document.getElementById('lnl-swap-total').style.color=swapDv01PnL>=0?'var(--text)':'var(--red)';
+  document.getElementById('lnl-swap-note').textContent=`Fully explained by DV01×ΔR. Zero unexplained for linear instruments.`;
+  // Swaption: same DV01 + gamma
+  const swptDv01PnL=g.dv01*sumDR;
+  const swptGammaPnL=0.5*g.gamma*sumDR*sumDR;
+  let swptTotal=swptDv01PnL+swptGammaPnL;
+  if(inputMode==='derived'&&currentRG){
+    const F2=currentF+sumDR*BP;
+    const p1=bachelierPrice(currentF,currentK,currentT,currentSigmaN,currentTau,currentType);
+    const p2=bachelierPrice(F2,currentK,currentT,currentSigmaN,currentTau,currentType);
+    swptTotal=(p2-p1)*currentN;
+  }
+  document.getElementById('lnl-swpt-dv01').textContent=fmtDollar(swptDv01PnL);
+  document.getElementById('lnl-swpt-gamma').textContent=fmtDollar2(swptGammaPnL);
+  document.getElementById('lnl-swpt-gamma').style.color=swptGammaPnL>=0?'var(--green)':'var(--red)';
+  document.getElementById('lnl-swpt-total').textContent=fmtDollar(swptTotal);
+  document.getElementById('lnl-swpt-total').style.color=swptTotal>=0?'var(--accent)':'var(--red)';
+  const diff=swptTotal-swapDv01PnL;
+  document.getElementById('lnl-swpt-note').textContent=`Gamma adds ${fmtDollar2(diff)} vs the equivalent-DV01 swap for ΔR=${sumDR>=0?'+':''}${sumDR}bp net.`;
+}
+
+function updateVannaDisplay(){
+  if(!currentDG) return;
+  const g=currentDG;
+  const dr=parseInt(document.getElementById('sl-conv-dr').value);
+  const ds=parseInt(document.getElementById('sl-attr-dsig').value);
+  const vpnl=g.vanna*dr*ds;
+  document.getElementById('vanna-pnl-display').textContent=fmtDollar(vpnl);
+  document.getElementById('vanna-ann').textContent=`Vanna PnL at ΔR=${dr>=0?'+':''}${dr}bp, Δσ=${ds>=0?'+':''}${ds}bp: ${fmtDollar(vpnl)}`;
+}
+
+// ─── SCENARIOS ────────────────────────────────────────────────────────────────
+const SCENARIOS={
+  parallel:{dR:[50,50,50,50,50],dSigma:0,dDays:0},
+  steepener:{dR:[15,20,35,55,80],dSigma:5,dDays:0},
+  flattener:{dR:[-5,-10,-30,-45,-60],dSigma:-3,dDays:0},
+  volspike:{dR:[0,0,0,0,0],dSigma:30,dDays:0},
+  crisis:{dR:[80,90,100,110,100],dSigma:50,dDays:0},
+};
+
+function loadScenario(card,key){
+  document.querySelectorAll('.sc-card').forEach(c=>c.classList.remove('active'));
+  card.classList.add('active');
+  const s=SCENARIOS[key];
+  s.dR.forEach((v,i)=>{
+    attrDR[i]=v;
+    const el=document.getElementById('adr-'+i);
+    if(el){el.value=v;document.getElementById('adn-'+i).textContent=(v>=0?'+':'')+v+'bp';}
+    hessDR[i]=v;
+    const hel=document.getElementById('hdr-'+i);
+    if(hel){hel.value=v;document.getElementById('hdn-'+i).textContent=(v>=0?'+':'')+v+'bp';}
+  });
+  const dsig=document.getElementById('sl-attr-dsig');
+  if(dsig){dsig.value=s.dSigma;document.getElementById('val-attr-dsig').textContent=(s.dSigma>=0?'+':'')+s.dSigma+' bp';}
+  const ddt=document.getElementById('sl-attr-dt');
+  if(ddt){ddt.value=s.dDays;document.getElementById('val-attr-dt').textContent=s.dDays+' day'+(s.dDays!==1?'s':'');}
+  updateAll();
+  document.getElementById('attribution').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ─── MODE TOGGLE ──────────────────────────────────────────────────────────────
+function setMode(mode){
+  inputMode=mode;
+  document.getElementById('btn-derived').classList.toggle('active',mode==='derived');
+  document.getElementById('btn-manual').classList.toggle('active',mode==='manual');
+  document.getElementById('panel-derived').style.display=mode==='derived'?'':'none';
+  document.getElementById('panel-manual').style.display=mode==='manual'?'':'none';
+  if(mode==='derived') onDerivedChange(); else onManualChange();
+}
+
+// ─── TAB ──────────────────────────────────────────────────────────────────────
+function setTab(t){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['gamma','volga','vanna'][i]===t));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+t));
+}
+
+// ─── COLLAPSIBLE ─────────────────────────────────────────────────────────────
+function toggleColl(btn){
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
+}
+
+// ─── MASTER UPDATE ────────────────────────────────────────────────────────────
+let debounce=null;
+
+function updateAll(){
+  updateGreeksDisplay();
+  updateConvexityChart();
+  updateConvSlider();
+  updateHessianPlot();
+  updateGammaChart();
+  updateVolgaChart();
+  updateVannaChart();
+  updateAttrChart();
+  updateLnlComparison();
+  updateVannaDisplay();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  initAttrSliders();
+  initHessianTenorInputs();
+  initConvexityChart();
+  initGammaChart();
+  initVolgaChart();
+  initVannaChart();
+  initAttributionChart();
+  readDerived();
+  updateAll();
+});
+</script>
+</body>
+</html>

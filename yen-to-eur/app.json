@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Yen → EUR",
-    "slug": "yen-to-eur",
+    "slug": "yen-converter",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -34,11 +34,15 @@
         {
           "cameraPermission": "Camera is used to detect ¥ prices and convert them to €."
         }
-      ],
-      "react-native-mlkit-ocr"
+      ]
     ],
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "6559d115-b963-4a9b-9b1a-36e98b80b609"
+      }
     }
   }
 }
