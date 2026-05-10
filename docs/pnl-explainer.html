@@ -202,19 +202,66 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
 
   <div style="margin-top:28px">
     <h3>Convexity in action — drag the rate move</h3>
-    <p style="font-size:13px;margin-bottom:14px">The grey line is the linear (DV01-only) estimate. The green curve adds gamma. The blue dots are full revaluation. Position uses current settings from the <a href="#position" style="color:var(--accent)">Position Setup</a> section.</p>
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px">
+    <p style="font-size:13px;margin-bottom:14px">Grey = linear DV01-only estimate. Green = adds gamma (second-order). Blue = full revaluation. The gap between grey and blue is exactly what the Taylor expansion's second-order terms recover.</p>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px">
       <canvas id="convexity-chart" style="max-height:280px"></canvas>
     </div>
-    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-      <div style="flex:1;min-width:240px">
-        <div class="sl-head"><span class="sl-name">ΔR — Rate Move</span><span class="sl-val" id="val-conv-dr">+50 bp</span></div>
-        <input type="range" id="sl-conv-dr" min="-150" max="150" step="5" value="50" oninput="onConvSlider()">
-      </div>
-      <div style="display:flex;gap:24px">
-        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">Linear est.</div><div style="font-size:17px;font-weight:800;color:var(--muted)" id="conv-linear">—</div></div>
-        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">+Gamma</div><div style="font-size:17px;font-weight:800;color:var(--green)" id="conv-quad">—</div></div>
-        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">Actual</div><div style="font-size:17px;font-weight:800;color:var(--accent)" id="conv-actual">—</div></div>
+
+    <div class="sl-card" style="margin-bottom:16px">
+      <div class="sl-head"><span class="sl-name">ΔR — Rate Move</span><span class="sl-val" id="val-conv-dr">+50 bp</span></div>
+      <input type="range" id="sl-conv-dr" min="-150" max="150" step="5" value="50" oninput="onConvSlider()">
+    </div>
+
+    <!-- Live term-by-term breakdown -->
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+      <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">Taylor expansion — live values at current ΔR</div>
+      <div style="padding:12px 16px;display:grid;gap:8px" id="conv-breakdown">
+
+        <div style="display:grid;grid-template-columns:1fr auto auto;align-items:baseline;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+          <div>
+            <span style="color:var(--accent2);font-weight:700;font-size:14px">DV01 × ΔR</span>
+            <span style="color:var(--muted);font-size:12px;margin-left:8px" id="conv-dv01-detail">—</span>
+          </div>
+          <span style="color:var(--muted);font-size:13px">=</span>
+          <span style="font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text);text-align:right" id="conv-dv01-pnl">—</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr auto auto;align-items:baseline;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+          <div>
+            <span style="color:var(--green);font-weight:700;font-size:14px">½ Γ × (ΔR)²</span>
+            <span style="color:var(--muted);font-size:12px;margin-left:8px" id="conv-gamma-detail">—</span>
+          </div>
+          <span style="color:var(--muted);font-size:13px">=</span>
+          <span style="font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--green);text-align:right" id="conv-gamma-pnl">—</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr auto auto;align-items:baseline;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+          <div>
+            <span style="color:var(--text);font-weight:700;font-size:14px">Predicted total</span>
+            <span style="color:var(--muted);font-size:12px;margin-left:8px">DV01 + Gamma terms</span>
+          </div>
+          <span style="color:var(--muted);font-size:13px">=</span>
+          <span style="font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text);text-align:right" id="conv-quad">—</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr auto auto;align-items:baseline;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+          <div>
+            <span style="color:var(--accent);font-weight:700;font-size:14px">Full revaluation</span>
+            <span style="color:var(--muted);font-size:12px;margin-left:8px">repriced at F+ΔR</span>
+          </div>
+          <span style="color:var(--muted);font-size:13px">=</span>
+          <span style="font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent);text-align:right" id="conv-actual">—</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr auto auto;align-items:baseline;gap:8px">
+          <div>
+            <span style="font-weight:700;font-size:14px" id="conv-unex-lbl" style="color:var(--yellow)">Unexplained</span>
+            <span style="color:var(--muted);font-size:12px;margin-left:8px">higher-order residual</span>
+          </div>
+          <span style="color:var(--muted);font-size:13px">=</span>
+          <span style="font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right" id="conv-unex">—</span>
+        </div>
+
       </div>
     </div>
   </div>
@@ -861,7 +908,7 @@ function initConvexityChart(){
     ]},
     options:{
       responsive:true,maintainAspectRatio:true,animation:{duration:150},
-      plugins:{legend:{labels:{color:'#7a8faa',font:{size:12}}},tooltip:{mode:'index',intersect:false,backgroundColor:'#1e2637',borderColor:'#2a3347',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#7a8faa'}},
+      plugins:{legend:{labels:{color:'#7a8faa',font:{size:12}}},tooltip:{enabled:false}},
       scales:{
         x:{ticks:{color:'#7a8faa',maxTicksLimit:9,callback:(v,i,arr)=>{const lbl=convChart.data.labels[i];return lbl?parseInt(lbl)+'bp':'';}},grid:{color:'#2a3347'},title:{display:true,text:'Rate Move ΔR (bp)',color:'#7a8faa'}},
         y:{ticks:{color:'#7a8faa',callback:v=>fmtDollar(v)},grid:{color:'#2a3347'},title:{display:true,text:'PnL ($)',color:'#7a8faa'}}
@@ -906,17 +953,44 @@ function updateConvSlider(){
   if(!currentDG) return;
   const g=currentDG;
   const dr=parseInt(document.getElementById('sl-conv-dr').value);
-  const lin=g.dv01*dr;
-  const quad=g.dv01*dr+0.5*g.gamma*dr*dr;
+  const dv01PnL  = g.dv01*dr;
+  const gammaPnL = 0.5*g.gamma*dr*dr;
+  const quad     = dv01PnL+gammaPnL;
   let actual=quad;
   if(inputMode==='derived'&&currentRG){
     const p2=bachelierPrice(currentF+dr*BP,currentK,currentT,currentSigmaN,currentTau,currentType);
     const p1=bachelierPrice(currentF,currentK,currentT,currentSigmaN,currentTau,currentType);
     actual=(p2-p1)*currentN;
   }
-  document.getElementById('conv-linear').textContent=fmtDollar(lin);
-  document.getElementById('conv-quad').textContent  =fmtDollar(quad);
+  const unex=actual-quad;
+
+  // Term detail strings
+  document.getElementById('conv-dv01-detail').textContent=
+    `${fmtDollar(g.dv01)}/bp × ${dr>=0?'+':''}${dr}bp`;
+  document.getElementById('conv-gamma-detail').textContent=
+    `½ × $${g.gamma.toFixed(2)}/bp² × (${dr>=0?'+':''}${dr}bp)²`;
+
+  // Dollar values
+  const setVal=(id,v,def)=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.textContent=v===null?'—':fmtDollar(v);
+    if(def) el.style.color=def;
+    else el.style.color=v>=0?'var(--green)':'var(--red)';
+  };
+  document.getElementById('conv-dv01-pnl').textContent=fmtDollar(dv01PnL);
+  document.getElementById('conv-dv01-pnl').style.color=dv01PnL>=0?'var(--text)':'var(--red)';
+  document.getElementById('conv-gamma-pnl').textContent=fmtDollar(gammaPnL);
+  document.getElementById('conv-gamma-pnl').style.color=gammaPnL>=0?'var(--green)':'var(--red)';
+  document.getElementById('conv-quad').textContent=fmtDollar(quad);
+  document.getElementById('conv-quad').style.color=quad>=0?'var(--text)':'var(--red)';
   document.getElementById('conv-actual').textContent=fmtDollar(actual);
+  document.getElementById('conv-actual').style.color=actual>=0?'var(--accent)':'var(--red)';
+
+  const unexEl=document.getElementById('conv-unex');
+  unexEl.textContent=inputMode==='derived'&&currentRG?fmtDollar(unex):'n/a (derived mode only)';
+  unexEl.style.color=Math.abs(unex)<Math.abs(actual)*0.02?'var(--muted)':'var(--yellow)';
+  const lblEl=document.getElementById('conv-unex-lbl');
+  if(lblEl){lblEl.style.color=Math.abs(unex)<Math.abs(actual)*0.02?'var(--muted)':'var(--yellow)';}
 }
 
 // ─── GAMMA DEEP DIVE ──────────────────────────────────────────────────────────
