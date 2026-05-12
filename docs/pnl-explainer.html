@@ -236,7 +236,9 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
     <h3>Convexity in action — drag the rate move</h3>
     <p style="font-size:13px;margin-bottom:14px">Grey = linear DV01-only estimate. Green = adds gamma (second-order). Blue = full revaluation. The gap between grey and blue is exactly what the Taylor expansion's second-order terms recover.</p>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px">
-      <canvas id="convexity-chart" style="max-height:280px"></canvas>
+      <div style="position:relative;height:280px">
+        <canvas id="convexity-chart"></canvas>
+      </div>
     </div>
 
     <div class="sl-card" style="margin-bottom:16px">
@@ -529,7 +531,7 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
       </div>
       <div>
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px">
-          <canvas id="gamma-chart" style="max-height:260px"></canvas>
+          <div style="position:relative;height:260px"><canvas id="gamma-chart"></canvas></div>
         </div>
       </div>
     </div>
@@ -555,7 +557,7 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
           <input type="range" id="sl-dv-dsig" min="-100" max="100" step="5" value="20" style="width:160px" oninput="onVolgaSlider()">
         </div>
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px">
-          <canvas id="volga-chart" style="max-height:260px"></canvas>
+          <div style="position:relative;height:260px"><canvas id="volga-chart"></canvas></div>
         </div>
       </div>
     </div>
@@ -578,7 +580,7 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
       <div>
         <p style="font-size:12px;color:var(--muted);margin-bottom:10px">DV01 (hedge ratio) at different vol levels — the gap between lines is the Vanna effect.</p>
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px">
-          <canvas id="vanna-chart" style="max-height:260px"></canvas>
+          <div style="position:relative;height:260px"><canvas id="vanna-chart"></canvas></div>
         </div>
       </div>
     </div>
@@ -620,7 +622,7 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
     <div>
       <div class="attr-wrap">
         <h3 style="margin-bottom:14px">PnL Attribution</h3>
-        <canvas id="attribution-chart" style="max-height:300px"></canvas>
+        <div style="position:relative;height:300px"><canvas id="attribution-chart"></canvas></div>
       </div>
       <div class="summary-bar" style="margin-top:12px">
         <div class="sum-item"><span class="sum-lbl">Predicted</span><span class="sum-val" id="sum-predicted" style="color:var(--green)">—</span></div>
@@ -990,7 +992,7 @@ function initConvexityChart(){
       {label:'Full Revaluation',data:[],borderColor:'#4a9eff',borderWidth:2,pointRadius:0,tension:0},
     ]},
     options:{
-      responsive:true,maintainAspectRatio:true,
+      responsive:true,maintainAspectRatio:false,
       animation:false,transitions:{},
       plugins:{
         legend:{labels:{color:'#7a8faa',font:{size:12}}},
@@ -1095,7 +1097,7 @@ function initGammaChart(){
       {label:'DV01 PnL (linear)',data:[],borderColor:'#4a5568',borderDash:[5,4],borderWidth:1.5,pointRadius:0,tension:0},
     ]},
     options:{
-      responsive:true,maintainAspectRatio:true,animation:{duration:150},
+      responsive:true,maintainAspectRatio:false,animation:false,
       plugins:{legend:{labels:{color:'#7a8faa',font:{size:11}}},tooltip:{mode:'index',intersect:false,backgroundColor:'#1e2637',borderColor:'#2a3347',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#7a8faa'}},
       scales:{
         x:{ticks:{color:'#7a8faa',maxTicksLimit:9,callback:(v,i)=>{const l=gammaChart.data.labels[i];return l?parseInt(l)+'bp':'';}},grid:{color:'#2a3347'},title:{display:true,text:'ΔR (bp)',color:'#7a8faa'}},
@@ -1133,7 +1135,7 @@ function initVolgaChart(){
       {label:'Vega + Volga (quadratic)',data:[],borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,0.08)',borderWidth:2,pointRadius:0,tension:0.2,fill:true},
     ]},
     options:{
-      responsive:true,maintainAspectRatio:true,animation:{duration:150},
+      responsive:true,maintainAspectRatio:false,animation:false,
       plugins:{legend:{labels:{color:'#7a8faa',font:{size:11}}},tooltip:{mode:'index',intersect:false,backgroundColor:'#1e2637',borderColor:'#2a3347',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#7a8faa'}},
       scales:{
         x:{ticks:{color:'#7a8faa',maxTicksLimit:9,callback:(v,i)=>{const l=volgaChart.data.labels[i];return l?parseInt(l)+'bp':'';}},grid:{color:'#2a3347'},title:{display:true,text:'Δσ (bp vol)',color:'#7a8faa'}},
@@ -1177,7 +1179,7 @@ function initVannaChart(){
       {label:'DV01 at vol -30bp',data:[],borderColor:'#4a9eff',borderWidth:2,pointRadius:0,tension:0.2},
     ]},
     options:{
-      responsive:true,maintainAspectRatio:true,animation:{duration:150},
+      responsive:true,maintainAspectRatio:false,animation:false,
       plugins:{legend:{labels:{color:'#7a8faa',font:{size:11}}},tooltip:{mode:'index',intersect:false,backgroundColor:'#1e2637',borderColor:'#2a3347',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#7a8faa'}},
       scales:{
         x:{ticks:{color:'#7a8faa',maxTicksLimit:9,callback:(v,i)=>{const l=vannaChart.data.labels[i];return l?parseFloat(l).toFixed(1)+'%':'';}},grid:{color:'#2a3347'},title:{display:true,text:'Forward Rate (F)',color:'#7a8faa'}},
@@ -1256,7 +1258,7 @@ function initAttributionChart(){
         borderRadius:4,borderWidth:0}]
     },
     options:{
-      indexAxis:'y',responsive:true,maintainAspectRatio:true,animation:{duration:200},
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,animation:false,
       plugins:{
         legend:{display:false},
         tooltip:{callbacks:{label:item=>' '+fmtDollar(item.raw)},backgroundColor:'#1e2637',borderColor:'#2a3347',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#7a8faa'}
