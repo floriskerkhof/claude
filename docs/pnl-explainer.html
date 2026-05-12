@@ -1406,6 +1406,12 @@ function setMode(mode){
 function setTab(t){
   document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['gamma','volga','vanna'][i]===t));
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+t));
+  // Charts initialised while display:none have zero dimensions — force resize after tab is visible
+  requestAnimationFrame(()=>{
+    if(t==='gamma'&&gammaChart) gammaChart.resize();
+    if(t==='volga'&&volgaChart) volgaChart.resize();
+    if(t==='vanna'&&vannaChart) vannaChart.resize();
+  });
 }
 
 // ─── COLLAPSIBLE ─────────────────────────────────────────────────────────────
@@ -1436,11 +1442,20 @@ window.addEventListener('DOMContentLoaded',()=>{
   initHessianTenorInputs();
   initConvexityChart();
   initGammaChart();
-  initVolgaChart();
-  initVannaChart();
   initAttributionChart();
   readDerived();
   updateAll();
+  // Defer volga/vanna init until after layout — their tabs are display:none at load
+  requestAnimationFrame(()=>{
+    initVolgaChart();
+    initVannaChart();
+    updateVolgaChart();
+    updateVannaChart();
+  });
+});
+
+window.addEventListener('resize',()=>{
+  [convChart,gammaChart,volgaChart,vannaChart,attrChart].forEach(c=>{if(c)c.resize();});
 });
 </script>
 </body>
