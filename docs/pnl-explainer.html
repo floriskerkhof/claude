@@ -964,11 +964,11 @@ function initConvexityChart(){
     type:'line',
     data:{labels:[],datasets:[
       {label:'Linear (DV01 only)',data:[],borderColor:'#4a5568',borderDash:[6,4],borderWidth:1.5,pointRadius:0,tension:0},
-      {label:'Quadratic (+Gamma)',data:[],borderColor:'#22d3a0',borderWidth:2,pointRadius:0,tension:0.2},
-      {label:'Full Revaluation',data:[],borderColor:'#4a9eff',borderWidth:2,pointRadius:2,pointBackgroundColor:'#4a9eff',tension:0},
+      {label:'Quadratic (+Gamma)',data:[],borderColor:'#22d3a0',borderWidth:2,pointRadius:0,tension:0},
+      {label:'Full Revaluation',data:[],borderColor:'#4a9eff',borderWidth:2,pointRadius:0,tension:0},
     ]},
     options:{
-      responsive:true,maintainAspectRatio:true,animation:{duration:150},
+      responsive:true,maintainAspectRatio:true,animation:false,
       plugins:{legend:{labels:{color:'#7a8faa',font:{size:12}}},tooltip:{enabled:false}},
       scales:{
         x:{ticks:{color:'#7a8faa',maxTicksLimit:9,callback:(v,i,arr)=>{const lbl=convChart.data.labels[i];return lbl?parseInt(lbl)+'bp':'';}},grid:{color:'#2a3347'},title:{display:true,text:'Rate Move ΔR (bp)',color:'#7a8faa'}},
