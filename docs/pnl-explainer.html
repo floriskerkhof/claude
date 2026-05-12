@@ -957,6 +957,28 @@ function updateHessianQF(){
 
 // ─── CONVEXITY CHART ──────────────────────────────────────────────────────────
 let convChart=null;
+let convCursorDR=50; // tracks slider value for cursor line
+
+// Plugin: draws a vertical cursor line at the current ΔR position
+const convCursorPlugin={
+  id:'convCursor',
+  afterDraw(chart){
+    if(!chart.data.labels||!chart.data.labels.length) return;
+    const idx=chart.data.labels.indexOf(convCursorDR.toString());
+    if(idx<0) return;
+    const {ctx,chartArea:{top,bottom},scales:{x}}=chart;
+    const xp=x.getPixelForValue(idx);
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(xp,top);
+    ctx.lineTo(xp,bottom);
+    ctx.lineWidth=1.5;
+    ctx.strokeStyle='rgba(251,191,36,0.7)';
+    ctx.setLineDash([5,4]);
+    ctx.stroke();
+    ctx.restore();
+  }
+};
 
 function initConvexityChart(){
   const ctx=document.getElementById('convexity-chart').getContext('2d');
@@ -964,17 +986,23 @@ function initConvexityChart(){
     type:'line',
     data:{labels:[],datasets:[
       {label:'Linear (DV01 only)',data:[],borderColor:'#4a5568',borderDash:[6,4],borderWidth:1.5,pointRadius:0,tension:0},
-      {label:'Quadratic (+Gamma)',data:[],borderColor:'#22d3a0',borderWidth:2,pointRadius:0,tension:0},
+      {label:'Quadratic (+Gamma)',data:[],borderColor:'#22d3a0',borderWidth:2.5,pointRadius:0,tension:0},
       {label:'Full Revaluation',data:[],borderColor:'#4a9eff',borderWidth:2,pointRadius:0,tension:0},
     ]},
     options:{
-      responsive:true,maintainAspectRatio:true,animation:false,
-      plugins:{legend:{labels:{color:'#7a8faa',font:{size:12}}},tooltip:{enabled:false}},
+      responsive:true,maintainAspectRatio:true,
+      animation:false,transitions:{},
+      plugins:{
+        legend:{labels:{color:'#7a8faa',font:{size:12}}},
+        tooltip:{enabled:false},
+        convCursor:{}
+      },
       scales:{
-        x:{ticks:{color:'#7a8faa',maxTicksLimit:9,callback:(v,i,arr)=>{const lbl=convChart.data.labels[i];return lbl?parseInt(lbl)+'bp':'';}},grid:{color:'#2a3347'},title:{display:true,text:'Rate Move ΔR (bp)',color:'#7a8faa'}},
+        x:{ticks:{color:'#7a8faa',maxTicksLimit:9,callback:(v,i)=>{const lbl=convChart.data.labels[i];return lbl&&parseInt(lbl)%50===0?parseInt(lbl)+'bp':'';}},grid:{color:'#2a3347'},title:{display:true,text:'Rate Move ΔR (bp)',color:'#7a8faa'}},
         y:{ticks:{color:'#7a8faa',callback:v=>fmtDollar(v)},grid:{color:'#2a3347'},title:{display:true,text:'PnL ($)',color:'#7a8faa'}}
       }
-    }
+    },
+    plugins:[convCursorPlugin]
   });
 }
 
@@ -987,14 +1015,13 @@ function updateConvexityChart(){
   const quadPnL=pts.map(dr=>g.dv01*dr+0.5*g.gamma*dr*dr);
   let actualPnL;
   if(inputMode==='derived'&&currentRG){
+    const p1=bachelierPrice(currentF,currentK,currentT,currentSigmaN,currentTau,currentType);
     actualPnL=pts.map(dr=>{
-      const F2=currentF+dr*BP;
-      const p2=bachelierPrice(F2,currentK,currentT,currentSigmaN,currentTau,currentType);
-      const p1=bachelierPrice(currentF,currentK,currentT,currentSigmaN,currentTau,currentType);
+      const p2=bachelierPrice(currentF+dr*BP,currentK,currentT,currentSigmaN,currentTau,currentType);
       return (p2-p1)*currentN;
     });
   }else{
-    actualPnL=quadPnL.map((q,i)=>q+0.5*0.01*g.gamma*pts[i]*pts[i]); // approximate
+    actualPnL=quadPnL.slice();
   }
   convChart.data.labels=pts.map(x=>x.toString());
   convChart.data.datasets[0].data=linPnL;
@@ -1006,7 +1033,9 @@ function updateConvexityChart(){
 
 function onConvSlider(){
   const dr=parseInt(document.getElementById('sl-conv-dr').value);
+  convCursorDR=dr;
   document.getElementById('val-conv-dr').textContent=(dr>=0?'+':'')+dr+' bp';
+  if(convChart) convChart.update('none'); // redraw cursor only
   updateConvSlider();
 }
 
