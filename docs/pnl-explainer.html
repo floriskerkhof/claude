@@ -179,8 +179,8 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
   </div>
 
   <div class="coll" style="text-align:left;max-width:760px;margin:0 auto">
-    <button class="coll-btn" onclick="toggleColl(this)">Why decompose PnL? <span class="coll-arrow">▼</span></button>
-    <div class="coll-body">
+    <button class="coll-btn open" onclick="toggleColl(this)">Why decompose PnL? <span class="coll-arrow" style="transform:rotate(180deg)">▼</span></button>
+    <div class="coll-body open">
       <p>Every trading desk runs a daily PnL explain. The goal: if risk systems said you had $500k DV01, and rates moved 10bp, you should have made roughly $5M. Did you? If actual PnL is $6.2M, the extra $1.2M came from somewhere — gamma, vol moves, or unexplained model residual.</p>
       <p>Small unexplained PnL = model is working well. Large unexplained = higher-order risks not captured, or a model/data issue. Under FRTB, regulators require the unexplained to stay below a threshold as a condition for using an internal model.</p>
       <p>For <strong style="color:var(--accent)">linear instruments</strong> (swaps, bonds): PnL is almost entirely DV01 × ΔR. Gamma is negligible. Vega is zero.<br>
@@ -193,7 +193,39 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
 <section id="taylor">
   <div class="section-intro">
     <h2>The Taylor Expansion</h2>
-    <p class="lead">PnL is approximated by expanding the pricing function around today's greeks. Each term is a greek multiplied by a market move.</p>
+    <p class="lead">The core idea: instead of repricing a position from scratch every time markets move, we approximate the price change using pre-computed sensitivities — the Greeks. Each Greek is multiplied by the relevant market move to give its dollar contribution.</p>
+  </div>
+
+  <div style="background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.18);border-radius:var(--r);padding:18px 22px;margin-bottom:24px">
+    <p style="color:var(--text);font-size:14px;margin-bottom:10px"><strong>The idea in one sentence:</strong> if you know how sensitive a position is to each market input, and you know how much each input moved, you can add up the contributions to estimate the total PnL — without rerunning a slow pricing model.</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:0">This is called a <em>first- and second-order Taylor expansion</em> of the pricing function. The first-order terms (DV01, Vega) are linear estimates. The second-order terms (Gamma, Volga, Vanna) correct for curvature — the fact that sensitivities themselves change as markets move. What remains after summing all terms is the <strong style="color:var(--yellow)">unexplained</strong> — the third-order and higher terms the expansion truncates.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:24px">
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:4px">DV01 × ΔR &nbsp;<span style="color:var(--muted);font-weight:400">· first order</span></div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.55">The bread-and-butter of rates PnL. DV01 is your dollar gain per basis-point move in rates. Multiply by how far rates moved. For swaps and bonds, this is the <em>entire</em> story.</div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px">½ Γ (ΔR)² &nbsp;<span style="color:var(--muted);font-weight:400">· second order</span></div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.55">Gamma corrects for the fact that your DV01 changes as rates move. A large move in either direction benefits a long-gamma position — the PnL curve bends upward. Proportional to the <em>square</em> of the move.</div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:4px">ν × Δσ &nbsp;<span style="color:var(--muted);font-weight:400">· first order</span></div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.55">Vega is your sensitivity to a 1bp change in implied vol. When vol rises (market becomes more uncertain), long-option positions gain. This term only applies to non-linear instruments — a plain swap has zero vega.</div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:13px;font-weight:700;color:var(--purple);margin-bottom:4px">½ 𝒱 (Δσ)² &nbsp;<span style="color:var(--muted);font-weight:400">· second order</span></div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.55">Volga (vol gamma) corrects the linear vega estimate for large vol moves. OTM swaptions have high Volga — when vol jumps 30bp, vega alone understates the gain significantly.</div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:4px">𝒜 × ΔR × Δσ &nbsp;<span style="color:var(--muted);font-weight:400">· cross term</span></div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.55">Vanna captures the interaction between a rate move and a vol move. It shows up whenever rates and vol move together — common in crises. Neither the DV01 term nor the Vega term alone captures it.</div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:4px">Θ × Δt &nbsp;<span style="color:var(--muted);font-weight:400">· time decay</span></div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.55">Theta is the daily bleed — the cost of holding an option as it ages. Long options always lose theta. It is the price you pay for the convexity benefit of being long gamma and long vega.</div>
+    </div>
   </div>
 
   <div class="formula-box">
@@ -271,7 +303,13 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
 <section id="position">
   <div class="section-intro">
     <h2>Position Setup</h2>
-    <p class="lead">Configure a swaption to derive all greeks automatically, or enter them directly in manual mode.</p>
+    <p class="lead">This section defines the position whose PnL we will explain. Every chart on this page updates to reflect the position you set here.</p>
+  </div>
+
+  <div style="background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.18);border-radius:var(--r);padding:18px 22px;margin-bottom:24px">
+    <p style="color:var(--text);font-size:14px;margin-bottom:8px"><strong>What is a swaption?</strong> A swaption is an option to enter an interest rate swap. A <em>payer swaption</em> gives you the right to pay fixed and receive floating — it profits when rates rise. A <em>receiver swaption</em> is the opposite. They are the primary non-linear instrument on a rates desk.</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:6px">The key parameters are: the <strong style="color:var(--accent2)">option expiry</strong> (how long until you must decide whether to enter the swap), the <strong style="color:var(--accent2)">swap tenor</strong> (how long the resulting swap would run), and the <strong style="color:var(--accent2)">normal vol</strong> (the market's implied uncertainty about where rates will be at expiry).</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:0">In <strong>Derived mode</strong>, all six Greeks are computed automatically from the Bachelier model. In <strong>Manual mode</strong>, you set the Greeks yourself — useful if you already know your book's risk numbers and just want to explore how they translate to PnL.</p>
   </div>
 
   <div class="toggle-bar">
@@ -397,6 +435,7 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
   <!-- GREEKS OUTPUT -->
   <div style="margin-top:24px">
     <h3>Current Greeks</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">These six numbers fully characterise the position's sensitivity to market moves. Every bar in the PnL Attribution chart is one of these Greeks multiplied by a market move. Hover the labels in the Glossary at the bottom of the page for quick definitions.</p>
     <div class="greeks-grid" style="margin-top:12px">
       <div class="greek-chip"><div class="greek-sym">DV01</div><div class="greek-val" id="gk-dv01">—</div><div class="greek-unit">$ per bp</div></div>
       <div class="greek-chip"><div class="greek-sym">Gamma (Γ)</div><div class="greek-val" id="gk-gamma">—</div><div class="greek-unit">$ per bp²</div></div>
@@ -413,7 +452,13 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
 <section id="hessian">
   <div class="section-intro">
     <h2>The Hessian — Curve Cross-Gamma</h2>
-    <p class="lead">In rates, gamma is not scalar. It is a matrix Γᵢⱼ across the 5 tenor nodes of the curve. Off-diagonal entries capture how PnL responds when two different tenors move simultaneously.</p>
+    <p class="lead">In equity options, gamma is a single number. In rates, the curve has many points — 1Y, 2Y, 5Y, 10Y, 30Y — and each pair of points has its own gamma. The Hessian matrix collects all of them.</p>
+  </div>
+
+  <div style="background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.18);border-radius:var(--r);padding:18px 22px;margin-bottom:24px">
+    <p style="color:var(--text);font-size:14px;margin-bottom:8px"><strong>Why does this matter?</strong> Consider a 2y10y swaption — an option expiring in 2 years on a 10-year swap. Its gamma is spread across the 2Y and 10Y parts of the curve. If both move together (a parallel shift), you get cross-gamma PnL from the interaction. If they move in opposite directions (a flattener), the cross-gamma can partially cancel the diagonal gamma.</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:6px"><strong style="color:var(--accent2)">Diagonal cells (Γᵢᵢ):</strong> own-gamma at a single tenor — the curvature of your PnL if only that one tenor moves. This is the number you'd see in a simple equity options world.</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:0"><strong style="color:var(--green)">Off-diagonal cells (Γᵢⱼ, i≠j):</strong> cross-gamma between tenor i and tenor j. Non-zero whenever a position spans more than one tenor. A book with many different swaption expiries and swap tenors will have a rich, dense Hessian. This is why rates PnL explain requires a matrix, not just a single gamma.</p>
   </div>
 
   <div class="formula-box">
@@ -454,7 +499,12 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
 <section id="deepdive">
   <div class="section-intro">
     <h2>Second-Order Greeks</h2>
-    <p class="lead">Gamma, Volga, and Vanna each tell a different story about how your risk profile changes with markets. These charts use the current position.</p>
+    <p class="lead">The first-order Greeks (DV01, Vega) tell you your sensitivity today. The second-order Greeks tell you how those sensitivities change as markets move. They are what make options different from linear instruments.</p>
+  </div>
+
+  <div style="background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.18);border-radius:var(--r);padding:18px 22px;margin-bottom:24px">
+    <p style="color:var(--text);font-size:14px;margin-bottom:8px"><strong>The intuition:</strong> imagine delta-hedging a swaption with a swap. Each day, you adjust the swap hedge so your net DV01 is zero. But rates keep moving, so the swaption's delta keeps changing — that daily re-hedging generates PnL. The faster the delta changes, the more PnL you earn from re-hedging. <strong style="color:var(--green)">Gamma</strong> is the speed of that change with respect to rates, <strong style="color:var(--purple)">Volga</strong> with respect to vol, and <strong style="color:var(--orange)">Vanna</strong> captures the cross-effect between rates and vol together.</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:0">Select a tab below to explore each one. The charts update automatically as you change the position in the <a href="#position" style="color:var(--accent)">Position Setup</a> section above.</p>
   </div>
 
   <div class="tab-bar">
@@ -467,9 +517,10 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
   <div class="tab-pane active" id="tab-gamma">
     <div class="two-col">
       <div>
-        <div class="formula-box" style="margin-bottom:14px">\[\Gamma = \frac{\partial^2 P}{\partial F^2} = A\,\frac{\mathcal{n}(d)}{\sigma_N\sqrt{T}}\]<div style="font-size:11px;color:var(--muted);margin-top:8px">Gamma PnL = ½ Γ (ΔR)² — always positive for long options regardless of move direction</div></div>
-        <p style="font-size:13px">The <span class="hl">convexity benefit</span> of long options: a 50bp move up or down both generate positive PnL for a gamma-long position. Short gamma positions bleed on every large move.</p>
-        <p style="font-size:13px">Gamma is largest <strong style="color:var(--accent2)">ATM near expiry</strong> and shrinks OTM or far from expiry.</p>
+        <p style="font-size:13px;color:var(--text);margin-bottom:10px"><strong>What Gamma tells you:</strong> your DV01 is not fixed. As rates move, your rate sensitivity changes. Gamma measures how fast. A position with DV01 = $5,000 and Gamma = $50/bp² will have a DV01 of $5,500 after a 10bp move up — and $4,500 after a 10bp move down.</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">The PnL from this shifting DV01 is <strong style="color:var(--green)">always positive for long-gamma positions</strong> — rates moving up increases the DV01 of a payer swaption (so you hold more of a winner), and rates moving down reduces it (so you hold less of a loser). This is the convexity benefit, and the chart on the right shows it as a parabola opening upward.</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Short-gamma positions (sold swaptions) have the opposite: the DV01 grows against you on big moves. This is why short-gamma positions bleed on volatility, regardless of direction. The cost of holding long gamma is <strong style="color:var(--red)">Theta</strong> — the daily time decay you pay to own that convexity.</p>
+        <div class="formula-box" style="margin-bottom:14px">\[\Gamma = \frac{\partial^2 P}{\partial F^2} = A\,\frac{\mathcal{n}(d)}{\sigma_N\sqrt{T}}\]<div style="font-size:11px;color:var(--muted);margin-top:8px">Gamma PnL = ½ Γ (ΔR)² — always positive for long options regardless of rate direction. Gamma is highest ATM and near expiry.</div></div>
         <div style="margin-top:12px;padding:12px 14px;background:var(--surface3);border:1px solid var(--border);border-radius:8px;font-size:13px">
           <div style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Gamma PnL at current ΔR</div>
           <div style="font-size:22px;font-weight:800;color:var(--green)" id="gamma-pnl-display">—</div>
@@ -488,9 +539,10 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
   <div class="tab-pane" id="tab-volga">
     <div class="two-col">
       <div>
-        <div class="formula-box" style="margin-bottom:14px">\[\mathcal{V} = \frac{\partial^2 P}{\partial\sigma^2} = A\,\sqrt{T}\,\mathcal{n}(d)\,\frac{d^2}{\sigma_N}\]<div style="font-size:11px;color:var(--muted);margin-top:8px">Volga PnL = ½ 𝒱 (Δσ)² — "vol of vega" — how vega itself changes with vol</div></div>
-        <p style="font-size:13px"><span class="hl">Volga</span> (also called Vomma) measures the curvature of the option price in vol space. An ATM option has low Volga — its vega barely changes as vol moves. An OTM option has high Volga — vol spikes dramatically increase its value.</p>
-        <p style="font-size:13px">For a vol spike from 80bp to 110bp: linear vega gives one estimate; adding ½ Volga (Δσ)² improves the prediction significantly for deep OTM structures.</p>
+        <p style="font-size:13px;color:var(--text);margin-bottom:10px"><strong>What Volga tells you:</strong> Vega is your option's sensitivity to vol — the price you earn (or lose) per 1bp change in implied vol. But Vega itself is not constant. As vol rises, the Vega of an OTM swaption increases — it becomes more sensitive to further vol moves. Volga measures how fast that happens.</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Think of it this way: if vol spikes from 80bp to 120bp (+40bp), linear vega says your gain = Vega × 40. But Volga says: after the first 20bp, your Vega has grown, so the second 20bp earns more. The true gain is larger than the linear estimate. The chart on the right shows this — the purple curve bends above the grey linear line.</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px"><strong style="color:var(--purple)">ATM options have near-zero Volga</strong> (their Vega barely changes with vol). <strong style="color:var(--purple)">OTM options have high Volga</strong> — they are highly convex in vol space. This is why OTM swaptions are disproportionately valuable when vol explodes in a crisis, even if rates haven't moved much yet.</p>
+        <div class="formula-box" style="margin-bottom:14px">\[\mathcal{V} = \frac{\partial^2 P}{\partial\sigma^2} = A\,\sqrt{T}\,\mathcal{n}(d)\,\frac{d^2}{\sigma_N}\]<div style="font-size:11px;color:var(--muted);margin-top:8px">Volga PnL = ½ 𝒱 (Δσ)² — the curvature of option price in vol space. Zero ATM, grows as moneyness increases.</div></div>
         <div style="margin-top:12px;padding:12px 14px;background:var(--surface3);border:1px solid var(--border);border-radius:8px;font-size:13px">
           <div style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Volga PnL at current Δσ</div>
           <div style="font-size:22px;font-weight:800;color:var(--purple)" id="volga-pnl-display">—</div>
@@ -513,9 +565,10 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
   <div class="tab-pane" id="tab-vanna">
     <div class="two-col">
       <div>
-        <div class="formula-box" style="margin-bottom:14px">\[\mathcal{A} = \frac{\partial^2 P}{\partial F\,\partial\sigma} = -A\,\frac{\mathcal{n}(d)\,d}{\sigma_N}\]<div style="font-size:11px;color:var(--muted);margin-top:8px">Vanna = ∂(DV01)/∂σ = ∂(Vega)/∂F — the skew cross-term</div></div>
-        <p style="font-size:13px"><span class="hl">Vanna</span> tells you two things simultaneously: (1) how your DV01 changes when vol moves, and (2) how your vega changes when rates move.</p>
-        <p style="font-size:13px">For a payer swaption, Vanna is negative when d &gt; 0 (ITM). When rates rise and vol rises simultaneously — a rate crisis — the Vanna cross-term adds negative PnL even if both rate and vol moves individually were favourable.</p>
+        <p style="font-size:13px;color:var(--text);margin-bottom:10px"><strong>What Vanna tells you:</strong> Vanna is a cross-derivative — it captures the interaction between a rate move and a vol move. It answers: "if rates move AND vol moves at the same time, is there extra PnL that neither the DV01 term nor the Vega term accounts for?" The answer is yes, and Vanna is that extra piece.</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Practically, Vanna tells you <strong style="color:var(--orange)">how your DV01 hedge ratio changes as vol moves</strong>. If you delta-hedge a swaption today (so net DV01 = 0) and overnight vol rises 20bp, your swaption's delta has shifted — you are no longer fully hedged. Vanna tells you by how much. This matters enormously in fast-moving markets where rate and vol moves are simultaneous.</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">The chart on the right shows DV01 as a function of the forward rate, plotted at three vol levels. The <strong style="color:var(--orange)">gap between the orange line (higher vol) and the blue line (lower vol)</strong> is the Vanna effect — the same rate position has a different DV01 depending on where vol is.</p>
+        <div class="formula-box" style="margin-bottom:14px">\[\mathcal{A} = \frac{\partial^2 P}{\partial F\,\partial\sigma} = -A\,\frac{\mathcal{n}(d)\,d}{\sigma_N}\]<div style="font-size:11px;color:var(--muted);margin-top:8px">Vanna = ∂(DV01)/∂σ = ∂(Vega)/∂F — the cross-sensitivity that appears when rates and vol move together.</div></div>
         <div style="margin-top:12px;padding:12px 14px;background:var(--surface3);border:1px solid var(--border);border-radius:8px;font-size:13px">
           <div style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Vanna PnL (ΔR × Δσ)</div>
           <div style="font-size:22px;font-weight:800;color:var(--orange)" id="vanna-pnl-display">—</div>
@@ -536,7 +589,13 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
 <section id="attribution">
   <div class="section-intro">
     <h2>PnL Attribution</h2>
-    <p class="lead">Set today's market moves and see how each greek contributes to total PnL — and how much the Taylor expansion misses.</p>
+    <p class="lead">This is the full picture: set today's market moves and see exactly how much each Greek contributed to total PnL. This is what a trader's morning PnL explain report shows.</p>
+  </div>
+
+  <div style="background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.18);border-radius:var(--r);padding:18px 22px;margin-bottom:24px">
+    <p style="color:var(--text);font-size:14px;margin-bottom:8px"><strong>How to read the bar chart:</strong> each bar is one Greek multiplied by its market move. Bars pointing right are positive PnL contributions; bars pointing left are losses. The bars sum to the <strong style="color:var(--green)">Predicted</strong> PnL. The <strong style="color:var(--accent)">Actual</strong> PnL (from full revaluation) is shown separately. The difference is the <strong style="color:var(--yellow)">Unexplained</strong>.</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:6px">On a <strong>quiet day</strong> (small rate moves, no vol change), the DV01 bar will dominate and Unexplained will be tiny — the linear approximation is sufficient. On a <strong>volatile day</strong> (large moves or vol spikes), the Gamma, Vega, and Volga bars grow, and Unexplained also grows as third-order terms start to matter.</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:0">Try loading a <a href="#scenarios" style="color:var(--accent)">scenario</a> below to see realistic combinations — or adjust the sliders on the left to construct your own market move.</p>
   </div>
 
   <div class="two-col" style="align-items:start">
@@ -574,7 +633,8 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
   <!-- LINEAR vs NON-LINEAR -->
   <div style="margin-top:32px">
     <h3>Linear vs Non-linear — same DV01, different instrument</h3>
-    <p style="font-size:13px;margin-bottom:16px">A swap and a swaption with identical DV01 behave very differently in large moves. The swaption's gamma adds convexity the swap doesn't have.</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:6px">A classic question on a rates desk: <em>"I can get the same DV01 with a swap or with a swaption. Why does it matter which I use?"</em></p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">The answer is gamma. The two cards below show what happens to each instrument under the <em>same net rate move</em> from the attribution sliders above. The swap's PnL is a straight line — DV01 × ΔR, nothing else. The swaption earns the same DV01 PnL <em>plus</em> a gamma bonus that grows with the square of the move. In calm markets this bonus is small. In large moves — like the scenarios below — it becomes decisive. The swaption costs more theta every day in exchange for this convexity.</p>
     <div class="lnl-grid">
       <div class="lnl-card linear">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Swap (Linear)</div>
@@ -600,8 +660,9 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
 <section id="scenarios">
   <div class="section-intro">
     <h2>Market Scenarios</h2>
-    <p class="lead">Click a card to load a real rates scenario. Market moves update the attribution and all charts instantly.</p>
+    <p class="lead">Click a card to load a realistic rate environment. All the sliders, charts, and the attribution bar update instantly so you can see which Greeks dominate in each scenario.</p>
   </div>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:20px">These scenarios are designed to highlight different parts of the Taylor expansion. <em>Parallel Shift</em> shows DV01 dominance. <em>Steepener/Flattener</em> shows when the Hessian cross-gamma matters. <em>Vol Spike</em> isolates Vega and Volga. <em>Rate Crisis</em> fires all terms simultaneously — the scenario where a full Taylor expansion is most necessary.</p>
   <div class="sc-grid">
     <div class="sc-card" onclick="loadScenario(this,'parallel')">
       <div class="sc-icon">↑</div>
