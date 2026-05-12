@@ -158,33 +158,40 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
 <section id="hero">
   <div class="badge">Rates Focus · Interactive Learning</div>
   <h1>PnL Explain</h1>
-  <p class="hero-sub">Break down exactly why a rates position made or lost money — first-order DV01, second-order gamma and convexity, vega, volga, vanna, and the residual the Taylor expansion misses.</p>
+  <p class="hero-sub">Your swaption made $1.4M today. Your risk system predicted $900k. Where did the extra $500k come from — and should you be worried about it?</p>
+
+  <div style="background:rgba(74,158,255,.07);border:1px solid rgba(74,158,255,.2);border-radius:var(--r);padding:20px 24px;max-width:760px;margin:0 auto 28px;text-align:left">
+    <p style="color:var(--text);font-size:15px;font-weight:600;margin-bottom:10px">The problem every rates trader faces every morning</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:8px">Your risk system runs overnight and tells you: <em>"Given your Greeks and last night's market moves, you should have made $900k."</em> You open your books and see $1.4M. That $500k gap isn't a gift — it needs an explanation.</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:8px">It could be <strong style="color:var(--green)">gamma</strong> — rates moved 80bp and your position had convexity that your linear DV01 estimate missed. It could be <strong style="color:var(--yellow)">vega</strong> — vol spiked and your swaptions gained more than expected. Or it could be <strong style="color:var(--red)">unexplained residual</strong> — a sign your model is missing something, or your risk data was stale.</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:0"><strong style="color:var(--text)">PnL explain</strong> is the process of attributing every dollar of actual PnL to a specific source. It is the daily sanity check between what your risk system says and what actually happened. Regulators (FRTB) require it. Risk managers live by it. This tool lets you build the intuition for it.</p>
+  </div>
 
   <div class="tri-grid">
     <div class="tri-card actual">
       <div class="tri-label actual">Actual PnL</div>
-      <div class="tri-title">Full Revaluation</div>
-      <div class="tri-desc">Mark the position at today's market levels. The truth — no approximation.</div>
+      <div class="tri-title">What really happened</div>
+      <div class="tri-desc">Reprice the position at today's market levels. This is the ground truth — what your P&L system reports. No model, no approximation.</div>
     </div>
     <div class="tri-card predicted">
       <div class="tri-label predicted">Predicted PnL</div>
-      <div class="tri-title">Greeks × Market Moves</div>
-      <div class="tri-desc">Taylor-expand the pricing function. Sum DV01, gamma, vega, volga, vanna, theta.</div>
+      <div class="tri-title">What your Greeks said</div>
+      <div class="tri-desc">Use yesterday's sensitivities (DV01, gamma, vega…) multiplied by today's market moves. This is what your risk system predicted overnight.</div>
     </div>
     <div class="tri-card unexplained">
       <div class="tri-label unexplained">Unexplained</div>
-      <div class="tri-title">Actual − Predicted</div>
-      <div class="tri-desc">Higher-order terms the Taylor truncates. Small for small moves; grows with large shocks.</div>
+      <div class="tri-title">The gap to investigate</div>
+      <div class="tri-desc">Actual minus predicted. Small = your model is good. Large = hidden risk, stale Greeks, or higher-order moves your Taylor approximation missed.</div>
     </div>
   </div>
 
   <div class="coll" style="text-align:left;max-width:760px;margin:0 auto">
-    <button class="coll-btn open" onclick="toggleColl(this)">Why decompose PnL? <span class="coll-arrow" style="transform:rotate(180deg)">▼</span></button>
+    <button class="coll-btn open" onclick="toggleColl(this)">How to use this tool <span class="coll-arrow" style="transform:rotate(180deg)">▼</span></button>
     <div class="coll-body open">
-      <p>Every trading desk runs a daily PnL explain. The goal: if risk systems said you had $500k DV01, and rates moved 10bp, you should have made roughly $5M. Did you? If actual PnL is $6.2M, the extra $1.2M came from somewhere — gamma, vol moves, or unexplained model residual.</p>
-      <p>Small unexplained PnL = model is working well. Large unexplained = higher-order risks not captured, or a model/data issue. Under FRTB, regulators require the unexplained to stay below a threshold as a condition for using an internal model.</p>
-      <p>For <strong style="color:var(--accent)">linear instruments</strong> (swaps, bonds): PnL is almost entirely DV01 × ΔR. Gamma is negligible. Vega is zero.<br>
-      For <strong style="color:var(--green)">non-linear instruments</strong> (swaptions, caps, floors): gamma, vega, volga, and vanna all contribute meaningfully — especially in large or vol-rich moves.</p>
+      <p><strong style="color:var(--accent2)">1. Set up your position</strong> in the <a href="#position" style="color:var(--accent)">Position Setup</a> section. Either configure a real swaption (expiry, tenor, rate, vol) and let the tool compute all the Greeks for you — or enter your own Greeks directly if you already have them from a risk system.</p>
+      <p><strong style="color:var(--accent2)">2. Apply a market move</strong> in the <a href="#attribution" style="color:var(--accent)">PnL Attribution</a> section. Set how much rates moved at each tenor and whether vol changed. The bar chart instantly shows the dollar contribution from each Greek.</p>
+      <p><strong style="color:var(--accent2)">3. Read the attribution.</strong> The bars are your PnL explain: DV01 is the linear rate contribution, Gamma is the convexity bonus (or penalty), Vega is the vol contribution, and Unexplained is what the approximation misses. On a normal day, Unexplained is tiny. After a large shock, it grows.</p>
+      <p><strong style="color:var(--accent2)">4. Try the scenarios</strong> at the bottom for realistic examples — parallel shift, bear steepener, vol spike, and crisis. Each one illustrates a different part of the PnL explain.</p>
     </div>
   </div>
 </section>
