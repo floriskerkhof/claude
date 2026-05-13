@@ -636,6 +636,59 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
         <div class="sum-item"><span class="sum-lbl">Actual</span><span class="sum-val" id="sum-actual" style="color:var(--accent)">—</span></div>
         <div class="sum-item"><span class="sum-lbl">Unexplained</span><span class="sum-val" id="sum-unexplained" style="color:var(--yellow)">—</span></div>
       </div>
+
+      <!-- Live breakdown table -->
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:12px">
+        <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">How each bar was calculated</div>
+        <div style="padding:12px 16px;display:grid;gap:7px">
+
+          <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:8px;padding-bottom:7px;border-bottom:1px solid var(--border)">
+            <div><span style="color:var(--accent);font-weight:700;font-size:13px">DV01 × ΔR</span><span style="color:var(--muted);font-size:11px;margin-left:6px" id="attr-bd-dv01-detail">—</span></div>
+            <span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right" id="attr-bd-dv01-val">—</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:8px;padding-bottom:7px;border-bottom:1px solid var(--border)">
+            <div><span style="color:var(--green);font-weight:700;font-size:13px">½ Γ × (ΔR)²</span><span style="color:var(--muted);font-size:11px;margin-left:6px" id="attr-bd-gamma-detail">—</span></div>
+            <span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right" id="attr-bd-gamma-val">—</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:8px;padding-bottom:7px;border-bottom:1px solid var(--border)">
+            <div><span style="color:var(--yellow);font-weight:700;font-size:13px">ν × Δσ</span><span style="color:var(--muted);font-size:11px;margin-left:6px" id="attr-bd-vega-detail">—</span></div>
+            <span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right" id="attr-bd-vega-val">—</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:8px;padding-bottom:7px;border-bottom:1px solid var(--border)">
+            <div><span style="color:var(--purple);font-weight:700;font-size:13px">½ 𝒱 × (Δσ)²</span><span style="color:var(--muted);font-size:11px;margin-left:6px" id="attr-bd-volga-detail">—</span></div>
+            <span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right" id="attr-bd-volga-val">—</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:8px;padding-bottom:7px;border-bottom:1px solid var(--border)">
+            <div><span style="color:var(--orange);font-weight:700;font-size:13px">𝒜 × ΔR × Δσ</span><span style="color:var(--muted);font-size:11px;margin-left:6px" id="attr-bd-vanna-detail">—</span></div>
+            <span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right" id="attr-bd-vanna-val">—</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:8px;padding-bottom:7px;border-bottom:1px solid var(--border)">
+            <div><span style="color:var(--red);font-weight:700;font-size:13px">Θ × Δt</span><span style="color:var(--muted);font-size:11px;margin-left:6px" id="attr-bd-theta-detail">—</span></div>
+            <span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right" id="attr-bd-theta-val">—</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:8px;padding-bottom:7px;border-bottom:2px solid var(--border)">
+            <span style="font-weight:700;font-size:13px;color:var(--text)">Predicted total</span>
+            <span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right" id="attr-bd-predicted-val">—</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:8px;padding-bottom:7px;border-bottom:1px solid var(--border)">
+            <span style="font-weight:700;font-size:13px;color:var(--text)">Actual (full reprice)</span>
+            <span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent);text-align:right" id="attr-bd-actual-val">—</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:8px">
+            <span style="font-weight:700;font-size:13px" id="attr-bd-unex-lbl">Unexplained</span>
+            <span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right" id="attr-bd-unex-val">—</span>
+          </div>
+
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1302,7 +1355,7 @@ function computeAttribution(){
     actual=(p2-p1)*currentN;
     unexplained=actual-predicted;
   }
-  return{dv01PnL,gammaPnL,vegaPnL,volgaPnL,vannaPnL,thetaPnL,predicted,actual,unexplained};
+  return{dv01PnL,gammaPnL,vegaPnL,volgaPnL,vannaPnL,thetaPnL,predicted,actual,unexplained,sumDR,dsig,dt};
 }
 
 function updateAttrChart(){
@@ -1318,6 +1371,42 @@ function updateAttrChart(){
   document.getElementById('sum-actual').style.color=a.actual>=0?'var(--accent)':'var(--red)';
   document.getElementById('sum-unexplained').textContent=fmtDollar(a.unexplained);
   document.getElementById('sum-unexplained').style.color=Math.abs(a.unexplained)>Math.abs(a.actual)*0.05?'var(--yellow)':'var(--muted)';
+
+  // Live breakdown table
+  if(!currentDG) return;
+  const g=currentDG, s=v=>v>=0?'+':'';
+  document.getElementById('attr-bd-dv01-detail').textContent=`${fmtDollar(g.dv01)}/bp × ${s(a.sumDR)}${a.sumDR}bp`;
+  document.getElementById('attr-bd-dv01-val').textContent=fmtDollar2(a.dv01PnL);
+  document.getElementById('attr-bd-dv01-val').style.color=a.dv01PnL>=0?'var(--text)':'var(--red)';
+
+  document.getElementById('attr-bd-gamma-detail').textContent=`½ × $${g.gamma.toFixed(1)}/bp² × (${a.sumDR}bp)²`;
+  document.getElementById('attr-bd-gamma-val').textContent=fmtDollar2(a.gammaPnL);
+  document.getElementById('attr-bd-gamma-val').style.color=a.gammaPnL>=0?'var(--green)':'var(--red)';
+
+  document.getElementById('attr-bd-vega-detail').textContent=`${fmtDollar(g.vega)}/bp_vol × ${s(a.dsig)}${a.dsig}bp`;
+  document.getElementById('attr-bd-vega-val').textContent=fmtDollar2(a.vegaPnL);
+  document.getElementById('attr-bd-vega-val').style.color=a.vegaPnL>=0?'var(--yellow)':'var(--red)';
+
+  document.getElementById('attr-bd-volga-detail').textContent=`½ × $${g.volga.toFixed(1)}/bp² × (${a.dsig}bp)²`;
+  document.getElementById('attr-bd-volga-val').textContent=fmtDollar2(a.volgaPnL);
+  document.getElementById('attr-bd-volga-val').style.color=a.volgaPnL>=0?'var(--purple)':'var(--red)';
+
+  document.getElementById('attr-bd-vanna-detail').textContent=`$${g.vanna.toFixed(1)}/bp·bp_vol × ${a.sumDR}bp × ${s(a.dsig)}${a.dsig}bp`;
+  document.getElementById('attr-bd-vanna-val').textContent=fmtDollar2(a.vannaPnL);
+  document.getElementById('attr-bd-vanna-val').style.color=a.vannaPnL>=0?'var(--orange)':'var(--red)';
+
+  document.getElementById('attr-bd-theta-detail').textContent=`${fmtDollar(g.theta)}/day × ${a.dt} day${a.dt!==1?'s':''}`;
+  document.getElementById('attr-bd-theta-val').textContent=fmtDollar2(a.thetaPnL);
+  document.getElementById('attr-bd-theta-val').style.color=a.thetaPnL>=0?'var(--text)':'var(--red)';
+
+  document.getElementById('attr-bd-predicted-val').textContent=fmtDollar2(a.predicted);
+  document.getElementById('attr-bd-predicted-val').style.color=a.predicted>=0?'var(--green)':'var(--red)';
+  document.getElementById('attr-bd-actual-val').textContent=fmtDollar2(a.actual);
+  document.getElementById('attr-bd-actual-val').style.color=a.actual>=0?'var(--accent)':'var(--red)';
+  const uc=Math.abs(a.unexplained)>Math.abs(a.actual)*0.05?'var(--yellow)':'var(--muted)';
+  document.getElementById('attr-bd-unex-val').textContent=fmtDollar2(a.unexplained);
+  document.getElementById('attr-bd-unex-val').style.color=uc;
+  document.getElementById('attr-bd-unex-lbl').style.color=uc;
 }
 
 function onAttrChange(){
