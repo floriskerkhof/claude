@@ -1294,25 +1294,37 @@ function ladderHTML(prefix){
     <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Curve shape</div>
     <div style="display:flex;flex-direction:column;gap:5px">
       ${TENOR_LABELS.map((lbl,i)=>`
-      <div style="display:grid;grid-template-columns:28px 1fr;align-items:center;gap:8px">
+      <div style="display:grid;grid-template-columns:28px 1fr 36px;align-items:center;gap:6px">
         <span style="font-size:10px;color:var(--muted);text-align:right">${lbl}</span>
         <div style="position:relative;height:10px;background:rgba(42,51,71,.6);border-radius:2px">
           <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border)"></div>
           <div id="${prefix}${i}" style="position:absolute;top:1px;height:8px;border-radius:2px;transition:left .1s,width .1s;left:50%;width:0"></div>
         </div>
+        <span id="${prefix}lbl-${i}" style="font-size:10px;font-variant-numeric:tabular-nums;color:var(--muted);text-align:right">0bp</span>
       </div>`).join('')}
+      <div style="border-top:1px solid var(--border);margin-top:4px;padding-top:6px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:10px;color:var(--muted)">Σ net ΔR</span>
+        <span id="${prefix}net" style="font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)">+0bp</span>
+      </div>
     </div>
   </div>`;
 }
 
 function updateLadder(arr,prefix){
+  let sum=0;
   arr.forEach((v,i)=>{
+    sum+=v;
     const bar=document.getElementById(prefix+i);
-    if(!bar) return;
-    const pct=Math.max(-1,Math.min(1,v/150));
-    if(pct>=0){bar.style.left='50%';bar.style.width=(pct*50)+'%';bar.style.background='var(--accent)';}
-    else{bar.style.left=(50+pct*50)+'%';bar.style.width=(-pct*50)+'%';bar.style.background='var(--red)';}
+    const lbl=document.getElementById(prefix+'lbl-'+i);
+    if(bar){
+      const pct=Math.max(-1,Math.min(1,v/150));
+      if(pct>=0){bar.style.left='50%';bar.style.width=(pct*50)+'%';bar.style.background='var(--accent)';}
+      else{bar.style.left=(50+pct*50)+'%';bar.style.width=(-pct*50)+'%';bar.style.background='var(--red)';}
+    }
+    if(lbl){lbl.textContent=(v>=0?'+':'')+v+'bp';lbl.style.color=v>0?'var(--accent)':v<0?'var(--red)':'var(--muted)';}
   });
+  const net=document.getElementById(prefix+'net');
+  if(net){net.textContent=(sum>=0?'+':'')+sum+'bp';net.style.color=sum>0?'var(--accent)':sum<0?'var(--red)':'var(--muted)';}
 }
 
 function initAttrSliders(){
@@ -1407,11 +1419,13 @@ function updateAttrChart(){
   // Live breakdown table
   if(!currentDG) return;
   const g=currentDG, s=v=>v>=0?'+':'';
-  document.getElementById('attr-bd-dv01-detail').textContent=`${fmtDollar(g.dv01)}/bp × ${s(a.sumDR)}${a.sumDR}bp`;
+  const drParts=attrDR.map((v,i)=>(v>=0?'+':'')+v).join(' ');
+  const drSum=`(${drParts} = ${s(a.sumDR)}${a.sumDR}bp)`;
+  document.getElementById('attr-bd-dv01-detail').textContent=`${fmtDollar(g.dv01)}/bp × ${drSum}`;
   document.getElementById('attr-bd-dv01-val').textContent=fmtDollar2(a.dv01PnL);
   document.getElementById('attr-bd-dv01-val').style.color=a.dv01PnL>=0?'var(--text)':'var(--red)';
 
-  document.getElementById('attr-bd-gamma-detail').textContent=`½ × $${g.gamma.toFixed(1)}/bp² × (${a.sumDR}bp)²`;
+  document.getElementById('attr-bd-gamma-detail').textContent=`½ × $${g.gamma.toFixed(1)}/bp² × (${s(a.sumDR)}${a.sumDR}bp)²`;
   document.getElementById('attr-bd-gamma-val').textContent=fmtDollar2(a.gammaPnL);
   document.getElementById('attr-bd-gamma-val').style.color=a.gammaPnL>=0?'var(--green)':'var(--red)';
 
@@ -1423,7 +1437,7 @@ function updateAttrChart(){
   document.getElementById('attr-bd-volga-val').textContent=fmtDollar2(a.volgaPnL);
   document.getElementById('attr-bd-volga-val').style.color=a.volgaPnL>=0?'var(--purple)':'var(--red)';
 
-  document.getElementById('attr-bd-vanna-detail').textContent=`$${g.vanna.toFixed(1)}/bp·bp_vol × ${a.sumDR}bp × ${s(a.dsig)}${a.dsig}bp`;
+  document.getElementById('attr-bd-vanna-detail').textContent=`$${g.vanna.toFixed(1)}/bp·bp_vol × ${s(a.sumDR)}${a.sumDR}bp × ${s(a.dsig)}${a.dsig}bp`;
   document.getElementById('attr-bd-vanna-val').textContent=fmtDollar2(a.vannaPnL);
   document.getElementById('attr-bd-vanna-val').style.color=a.vannaPnL>=0?'var(--orange)':'var(--red)';
 
