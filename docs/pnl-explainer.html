@@ -961,19 +961,22 @@ function updateGreeksDisplay(){
 // ─── HESSIAN ─────────────────────────────────────────────────────────────────
 function initHessianTenorInputs(){
   const c=document.getElementById('hess-tenor-inputs');
-  c.innerHTML='';
+  let html=ladderHTML('hess-lbar-');
   TENOR_LABELS.forEach((lbl,i)=>{
-    c.innerHTML+=`<div class="tenor-row">
+    html+=`<div class="tenor-row">
       <span class="tenor-lbl">${lbl}</span>
       <input type="range" id="hdr-${i}" min="-150" max="150" step="5" value="${hessDR[i]}" oninput="onHessDRChange(${i})">
       <span class="tenor-num" id="hdn-${i}">${hessDR[i]>0?'+':''}${hessDR[i]}bp</span>
     </div>`;
   });
+  c.innerHTML=html;
+  updateLadder(hessDR,'hess-lbar-');
 }
 
 function onHessDRChange(i){
   hessDR[i]=parseInt(document.getElementById('hdr-'+i).value);
   document.getElementById('hdn-'+i).textContent=(hessDR[i]>=0?'+':'')+hessDR[i]+'bp';
+  updateLadder(hessDR,'hess-lbar-');
   updateHessianQF();
 }
 
@@ -1286,21 +1289,50 @@ function updateVannaChart(){
 }
 
 // ─── ATTRIBUTION SLIDERS ──────────────────────────────────────────────────────
+function ladderHTML(prefix){
+  return `<div style="background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:12px">
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Curve shape</div>
+    <div style="display:flex;flex-direction:column;gap:5px">
+      ${TENOR_LABELS.map((lbl,i)=>`
+      <div style="display:grid;grid-template-columns:28px 1fr;align-items:center;gap:8px">
+        <span style="font-size:10px;color:var(--muted);text-align:right">${lbl}</span>
+        <div style="position:relative;height:10px;background:rgba(42,51,71,.6);border-radius:2px">
+          <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border)"></div>
+          <div id="${prefix}${i}" style="position:absolute;top:1px;height:8px;border-radius:2px;transition:left .1s,width .1s;left:50%;width:0"></div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function updateLadder(arr,prefix){
+  arr.forEach((v,i)=>{
+    const bar=document.getElementById(prefix+i);
+    if(!bar) return;
+    const pct=Math.max(-1,Math.min(1,v/150));
+    if(pct>=0){bar.style.left='50%';bar.style.width=(pct*50)+'%';bar.style.background='var(--accent)';}
+    else{bar.style.left=(50+pct*50)+'%';bar.style.width=(-pct*50)+'%';bar.style.background='var(--red)';}
+  });
+}
+
 function initAttrSliders(){
   const c=document.getElementById('attr-tenor-sliders');
-  c.innerHTML='';
+  let html=ladderHTML('attr-lbar-');
   TENOR_LABELS.forEach((lbl,i)=>{
-    c.innerHTML+=`<div class="tenor-row">
+    html+=`<div class="tenor-row">
       <span class="tenor-lbl">${lbl}</span>
       <input type="range" id="adr-${i}" min="-150" max="150" step="5" value="${attrDR[i]}" oninput="onAttrTenorChange(${i})">
       <span class="tenor-num" id="adn-${i}">${attrDR[i]>0?'+':''}${attrDR[i]}bp</span>
     </div>`;
   });
+  c.innerHTML=html;
+  updateLadder(attrDR,'attr-lbar-');
 }
 
 function onAttrTenorChange(i){
   attrDR[i]=parseInt(document.getElementById('adr-'+i).value);
   document.getElementById('adn-'+i).textContent=(attrDR[i]>=0?'+':'')+attrDR[i]+'bp';
+  updateLadder(attrDR,'attr-lbar-');
   onAttrChange();
 }
 
@@ -1530,6 +1562,8 @@ function updateAll(){
   updateAttrChart();
   updateLnlComparison();
   updateVannaDisplay();
+  updateLadder(attrDR,'attr-lbar-');
+  updateLadder(hessDR,'hess-lbar-');
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
