@@ -75,10 +75,13 @@ select{background:var(--surface3);border:1px solid var(--border);color:var(--tex
 /* greeks table */
 .greeks-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
 @media(max-width:520px){.greeks-grid{grid-template-columns:1fr 1fr}}
-.greek-chip{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.greek-chip{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;transition:border-color .15s}
+.greek-chip:hover{border-color:var(--accent)}
+.greek-chip.active{border-color:var(--accent);background:rgba(74,158,255,.08)}
 .greek-sym{font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:2px}
 .greek-val{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
 .greek-unit{font-size:10px;color:var(--muted);margin-top:1px}
+.greek-tap-hint{font-size:10px;color:var(--muted);margin-top:4px;opacity:.6}
 /* hessian */
 .hess-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
 /* attribution */
@@ -444,15 +447,25 @@ footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-t
   <!-- GREEKS OUTPUT -->
   <div style="margin-top:24px">
     <h3>Current Greeks</h3>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">These six numbers fully characterise the position's sensitivity to market moves. Every bar in the PnL Attribution chart is one of these Greeks multiplied by a market move. Hover the labels in the Glossary at the bottom of the page for quick definitions.</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Tap any chip to see exactly how that number was derived from the parameters above.</p>
     <div class="greeks-grid" style="margin-top:12px">
-      <div class="greek-chip"><div class="greek-sym">DV01</div><div class="greek-val" id="gk-dv01">—</div><div class="greek-unit">$ per bp</div></div>
-      <div class="greek-chip"><div class="greek-sym">Gamma (Γ)</div><div class="greek-val" id="gk-gamma">—</div><div class="greek-unit">$ per bp²</div></div>
-      <div class="greek-chip"><div class="greek-sym">Vega (ν)</div><div class="greek-val" id="gk-vega">—</div><div class="greek-unit">$ per bp vol</div></div>
-      <div class="greek-chip"><div class="greek-sym">Volga (𝒱)</div><div class="greek-val" id="gk-volga">—</div><div class="greek-unit">$ per bp² vol</div></div>
-      <div class="greek-chip"><div class="greek-sym">Vanna (𝒜)</div><div class="greek-val" id="gk-vanna">—</div><div class="greek-unit">$ per bp·bp_vol</div></div>
-      <div class="greek-chip"><div class="greek-sym">Theta (Θ)</div><div class="greek-val" id="gk-theta">—</div><div class="greek-unit">$ per day</div></div>
+      <div class="greek-chip" id="gc-dv01" onclick="selectGreek('dv01')"><div class="greek-sym">DV01</div><div class="greek-val" id="gk-dv01">—</div><div class="greek-unit">$ per bp</div><div class="greek-tap-hint">tap for formula</div></div>
+      <div class="greek-chip" id="gc-gamma" onclick="selectGreek('gamma')"><div class="greek-sym">Gamma (Γ)</div><div class="greek-val" id="gk-gamma">—</div><div class="greek-unit">$ per bp²</div><div class="greek-tap-hint">tap for formula</div></div>
+      <div class="greek-chip" id="gc-vega" onclick="selectGreek('vega')"><div class="greek-sym">Vega (ν)</div><div class="greek-val" id="gk-vega">—</div><div class="greek-unit">$ per bp vol</div><div class="greek-tap-hint">tap for formula</div></div>
+      <div class="greek-chip" id="gc-volga" onclick="selectGreek('volga')"><div class="greek-sym">Volga (𝒱)</div><div class="greek-val" id="gk-volga">—</div><div class="greek-unit">$ per bp² vol</div><div class="greek-tap-hint">tap for formula</div></div>
+      <div class="greek-chip" id="gc-vanna" onclick="selectGreek('vanna')"><div class="greek-sym">Vanna (𝒜)</div><div class="greek-val" id="gk-vanna">—</div><div class="greek-unit">$ per bp·bp_vol</div><div class="greek-tap-hint">tap for formula</div></div>
+      <div class="greek-chip" id="gc-theta" onclick="selectGreek('theta')"><div class="greek-sym">Theta (Θ)</div><div class="greek-val" id="gk-theta">—</div><div class="greek-unit">$ per day</div><div class="greek-tap-hint">tap for formula</div></div>
     </div>
+
+    <!-- Formula derivation panel -->
+    <div id="greek-formula-panel" style="display:none;margin-top:12px;background:var(--surface2);border:1px solid var(--accent);border-radius:var(--r);overflow:hidden">
+      <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;font-weight:700;color:var(--accent2)" id="gkf-title">—</span>
+        <button onclick="selectGreek(null)" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px">✕</button>
+      </div>
+      <div style="padding:14px 16px" id="gkf-content">—</div>
+    </div>
+
     <div style="margin-top:10px;font-size:13px;padding:10px 14px;background:rgba(74,158,255,.07);border:1px solid rgba(74,158,255,.15);border-radius:8px" id="gk-explain">—</div>
   </div>
 </section>
@@ -931,6 +944,137 @@ function onManualChange(){
   updateAll();
 }
 
+// ─── GREEK FORMULA PANEL ─────────────────────────────────────────────────────
+let selectedGreek=null;
+
+function selectGreek(name){
+  if(!name||selectedGreek===name){
+    selectedGreek=null;
+    document.getElementById('greek-formula-panel').style.display='none';
+    document.querySelectorAll('.greek-chip').forEach(c=>c.classList.remove('active'));
+    return;
+  }
+  selectedGreek=name;
+  document.querySelectorAll('.greek-chip').forEach(c=>c.classList.remove('active'));
+  const chip=document.getElementById('gc-'+name);
+  if(chip) chip.classList.add('active');
+  document.getElementById('greek-formula-panel').style.display='block';
+  updateGreekFormula();
+  document.getElementById('greek-formula-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function updateGreekFormula(){
+  if(!selectedGreek) return;
+  const title=document.getElementById('gkf-title');
+  const content=document.getElementById('gkf-content');
+  const NAMES={dv01:'DV01',gamma:'Gamma (Γ)',vega:'Vega (ν)',volga:'Volga (𝒱)',vanna:'Vanna (𝒜)',theta:'Theta (Θ)'};
+  title.textContent=NAMES[selectedGreek]||selectedGreek;
+
+  if(inputMode==='manual'||!currentRG){
+    content.innerHTML='<p style="color:var(--muted);font-size:13px">Manual input mode — value set directly, no Bachelier derivation available.</p>';
+    return;
+  }
+  const rg=currentRG, dg=currentDG;
+  const tau=currentTau, T=currentT, N=currentN;
+  const sigN_bp=Math.round(currentSigmaN/BP);
+  const F_bp=Math.round(currentF/BP), K_bp=Math.round(currentK/BP);
+  const Ns=N>=1e6?'$'+(N/1e6).toFixed(0)+'M':'$'+N.toLocaleString();
+  const row=(label,val,color)=>`<div style="display:grid;grid-template-columns:1fr auto;gap:8px;padding:3px 0">
+    <span style="font-size:12px;color:var(--muted);font-family:monospace">${label}</span>
+    <span style="font-size:12px;font-weight:700;color:${color||'var(--text)'};font-variant-numeric:tabular-nums;text-align:right;font-family:monospace">${val}</span></div>`;
+
+  let html='';
+  switch(selectedGreek){
+    case 'dv01':
+      html=`<p style="font-size:12px;color:var(--muted);margin-bottom:10px">The option delta (probability of expiry ITM) × the underlying swap's rate sensitivity × notional.</p>
+      <div style="background:var(--surface3);border-radius:6px;padding:12px">
+        ${row('DV01 = tau × N(d) × notional × BP','')}
+        ${row('tau (swap tenor)','${tau}y')}
+        ${row('N(d) = Bachelier delta',rg.Nd.toFixed(4))}
+        ${row('d = (F−K)/(σ_N√T) = ('+F_bp+'−'+K_bp+')/('+sigN_bp+'×'+rg.sqT.toFixed(3)+')',rg.d.toFixed(4))}
+        ${row('notional',Ns)}
+        ${row('BP',0.0001)}
+        <div style="border-top:1px solid var(--border);margin-top:6px;padding-top:6px">
+        ${row(tau+' × '+rg.Nd.toFixed(4)+' × '+Ns+' × 0.0001','<b>'+fmtDollar(dg.dv01)+'/bp</b>','var(--accent2)')}
+        </div>
+      </div>`;
+      break;
+    case 'gamma':
+      html=`<p style="font-size:12px;color:var(--muted);margin-bottom:10px">The normal PDF at d divided by vol×√T — peaks ATM and near expiry.</p>
+      <div style="background:var(--surface3);border-radius:6px;padding:12px">
+        ${row('Γ = tau × n(d) / (σ_N × √T) × notional × BP²','')}
+        ${row('tau (swap tenor)',tau+'y')}
+        ${row('n(d) = normal PDF at d',rg.nd.toFixed(4))}
+        ${row('d',rg.d.toFixed(4))}
+        ${row('σ_N',sigN_bp+'bp')}
+        ${row('√T',rg.sqT.toFixed(4))}
+        ${row('notional',Ns)}
+        <div style="border-top:1px solid var(--border);margin-top:6px;padding-top:6px">
+        ${row(tau+' × '+rg.nd.toFixed(4)+' / ('+sigN_bp+' × '+rg.sqT.toFixed(3)+') × '+Ns+' × (0.0001)²','<b>$'+dg.gamma.toFixed(2)+'/bp²</b>','var(--green)')}
+        </div>
+      </div>`;
+      break;
+    case 'vega':
+      html=`<p style="font-size:12px;color:var(--muted);margin-bottom:10px">PnL per 1bp rise in implied normal vol. Largest for long-dated ATM options.</p>
+      <div style="background:var(--surface3);border-radius:6px;padding:12px">
+        ${row('ν = tau × √T × n(d) × notional × BP','')}
+        ${row('tau',tau+'y')}
+        ${row('√T',rg.sqT.toFixed(4))}
+        ${row('n(d)',rg.nd.toFixed(4))}
+        ${row('notional',Ns)}
+        <div style="border-top:1px solid var(--border);margin-top:6px;padding-top:6px">
+        ${row(tau+' × '+rg.sqT.toFixed(3)+' × '+rg.nd.toFixed(4)+' × '+Ns+' × 0.0001','<b>'+fmtDollar(dg.vega)+'/bp_vol</b>','var(--yellow)')}
+        </div>
+      </div>`;
+      break;
+    case 'volga':
+      const d2=(rg.d*rg.d).toFixed(4);
+      html=`<p style="font-size:12px;color:var(--muted);margin-bottom:10px">Vol convexity — how Vega changes as vol moves. Zero ATM (d=0), grows OTM.</p>
+      <div style="background:var(--surface3);border-radius:6px;padding:12px">
+        ${row('𝒱 = tau × √T × n(d) × d² / σ_N × notional × BP²','')}
+        ${row('tau',tau+'y')}
+        ${row('√T',rg.sqT.toFixed(4))}
+        ${row('n(d)',rg.nd.toFixed(4))}
+        ${row('d² (zero ATM, grows OTM)',d2)}
+        ${row('σ_N',sigN_bp+'bp')}
+        ${row('notional',Ns)}
+        <div style="border-top:1px solid var(--border);margin-top:6px;padding-top:6px">
+        ${row('= $'+dg.volga.toFixed(2)+'/bp²_vol','<b>$'+dg.volga.toFixed(2)+'/bp²_vol</b>','var(--purple)')}
+        </div>
+      </div>`;
+      break;
+    case 'vanna':
+      html=`<p style="font-size:12px;color:var(--muted);margin-bottom:10px">Cross-sensitivity: how DV01 changes with vol and how Vega changes with rates. Zero ATM.</p>
+      <div style="background:var(--surface3);border-radius:6px;padding:12px">
+        ${row('𝒜 = −tau × n(d) × d / σ_N × notional × BP²','')}
+        ${row('tau',tau+'y')}
+        ${row('n(d)',rg.nd.toFixed(4))}
+        ${row('d',rg.d.toFixed(4))}
+        ${row('σ_N',sigN_bp+'bp')}
+        ${row('notional',Ns)}
+        <div style="border-top:1px solid var(--border);margin-top:6px;padding-top:6px">
+        ${row('= $'+dg.vanna.toFixed(2)+'/bp·bp_vol','<b>$'+dg.vanna.toFixed(2)+'/bp·bp_vol</b>','var(--orange)')}
+        </div>
+      </div>`;
+      break;
+    case 'theta':
+      html=`<p style="font-size:12px;color:var(--muted);margin-bottom:10px">Daily time decay — the cost of owning gamma and vega. Always negative for long options.</p>
+      <div style="background:var(--surface3);border-radius:6px;padding:12px">
+        ${row('Θ = −tau × σ_N × n(d) / (2 × √T) × notional / 365','')}
+        ${row('tau',tau+'y')}
+        ${row('σ_N',sigN_bp+'bp')}
+        ${row('n(d)',rg.nd.toFixed(4))}
+        ${row('√T',rg.sqT.toFixed(4))}
+        ${row('notional',Ns)}
+        <div style="border-top:1px solid var(--border);margin-top:6px;padding-top:6px">
+        ${row('= '+fmtDollar(dg.theta)+'/day','<b>'+fmtDollar(dg.theta)+'/day</b>','var(--red)')}
+        </div>
+      </div>`;
+      break;
+  }
+  content.innerHTML=html;
+}
+
 // ─── GREEKS DISPLAY ───────────────────────────────────────────────────────────
 function updateGreeksDisplay(){
   const g=currentDG;
@@ -956,6 +1100,7 @@ function updateGreeksDisplay(){
     expl='Manual greeks mode. Adjust sliders above to set position risk.';
   }
   document.getElementById('gk-explain').textContent=expl;
+  updateGreekFormula();
 }
 
 // ─── HESSIAN ─────────────────────────────────────────────────────────────────
