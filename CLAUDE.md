@@ -76,22 +76,6 @@ These are hard constraints. Violating them causes charts to collapse or animate 
 
 ---
 
-## Financial context (docs/sabr.html, docs/pnl-explainer.html)
-
-### Normal (Bachelier) swaption model
-Used for Greeks in `pnl-explainer.html`. Rates modelled as arithmetic Brownian motion (supports negative rates):
-```
-V = A · [(F−K)·N(d) + σ_N√T·n(d)],  d = (F−K)/(σ_N√T)
-```
-Greeks dollar-scaled by `notional × BP` (BP = 0.0001).
-
-### PnL explain Taylor expansion
-`ΔP ≈ DV01·ΔR + ½Γ(ΔR)² + ν·Δσ + ½𝒱(Δσ)² + 𝒜·ΔR·Δσ + Θ·Δt`
-
-Hessian = 5×5 cross-gamma matrix across tenor nodes [1Y, 2Y, 5Y, 10Y, 30Y]. Unexplained = Actual (full revaluation) minus sum of Taylor terms.
-
----
-
 ## Expo apps (secondary)
 
 ```bash
