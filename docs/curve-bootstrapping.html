@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Curve Bootstrapping — Rates Education</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" defer></script>
+<style>
+:root{
+  --bg:#07090f;--surface:#0d1117;--surface2:#161b27;--surface3:#1e2637;
+  --border:#2a3347;--text:#e2e8f0;--muted:#7a8faa;
+  --accent:#4a9eff;--accent2:#7bc4ff;--green:#22d3a0;--red:#f87171;
+  --yellow:#fbbf24;--purple:#a78bfa;--orange:#fb923c;--r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.6}
+a{color:var(--accent);text-decoration:none}
+h1{font-size:2.2rem;font-weight:700;line-height:1.2}
+h2{font-size:1.5rem;font-weight:600;margin-bottom:.75rem}
+h3{font-size:1.1rem;font-weight:600;margin-bottom:.5rem}
+.container{max-width:1100px;margin:0 auto;padding:0 1.5rem}
+.lead{font-size:1.05rem;color:var(--muted);margin-bottom:1.25rem}
+.callout{background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.18);border-radius:var(--r);padding:1.25rem 1.5rem;margin:1.25rem 0}
+.callout-green{background:rgba(34,211,160,.06);border-color:rgba(34,211,160,.25)}
+.callout-yellow{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.25)}
+.callout strong{color:var(--accent2)}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 0;position:sticky;top:0;z-index:100}
+nav .inner{max-width:1100px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap}
+nav .brand{font-weight:700;color:var(--text);font-size:1rem}
+nav a{color:var(--muted);font-size:.9rem;transition:color .2s}
+nav a:hover{color:var(--accent)}
+.hero{padding:4rem 0 3rem;border-bottom:1px solid var(--border)}
+.hero-badge{display:inline-block;background:rgba(74,158,255,.12);color:var(--accent);font-size:.8rem;font-weight:600;letter-spacing:.04em;padding:.25rem .75rem;border-radius:20px;border:1px solid rgba(74,158,255,.25);margin-bottom:1.25rem}
+.hero p{font-size:1.1rem;color:var(--muted);max-width:680px;margin:.75rem 0 1.5rem}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:2rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem}
+.card .icon{font-size:1.5rem;margin-bottom:.5rem}
+.card h3{font-size:.95rem;color:var(--accent2);margin-bottom:.25rem}
+.card p{font-size:.85rem;color:var(--muted)}
+section{padding:3rem 0;border-bottom:1px solid var(--border)}
+.tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.5rem 1rem;cursor:pointer;font-size:.9rem;color:var(--muted);transition:all .2s}
+.tab.active{background:rgba(74,158,255,.12);border-color:rgba(74,158,255,.4);color:var(--accent)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.tbl-wrap{overflow-x:auto;margin:1rem 0}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{background:var(--surface2);color:var(--muted);font-weight:600;text-align:left;padding:.6rem .9rem;border-bottom:2px solid var(--border);white-space:nowrap}
+td{padding:.55rem .9rem;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.02)}
+.df-col{color:var(--green);font-weight:600}
+.zr-col{color:var(--accent2);font-weight:600}
+.fwd-col{color:var(--yellow);font-weight:600}
+.rate-input{background:var(--surface3);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:.25rem .5rem;width:72px;font-size:.88rem;text-align:right}
+.rate-input:focus{outline:none;border-color:var(--accent)}
+.badge{display:inline-block;font-size:.72rem;font-weight:600;padding:.15rem .45rem;border-radius:20px;margin-left:.3rem}
+.badge-deposit{background:rgba(34,211,160,.15);color:var(--green)}
+.badge-ois{background:rgba(74,158,255,.15);color:var(--accent)}
+.badge-fra{background:rgba(167,139,250,.15);color:var(--purple)}
+.badge-irs{background:rgba(251,191,36,.15);color:var(--yellow)}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1.5rem 0}
+.chart-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem}
+.chart-box h3{font-size:.88rem;color:var(--muted);margin-bottom:1rem;font-weight:500}
+details{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin:1rem 0}
+details summary{padding:1rem 1.25rem;cursor:pointer;font-weight:600;color:var(--accent2);list-style:none;display:flex;align-items:center;gap:.5rem;user-select:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:'\25B6';font-size:.65rem;transition:transform .2s;display:inline-block}
+details[open] summary::before{transform:rotate(90deg)}
+details .body{padding:0 1.25rem 1.25rem}
+.steps{counter-reset:step;display:flex;flex-direction:column;gap:.75rem;padding:.25rem 0}
+.step{display:flex;gap:1rem;align-items:flex-start}
+.step-num{background:var(--accent);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0;margin-top:.15rem}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1.5rem 0}
+.compare-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem}
+.compare-card.ois-card{border-top:3px solid var(--green)}
+.compare-card.fwd-card{border-top:3px solid var(--purple)}
+.compare-card ul{padding-left:1.25rem;color:var(--muted);font-size:.88rem}
+.compare-card ul li{margin:.4rem 0}
+.compare-card ul li strong{color:var(--text)}
+.curve-label{font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.2rem .55rem;border-radius:4px;margin-left:.5rem;vertical-align:middle}
+.lbl-ois{background:rgba(34,211,160,.15);color:var(--green)}
+.lbl-euribor{background:rgba(167,139,250,.15);color:var(--purple)}
+.scenario-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin:1.5rem 0}
+.scenario-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;cursor:pointer;transition:all .2s}
+.scenario-card:hover,.scenario-card.active-scenario{border-color:var(--accent);background:rgba(74,158,255,.04)}
+.scenario-card .s-icon{font-size:1.6rem;margin-bottom:.5rem}
+.scenario-card h3{font-size:.92rem;color:var(--text);margin-bottom:.35rem}
+.scenario-card p{font-size:.8rem;color:var(--muted);line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.65rem}
+.chip{font-size:.7rem;padding:.15rem .45rem;border-radius:20px;background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
+.glossary{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:1.25rem}
+.term{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.4rem .75rem;font-size:.83rem;cursor:help;position:relative;transition:border-color .15s}
+.term:hover{border-color:var(--accent)}
+.term .tip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:.6rem .9rem;font-size:.79rem;color:var(--text);width:270px;z-index:10;line-height:1.5;box-shadow:0 4px 20px rgba(0,0,0,.5);pointer-events:none}
+.term:hover .tip{display:block}
+code{font-family:monospace;font-size:.85em;background:var(--surface2);padding:.1em .3em;border-radius:3px}
+pre.math-block{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:1rem 1.25rem;font-family:monospace;font-size:.83rem;line-height:1.8;color:var(--text);overflow-x:auto}
+@media(max-width:720px){
+  .cards3,.compare-grid,.chart-grid{grid-template-columns:1fr}
+  h1{font-size:1.6rem}
+  .hero{padding:2.5rem 0 2rem}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <span class="brand">Rates Education</span>
+    <a href="#curve-types">Curve Types</a>
+    <a href="#ois-curve">OIS</a>
+    <a href="#fwd-curve">EURIBOR 3M</a>
+    <a href="#builder">Builder</a>
+    <a href="#scenarios">Scenarios</a>
+    <a href="#glossary">Glossary</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="container">
+    <span class="hero-badge">Interactive Education</span>
+    <h1>Curve Bootstrapping</h1>
+    <p>Your interest rate swap prices at 102 bps. Your model says 98 bps. The gap almost always lives in how the discount or forward curve was built — specifically, which market instruments anchored each pillar.</p>
+
+    <div class="callout">
+      <strong>Morning desk scenario:</strong> You receive a &euro;100M notional EURIBOR 3M swap maturing in 5 years. Before you can hedge it or book a risk number, you need two separate curves: an <strong>OIS discount curve</strong> (to PV every cash flow) and a <strong>EURIBOR 3M forward curve</strong> (to project what the floating rate will fix at on each reset date). Both are built by bootstrapping &mdash; stripping a discount factor from each market quote in turn, shortest maturity first. This page shows you exactly which instruments go in, what discount factors and zero rates come out, and why the two curves are necessarily different.
+    </div>
+
+    <div class="cards3">
+      <div class="card">
+        <div class="icon">&#128229;</div>
+        <h3>Market Inputs</h3>
+        <p>Overnight deposits, OIS swaps, FRAs, futures, and vanilla IRS &mdash; see which instrument anchors each part of each curve.</p>
+      </div>
+      <div class="card">
+        <div class="icon">&#128202;</div>
+        <h3>Discount Factors &amp; Zero Rates</h3>
+        <p>Each input yields one discount factor. From that, a continuously-compounded zero rate. Watch the chain update live as you edit rates.</p>
+      </div>
+      <div class="card">
+        <div class="icon">&#9889;</div>
+        <h3>OIS vs Forward Curve</h3>
+        <p>Post-2008 dual-curve framework: one curve discounts all cash flows, a second projects IBOR fixings. The spread between them is term bank credit risk.</p>
+      </div>
+    </div>
+
+    <details open>
+      <summary>How to use this page</summary>
+      <div class="body">
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><span>Read <a href="#curve-types">Curve Types</a> to understand the discount vs forward distinction and why OIS replaced LIBOR for discounting.</span></div>
+          <div class="step"><div class="step-num">2</div><span>In <a href="#ois-curve">OIS Discount Curve</a>, trace how overnight deposit and OIS swap rates are stripped into discount factors and zero rates pillar by pillar.</span></div>
+          <div class="step"><div class="step-num">3</div><span>In <a href="#fwd-curve">EURIBOR 3M Forward Curve</a>, see how deposits, FRAs, and IRS build the projection curve &mdash; discounted using the OIS curve you already built.</span></div>
+          <div class="step"><div class="step-num">4</div><span>Use the <a href="#builder">Interactive Builder</a> to move any market rate and watch discount factors, zero rates, and forward rates update instantly across both curves.</span></div>
+          <div class="step"><div class="step-num">5</div><span>Load a <a href="#scenarios">Scenario</a> (inverted curve, hiking cycle, credit stress) to see how real market environments reshape the curves end-to-end.</span></div>
+        </div>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- Section 1: Curve Types -->
+<section id="curve-types">
+  <div class="container">
+    <h2>Discount Curves vs Forward Curves</h2>
+    <p class="lead">A swap has two legs. You need to know what each future cash flow is worth today (discount curve) and, for the floating leg, what rate it will fix at on each reset date (forward curve). These are different questions answered by different curves.</p>
+
+    <div class="callout">
+      <strong>Why did two curves replace one?</strong> Before 2008, a single LIBOR curve handled both discounting and forward projection. The financial crisis exposed LIBOR as embedding significant bank credit and liquidity risk &mdash; it was too high to use as a risk-free discount rate. Since then, OIS rates (anchored to central bank overnight rates, nearly risk-free) discount all collateralised derivatives. IBOR curves survive only for projecting the floating rates of instruments that reference them. Two curves, two jobs.
+    </div>
+
+    <div class="compare-grid">
+      <div class="compare-card ois-card">
+        <h3>Discount Curve <span class="curve-label lbl-ois">OIS / Risk-Free</span></h3>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:.75rem"><em>Question it answers:</em> what is &euro;1 received in 5 years worth today?</p>
+        <ul>
+          <li>Built from <strong>OIS swap rates</strong> (ESTR in EUR, SOFR in USD, SONIA in GBP)</li>
+          <li>Short end anchored by the <strong>overnight deposit rate</strong> (= central bank rate)</li>
+          <li>Output: <span class="df-col">discount factors P(0,T)</span> at each pillar tenor</li>
+          <li>Used to PV <em>all</em> cash flows regardless of product type or floating index</li>
+          <li>CSA / collateral agreements reference OIS, so counterparties expect OIS discounting</li>
+          <li>No tenor basis &mdash; one OIS curve per currency</li>
+        </ul>
+      </div>
+      <div class="compare-card fwd-card">
+        <h3>Forward Curve <span class="curve-label lbl-euribor">EURIBOR 3M</span></h3>
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:.75rem"><em>Question it answers:</em> what will 3M EURIBOR fix at in 2 years?</p>
+        <ul>
+          <li>Built from <strong>3M deposits, FRAs, IMM futures, and EURIBOR IRS</strong></li>
+          <li>Encodes the market&rsquo;s expectation of future EURIBOR fixings</li>
+          <li>Output: <span class="fwd-col">forward rates F(T&#8321;,T&#8322;)</span> &mdash; the implied 3M fixing at each future date</li>
+          <li>Used <em>only</em> to project floating cash flows of EURIBOR-indexed products</li>
+          <li>Cash flows from this curve are then <strong>discounted with the OIS curve</strong></li>
+          <li>Separate forward curve exists for each IBOR tenor (1M, 3M, 6M, 12M)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-green">
+      <strong>Bootstrapping in one sentence:</strong> For each pillar tenor T, find the discount factor P(0,T) such that the market instrument with that maturity re-prices to par (NPV = 0) &mdash; using all previously solved discount factors for shorter tenors as known inputs.
+    </div>
+
+    <div class="callout callout-yellow" style="margin-top:1rem">
+      <strong>OIS vs non-OIS spread = term bank credit risk.</strong> The gap between the OIS zero rate and the EURIBOR 3M zero rate at the same tenor is not noise &mdash; it reflects the credit and liquidity risk of unsecured interbank lending over that period. In normal markets this spread is 15&ndash;30 bp. In stress (e.g. March 2020, March 2023) it widens to 60&ndash;100+ bp. If your system uses one curve for both, it is mispricing every EURIBOR-indexed product.
+    </div>
+  </div>
+</section>
+
+<!-- Section 2: OIS Curve -->
+<section id="ois-curve">
+  <div class="container">
+    <h2>OIS Discount Curve <span class="curve-label lbl-ois">ESTR &mdash; EUR</span></h2>
+    <p class="lead">The OIS curve runs from overnight to 30 years. The very short end is anchored by the actual central bank deposit rate; the belly and long end are anchored by OIS swap rates quoted in the interbank market.</p>
+
+    <div class="callout">
+      <strong>How an OIS swap constrains a discount factor:</strong> An OIS swap pays a fixed rate R against the daily-compounded ESTR. The floating leg exactly replicates a zero-coupon bond &mdash; so its NPV is simply <code>1 &minus; P(0,T)</code>. Setting fixed = floating and solving for the unknown pillar discount factor gives: <code>P(0,T&#8345;) = [1 &minus; R &middot; &sum; P(0,T&#7522;) &middot; &tau;&#7522;] / [1 + R &middot; &tau;&#8345;]</code>. Each new pillar uses all previously solved DFs, working from short to long.
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:28px">#</th>
+            <th>Instrument</th>
+            <th>Tenor</th>
+            <th>Market Rate</th>
+            <th style="color:var(--muted)">Days</th>
+            <th class="df-col">Discount Factor P(0,T)</th>
+            <th class="zr-col">Zero Rate (cont.)</th>
+            <th class="fwd-col">Inst. Fwd Rate</th>
+          </tr>
+        </thead>
+        <tbody id="ois-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-box">
+        <h3>Discount Factors &mdash; OIS curve</h3>
+        <div style="position:relative;height:230px"><canvas id="ois-df-chart"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <h3>Zero Rates (continuously compounded) &mdash; OIS curve</h3>
+        <div style="position:relative;height:230px"><canvas id="ois-zr-chart"></canvas></div>
+      </div>
+    </div>
+
+    <details>
+      <summary>Bootstrap derivation &mdash; OIS</summary>
+      <div class="body">
+        <p style="color:var(--muted);margin-bottom:.75rem">Step-by-step derivation for each pillar:</p>
+        <pre class="math-block">Short end (O/N Deposit, simple interest, ACT/360):
+  P(0,T) = 1 / (1 + R &middot; T)
+
+Sub-annual OIS swap (single period, &lt;1Y):
+  P(0,T) = 1 / (1 + R &middot; T)
+
+Annual OIS swap (multi-period, annual coupon dates T&#8321;...T&#8345;):
+  Fixed leg: R &middot; &sum;&#7522;&#8331;&#8321;&#8319; P(0,T&#7522;) &middot; &tau;&#7522;
+  Float leg: 1 &minus; P(0,T&#8345;)    [compounded ON = ZCB]
+
+  NPV = 0  =>  P(0,T&#8345;) = [1 &minus; R &middot; &sum;&#7522;&#8331;&#8321;&#8319;&#713;&#185; P(0,T&#7522;)] / [1 + R &middot; &tau;&#8345;]
+
+Zero rate from DF:
+  r(T) = &minus;ln P(0,T) / T          (continuously compounded)
+
+Forward DF between T&#8321; and T&#8322;:
+  P(T&#8321;,T&#8322;) = P(0,T&#8322;) / P(0,T&#8321;)
+
+Forward rate:
+  f(T&#8321;,T&#8322;) = [P(0,T&#8321;)/P(0,T&#8322;) &minus; 1] / (T&#8322;&minus;T&#8321;)</pre>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- Section 3: EURIBOR Forward Curve -->
+<section id="fwd-curve">
+  <div class="container">
+    <h2>EURIBOR 3M Forward Curve <span class="curve-label lbl-euribor">Projection</span></h2>
+    <p class="lead">This curve is built to answer one question: what 3M EURIBOR rate will the market project at each future reset date? Deposits anchor the near end, FRAs cover the 3M&ndash;2Y belly, and par IRS rates extend the curve to 30 years &mdash; all discounted using the OIS curve.</p>
+
+    <div class="callout">
+      <strong>Dual-curve bootstrapping:</strong> When you bootstrap a 5Y EURIBOR swap, the fixed leg PV uses <em>OIS discount factors</em>. You are solving for the EURIBOR projection curve&rsquo;s own discount factor at 5Y &mdash; a completely separate object from the OIS DF &mdash; that makes the swap price to par. The OIS curve is an external input to this bootstrap; the output is the projection curve DFs, from which 3M forward rates are derived.
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:28px">#</th>
+            <th>Instrument</th>
+            <th>Period</th>
+            <th>Market Rate</th>
+            <th style="color:var(--muted)">OIS DF</th>
+            <th class="df-col">Proj. DF P&#7506;(0,T)</th>
+            <th class="fwd-col">3M Fwd Rate</th>
+            <th class="zr-col">Proj. Zero Rate</th>
+          </tr>
+        </thead>
+        <tbody id="euribor-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-box">
+        <h3>Implied 3M Forward Rates &mdash; EURIBOR curve</h3>
+        <div style="position:relative;height:230px"><canvas id="eur-fwd-chart"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <h3>Zero Rate Comparison: OIS vs EURIBOR 3M</h3>
+        <div style="position:relative;height:230px"><canvas id="compare-chart"></canvas></div>
+      </div>
+    </div>
+
+    <details>
+      <summary>Bootstrap derivation &mdash; EURIBOR dual-curve</summary>
+      <div class="body">
+        <p style="color:var(--muted);margin-bottom:.75rem">Three instrument types, three formulas:</p>
+        <pre class="math-block">3M Deposit (direct, simple interest):
+  P&#7506;(0, 3M) = 1 / (1 + R &middot; 0.25)
+
+FRA for period [T&#8321;, T&#8322;]:
+  R = F(T&#8321;,T&#8322;) = [P&#7506;(0,T&#8321;)/P&#7506;(0,T&#8322;) &minus; 1] / &tau;
+  => P&#7506;(0,T&#8322;) = P&#7506;(0,T&#8321;) / (1 + R &middot; &tau;)
+
+Par IRS vs EURIBOR 3M (annual fixed, quarterly float):
+  Fixed leg:  PV_fix = R &middot; &sum; P_OIS(0,T&#7522;) &middot; &tau;&#7522;       [OIS DFs]
+  Float leg:  PV_flt = &sum; F_j &middot; &tau;_j &middot; P_OIS(0,T_j)  [projected fwds, OIS discount]
+  where F_j = [P&#7506;(0,T_{j-1})/P&#7506;(0,T_j) &minus; 1] / &tau;_j
+
+  NPV = 0, all F_j known except last => solve for P&#7506;(0,T_last):
+  PV_fix &minus; PV_flt_known = [P&#7506;(0,T_{n-1})/P&#7506;(0,T_n) &minus; 1] &middot; &tau; &middot; P_OIS(0,T_n)
+  => P&#7506;(0,T_n) = P&#7506;(0,T_{n-1}) / [1 + (PV_fix &minus; PV_flt_known)/(&tau; &middot; P_OIS(0,T_n))]</pre>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- Section 4: Interactive Builder -->
+<section id="builder">
+  <div class="container">
+    <h2>Interactive Curve Builder</h2>
+    <p class="lead">Edit any market rate and watch the bootstrapped discount factors, zero rates, and 3M forward rates update instantly across both curves. Notice how changing one pillar propagates to all longer-dated outputs.</p>
+
+    <div class="callout">
+      <strong>Try this:</strong> Raise the 5Y OIS rate by 20 bp (from 2.300 to 2.500). Every OIS discount factor beyond 5Y drops &mdash; any trade maturing after 5Y becomes marginally cheaper to PV. Then compare: the EURIBOR 3M zero rate at 5Y barely moves, because the projection curve is anchored by its own IRS inputs. The spread between the two curves at 5Y is the market&rsquo;s real-time pricing of 5-year term bank credit risk.
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="setBuilderTab(this,'ois-builder')">OIS Curve Inputs</button>
+      <button class="tab" onclick="setBuilderTab(this,'eur-builder')">EURIBOR 3M Inputs</button>
+    </div>
+
+    <div id="ois-builder" class="tab-panel active">
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Instrument</th>
+              <th>Tenor</th>
+              <th>Rate (%)</th>
+              <th class="df-col">Discount Factor</th>
+              <th class="zr-col">Zero Rate (%)</th>
+            </tr>
+          </thead>
+          <tbody id="ois-interactive-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="eur-builder" class="tab-panel">
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Instrument</th>
+              <th>Period</th>
+              <th>Rate (%)</th>
+              <th style="color:var(--muted)">OIS DF</th>
+              <th class="df-col">Proj. DF</th>
+              <th class="fwd-col">3M Fwd (%)</th>
+              <th class="zr-col">Zero Rate (%)</th>
+            </tr>
+          </thead>
+          <tbody id="eur-interactive-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-box">
+        <h3>Zero Rates &mdash; live</h3>
+        <div style="position:relative;height:250px"><canvas id="live-zr-chart"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <h3>Discount Factors &mdash; live</h3>
+        <div style="position:relative;height:250px"><canvas id="live-df-chart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Scenarios -->
+<section id="scenarios">
+  <div class="container">
+    <h2>Scenarios</h2>
+    <p class="lead">Load a real-world rate environment and see how the shape of both curves changes. Each scenario loads into the Interactive Builder above &mdash; you can then tweak individual rates from there.</p>
+
+    <div class="scenario-grid">
+      <div class="scenario-card" id="sc-flat" onclick="loadScenario('flat',this)">
+        <div class="s-icon">&#128207;</div>
+        <h3>Flat Curve</h3>
+        <p>ECB on hold, market pricing no cuts or hikes. OIS and EURIBOR curves flat; spread constant at ~25 bp reflecting stable bank credit conditions.</p>
+        <div class="chips"><span class="chip">OIS: 2.40%</span><span class="chip">EURIBOR 3M: 2.65%</span><span class="chip">Flat</span></div>
+      </div>
+      <div class="scenario-card" id="sc-inversion" onclick="loadScenario('inversion',this)">
+        <div class="s-icon">&#128201;</div>
+        <h3>Inverted Curve</h3>
+        <p>Market prices aggressive ECB cuts. 1Y OIS near 3.50%, 10Y only 2.80%. Short rates elevated; long end anchored by long-run inflation expectations.</p>
+        <div class="chips"><span class="chip">1Y: 3.50%</span><span class="chip">10Y: 2.80%</span><span class="chip">Inverted</span></div>
+      </div>
+      <div class="scenario-card" id="sc-steepening" onclick="loadScenario('steepening',this)">
+        <div class="s-icon">&#128200;</div>
+        <h3>Bull Steepener</h3>
+        <p>ECB has cut aggressively. O/N at 1.50%, 10Y near 3.10%. Classic steepening shape out of an easing cycle; forward rates imply gradual re-pricing higher.</p>
+        <div class="chips"><span class="chip">O/N: 1.50%</span><span class="chip">10Y: 3.10%</span><span class="chip">Steep</span></div>
+      </div>
+      <div class="scenario-card" id="sc-tightening" onclick="loadScenario('tightening',this)">
+        <div class="s-icon">&#128314;</div>
+        <h3>Hiking Cycle</h3>
+        <p>ECB is actively hiking. Short end elevated at 4.25%, curve mildly inverted at 2&ndash;5Y as the market prices eventual cuts from the peak rate.</p>
+        <div class="chips"><span class="chip">O/N: 4.25%</span><span class="chip">5Y: 3.90%</span><span class="chip">10Y: 3.50%</span></div>
+      </div>
+      <div class="scenario-card" id="sc-widening" onclick="loadScenario('widening',this)">
+        <div class="s-icon">&#8596;</div>
+        <h3>Credit Stress</h3>
+        <p>Bank credit stress widens OIS&ndash;EURIBOR spread to 75 bp, as occurred in early 2012. OIS curve unchanged; EURIBOR curve sharply elevated vs OIS.</p>
+        <div class="chips"><span class="chip">OIS&ndash;EURIBOR: 75 bp</span><span class="chip">Credit stress</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Glossary -->
+<section id="glossary" style="border-bottom:none">
+  <div class="container">
+    <h2>Glossary</h2>
+    <div class="glossary">
+      <span class="term">Discount Factor<span class="tip">P(0,T): the present value of &euro;1 received at time T. Always between 0 and 1; declines monotonically with tenor.</span></span>
+      <span class="term">Zero Rate<span class="tip">Continuously-compounded rate r(T) such that e^(&minus;r&middot;T) = P(0,T). Represents the pure time-value of money at tenor T with no coupon reinvestment assumption.</span></span>
+      <span class="term">Par Swap Rate<span class="tip">The fixed rate that makes a vanilla swap NPV = 0 at inception. Bootstrapping strips zero rates from these par rates one tenor at a time.</span></span>
+      <span class="term">OIS<span class="tip">Overnight Index Swap. Exchanges a fixed rate vs daily-compounded overnight rate (ESTR/SOFR/SONIA). Nearly risk-free; used as the universal discount curve post-2008.</span></span>
+      <span class="term">ESTR<span class="tip">Euro Short-Term Rate. The ECB&rsquo;s overnight unsecured benchmark, volume-weighted across eligible transactions. Replaced EONIA in 2022. Anchors the EUR OIS curve.</span></span>
+      <span class="term">EURIBOR 3M<span class="tip">Euro Interbank Offered Rate, 3-month tenor. Panel-based unsecured lending rate. Typically 15&ndash;35 bp above OIS; the spread widens in credit stress.</span></span>
+      <span class="term">FRA<span class="tip">Forward Rate Agreement. Locks in a rate for a future period, e.g. &ldquo;3&times;6&rdquo; = 3M EURIBOR starting in 3 months. Primary mid-curve inputs for the EURIBOR forward curve.</span></span>
+      <span class="term">Forward Rate<span class="tip">Implied rate between two future dates: F(T&#8321;,T&#8322;) = [P(0,T&#8321;)/P(0,T&#8322;)&minus;1]/&tau;. Extracted from bootstrapped DFs; used to project IBOR fixings.</span></span>
+      <span class="term">Pillar<span class="tip">A tenor at which a discount factor is directly solved from one market instrument. Between pillars, DFs are obtained by interpolation (usually log-linear in DF = linear in zero rate).</span></span>
+      <span class="term">Dual-Curve<span class="tip">Post-2008 framework: cash flows are projected using an IBOR curve but discounted using the OIS curve. Also called multi-curve. Single-curve pricing misprices every collateralised IBOR swap.</span></span>
+      <span class="term">Log-Linear Interp.<span class="tip">Standard interpolation between pillars: ln P(T) is linear in T, equivalent to linear interpolation of zero rates. Ensures discount factors are always positive and forward rates are smooth.</span></span>
+      <span class="term">Bootstrapping<span class="tip">Iterative procedure that solves for one unknown discount factor per market instrument, starting from the shortest maturity and using all previously solved DFs as inputs.</span></span>
+    </div>
+  </div>
+</section>
+
+<script>
+// ─── Default data ────────────────────────────────────────────────────────────
+
+const OIS_DEFAULTS = [
+  { tenor:'O/N',  T:1/365,  inst:'O/N Deposit', rate:2.400, badge:'badge-deposit' },
+  { tenor:'1W',   T:7/365,  inst:'OIS Swap',    rate:2.410, badge:'badge-ois' },
+  { tenor:'1M',   T:1/12,   inst:'OIS Swap',    rate:2.415, badge:'badge-ois' },
+  { tenor:'3M',   T:3/12,   inst:'OIS Swap',    rate:2.380, badge:'badge-ois' },
+  { tenor:'6M',   T:6/12,   inst:'OIS Swap',    rate:2.250, badge:'badge-ois' },
+  { tenor:'1Y',   T:1,      inst:'OIS Swap',    rate:2.100, badge:'badge-ois' },
+  { tenor:'2Y',   T:2,      inst:'OIS Swap',    rate:2.150, badge:'badge-ois' },
+  { tenor:'3Y',   T:3,      inst:'OIS Swap',    rate:2.200, badge:'badge-ois' },
+  { tenor:'5Y',   T:5,      inst:'OIS Swap',    rate:2.300, badge:'badge-ois' },
+  { tenor:'7Y',   T:7,      inst:'OIS Swap',    rate:2.380, badge:'badge-ois' },
+  { tenor:'10Y',  T:10,     inst:'OIS Swap',    rate:2.450, badge:'badge-ois' },
+  { tenor:'15Y',  T:15,     inst:'OIS Swap',    rate:2.490, badge:'badge-ois' },
+  { tenor:'20Y',  T:20,     inst:'OIS Swap',    rate:2.500, badge:'badge-ois' },
+  { tenor:'30Y',  T:30,     inst:'OIS Swap',    rate:2.480, badge:'badge-ois' },
+];
+
+const EUR_DEFAULTS = [
+  { tenor:'3M',     T:3/12,  Tstart:0,     inst:'3M Deposit', rate:2.650, badge:'badge-deposit' },
+  { tenor:'3x6',    T:6/12,  Tstart:3/12,  inst:'FRA',        rate:2.620, badge:'badge-fra' },
+  { tenor:'6x9',    T:9/12,  Tstart:6/12,  inst:'FRA',        rate:2.560, badge:'badge-fra' },
+  { tenor:'9x12',   T:1,     Tstart:9/12,  inst:'FRA',        rate:2.510, badge:'badge-fra' },
+  { tenor:'12x15',  T:15/12, Tstart:1,     inst:'FRA',        rate:2.480, badge:'badge-fra' },
+  { tenor:'15x18',  T:18/12, Tstart:15/12, inst:'FRA',        rate:2.460, badge:'badge-fra' },
+  { tenor:'18x21',  T:21/12, Tstart:18/12, inst:'FRA',        rate:2.450, badge:'badge-fra' },
+  { tenor:'21x24',  T:2,     Tstart:21/12, inst:'FRA',        rate:2.445, badge:'badge-fra' },
+  { tenor:'3Y IRS', T:3,     Tstart:0,     inst:'IRS',        rate:2.490, badge:'badge-irs' },
+  { tenor:'5Y IRS', T:5,     Tstart:0,     inst:'IRS',        rate:2.560, badge:'badge-irs' },
+  { tenor:'7Y IRS', T:7,     Tstart:0,     inst:'IRS',        rate:2.620, badge:'badge-irs' },
+  { tenor:'10Y IRS',T:10,    Tstart:0,     inst:'IRS',        rate:2.690, badge:'badge-irs' },
+  { tenor:'15Y IRS',T:15,    Tstart:0,     inst:'IRS',        rate:2.720, badge:'badge-irs' },
+  { tenor:'20Y IRS',T:20,    Tstart:0,     inst:'IRS',        rate:2.720, badge:'badge-irs' },
+];
+
+let oisData = JSON.parse(JSON.stringify(OIS_DEFAULTS));
+let eurData = JSON.parse(JSON.stringify(EUR_DEFAULTS));
+
+// ─── Bootstrap engine ────────────────────────────────────────────────────────
+
+function interpDF(pillars, T) {
+  if (!pillars.length || T <= 0) return 1;
+  if (T <= pillars[0].T) return Math.exp(-pillars[0].zr * T);
+  const last = pillars[pillars.length - 1];
+  if (T >= last.T) return Math.exp(-last.zr * T);
+  for (let i = 1; i < pillars.length; i++) {
+    if (T <= pillars[i].T) {
+      const t0 = pillars[i-1].T, t1 = pillars[i].T;
+      const r0 = pillars[i-1].zr, r1 = pillars[i].zr;
+      const r = r0 + (r1 - r0) * (T - t0) / (t1 - t0);
+      return Math.exp(-r * T);
+    }
+  }
+  return Math.exp(-last.zr * T);
+}
+
+function bootstrapOIS(data) {
+  const pillars = [];
+  data.forEach((d, i) => {
+    const R = d.rate / 100;
+    let df;
+    if (d.inst === 'O/N Deposit' || d.T <= 1) {
+      df = 1 / (1 + R * d.T);
+    } else {
+      const nY = Math.round(d.T);
+      let annuity = 0;
+      for (let y = 1; y < nY; y++) annuity += interpDF(pillars, y);
+      df = (1 - R * annuity) / (1 + R);
+    }
+    df = Math.max(df, 1e-6);
+    const zr = -Math.log(df) / d.T;
+    pillars.push({ T: d.T, zr });
+    const prevDF = i === 0 ? 1 : interpDF(pillars.slice(0,-1), Math.max(0, d.T - 0.25));
+    data[i]._df = df;
+    data[i]._zr = zr * 100;
+    data[i]._fwd = (prevDF / df - 1) / 0.25 * 100;
+  });
+  return data;
+}
+
+function getOISpillars() {
+  return oisData.map(d => ({ T: d.T, zr: d._zr / 100 }));
+}
+
+function bootstrapEURIBOR(data) {
+  const oisPillars = getOISpillars();
+  const projPillars = [];
+
+  data.forEach((d, idx) => {
+    const R = d.rate / 100;
+    let projDF;
+
+    if (d.inst === '3M Deposit') {
+      projDF = 1 / (1 + R * 0.25);
+    } else if (d.inst === 'FRA') {
+      const dfStart = d.Tstart === 0 ? 1 : interpDF(projPillars, d.Tstart);
+      projDF = dfStart / (1 + R * (d.T - d.Tstart));
+    } else {
+      // IRS: annual fixed vs quarterly float EURIBOR, discounted with OIS
+      const nY = Math.round(d.T);
+      const fixedDates = [];
+      for (let y = 1; y <= nY; y++) fixedDates.push(y);
+      const floatDates = [];
+      for (let q = 0.25; q <= d.T + 0.001; q = parseFloat((q + 0.25).toFixed(4))) floatDates.push(q);
+
+      let pvFixed = 0;
+      fixedDates.forEach(t => { pvFixed += interpDF(oisPillars, t); });
+      pvFixed *= R;
+
+      let pvFloatKnown = 0;
+      for (let j = 0; j < floatDates.length - 1; j++) {
+        const te = floatDates[j];
+        const ts = j === 0 ? 0 : floatDates[j-1];
+        const dfS = ts === 0 ? 1 : interpDF(projPillars, ts);
+        const dfE = interpDF(projPillars, te);
+        pvFloatKnown += (dfS / dfE - 1) * interpDF(oisPillars, te);
+      }
+
+      const lastQ = floatDates[floatDates.length - 1];
+      const prevQ = floatDates.length > 1 ? floatDates[floatDates.length - 2] : 0;
+      const dfPrev = prevQ === 0 ? 1 : interpDF(projPillars, prevQ);
+      const oisLast = interpDF(oisPillars, lastQ);
+      const rhs = (pvFixed - pvFloatKnown) / oisLast;
+      projDF = dfPrev / (1 + rhs);
+    }
+
+    projDF = Math.max(projDF, 1e-6);
+    const zr = -Math.log(projDF) / d.T;
+    projPillars.push({ T: d.T, zr });
+
+    const tPrev = d.Tstart > 0 ? d.Tstart : (idx === 0 ? 0 : Math.max(0, d.T - 0.25));
+    const dfPrev2 = tPrev === 0 ? 1 : interpDF(projPillars.slice(0, -1), tPrev);
+
+    data[idx]._projDF = projDF;
+    data[idx]._zr = zr * 100;
+    data[idx]._fwd = (dfPrev2 / projDF - 1) / 0.25 * 100;
+    data[idx]._oisDF = interpDF(oisPillars, d.T);
+  });
+  return data;
+}
+
+// ─── Rendering ───────────────────────────────────────────────────────────────
+
+function fmt6(v) { return (+v).toFixed(6); }
+function fmtPct(v) { return (+v).toFixed(3) + '%'; }
+function days(T) { return Math.round(T * 365); }
+
+function renderOISStatic() {
+  const tb = document.getElementById('ois-tbody');
+  tb.innerHTML = '';
+  oisData.forEach((d, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td style="color:var(--muted)">' + (i+1) + '</td>' +
+      '<td>' + d.inst + ' <span class="badge ' + d.badge + '">' + d.tenor + '</span></td>' +
+      '<td><code>' + d.tenor + '</code></td>' +
+      '<td>' + fmtPct(d.rate) + '</td>' +
+      '<td style="color:var(--muted)">' + days(d.T) + '</td>' +
+      '<td class="df-col" style="font-family:monospace">' + fmt6(d._df) + '</td>' +
+      '<td class="zr-col" style="font-family:monospace">' + fmtPct(d._zr) + '</td>' +
+      '<td class="fwd-col" style="font-family:monospace">' + fmtPct(d._fwd) + '</td>';
+    tb.appendChild(tr);
+  });
+}
+
+function renderEURStatic() {
+  const tb = document.getElementById('euribor-tbody');
+  tb.innerHTML = '';
+  eurData.forEach((d, i) => {
+    const tr = document.createElement('tr');
+    const period = d.inst === '3M Deposit' ? '0 &#8594; 3M' :
+                   d.inst === 'FRA' ? (Math.round(d.Tstart*12)) + 'M &#8594; ' + Math.round(d.T*12) + 'M' :
+                   '0 &#8594; ' + d.tenor;
+    tr.innerHTML =
+      '<td style="color:var(--muted)">' + (i+1) + '</td>' +
+      '<td>' + d.inst + ' <span class="badge ' + d.badge + '">' + d.tenor + '</span></td>' +
+      '<td>' + period + '</td>' +
+      '<td>' + fmtPct(d.rate) + '</td>' +
+      '<td style="color:var(--muted);font-family:monospace">' + fmt6(d._oisDF || 0) + '</td>' +
+      '<td class="df-col" style="font-family:monospace">' + fmt6(d._projDF) + '</td>' +
+      '<td class="fwd-col" style="font-family:monospace">' + fmtPct(d._fwd) + '</td>' +
+      '<td class="zr-col" style="font-family:monospace">' + fmtPct(d._zr) + '</td>';
+    tb.appendChild(tr);
+  });
+}
+
+function renderOISInteractive() {
+  const tb = document.getElementById('ois-interactive-tbody');
+  tb.innerHTML = '';
+  oisData.forEach((d, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + d.inst + ' <span class="badge ' + d.badge + '">' + d.tenor + '</span></td>' +
+      '<td><code>' + d.tenor + '</code></td>' +
+      '<td><input class="rate-input" type="number" step="0.005" min="0" max="20" value="' + d.rate.toFixed(3) + '" data-idx="' + i + '" data-curve="ois"></td>' +
+      '<td class="df-col" style="font-family:monospace" id="iois-df-' + i + '">' + fmt6(d._df) + '</td>' +
+      '<td class="zr-col" style="font-family:monospace" id="iois-zr-' + i + '">' + fmtPct(d._zr) + '</td>';
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll('input').forEach(el => el.addEventListener('input', onRate));
+}
+
+function renderEURInteractive() {
+  const tb = document.getElementById('eur-interactive-tbody');
+  tb.innerHTML = '';
+  eurData.forEach((d, i) => {
+    const tr = document.createElement('tr');
+    const period = d.inst === '3M Deposit' ? '0&#8594;3M' :
+                   d.inst === 'FRA' ? Math.round(d.Tstart*12) + '&#8594;' + Math.round(d.T*12) + 'M' :
+                   d.tenor;
+    tr.innerHTML =
+      '<td>' + d.inst + ' <span class="badge ' + d.badge + '">' + d.tenor + '</span></td>' +
+      '<td>' + period + '</td>' +
+      '<td><input class="rate-input" type="number" step="0.005" min="0" max="20" value="' + d.rate.toFixed(3) + '" data-idx="' + i + '" data-curve="eur"></td>' +
+      '<td style="color:var(--muted);font-family:monospace" id="ieur-oisdf-' + i + '">' + fmt6(d._oisDF || 0) + '</td>' +
+      '<td class="df-col" style="font-family:monospace" id="ieur-df-' + i + '">' + fmt6(d._projDF) + '</td>' +
+      '<td class="fwd-col" style="font-family:monospace" id="ieur-fwd-' + i + '">' + fmtPct(d._fwd) + '</td>' +
+      '<td class="zr-col" style="font-family:monospace" id="ieur-zr-' + i + '">' + fmtPct(d._zr) + '</td>';
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll('input').forEach(el => el.addEventListener('input', onRate));
+}
+
+function onRate(e) {
+  const i = +e.target.dataset.idx;
+  const curve = e.target.dataset.curve;
+  const v = parseFloat(e.target.value) || 0;
+  if (curve === 'ois') { oisData[i].rate = v; rebuildAll(); }
+  else { eurData[i].rate = v; rebuildEUR(); }
+}
+
+function rebuildAll() {
+  oisData = bootstrapOIS(oisData);
+  eurData = bootstrapEURIBOR(eurData);
+  oisData.forEach((d, i) => {
+    const df = document.getElementById('iois-df-' + i);
+    const zr = document.getElementById('iois-zr-' + i);
+    if (df) df.textContent = fmt6(d._df);
+    if (zr) zr.textContent = fmtPct(d._zr);
+  });
+  syncEURCells();
+  updateLiveCharts();
+}
+
+function rebuildEUR() {
+  eurData = bootstrapEURIBOR(eurData);
+  syncEURCells();
+  updateLiveCharts();
+}
+
+function syncEURCells() {
+  eurData.forEach((d, i) => {
+    const oisdf = document.getElementById('ieur-oisdf-' + i);
+    const df    = document.getElementById('ieur-df-'    + i);
+    const fwd   = document.getElementById('ieur-fwd-'   + i);
+    const zr    = document.getElementById('ieur-zr-'    + i);
+    if (oisdf) oisdf.textContent = fmt6(d._oisDF || 0);
+    if (df)    df.textContent    = fmt6(d._projDF);
+    if (fwd)   fwd.textContent   = fmtPct(d._fwd);
+    if (zr)    zr.textContent    = fmtPct(d._zr);
+  });
+}
+
+// ─── Charts ──────────────────────────────────────────────────────────────────
+
+const SCALE_X  = { ticks:{color:'#7a8faa',font:{size:10}}, grid:{color:'#2a3347'} };
+const SCALE_Y  = { ticks:{color:'#7a8faa',font:{size:10}}, grid:{color:'#2a3347'} };
+const PLUGINS  = { legend:{display:false,labels:{color:'#7a8faa',font:{size:11}}}, tooltip:{enabled:false} };
+const PLUGINS_LEGEND = { legend:{display:true,labels:{color:'#7a8faa',font:{size:11}}}, tooltip:{enabled:false} };
+
+function lineDS(data, color) {
+  return { data, borderColor:color, backgroundColor:color.replace(')', ',.08)').replace('rgb','rgba'), tension:.35, pointRadius:4, pointBackgroundColor:color };
+}
+
+let charts = {};
+
+function initCharts() {
+  const oL = oisData.map(d => d.tenor);
+  const oDFs = oisData.map(d => +d._df.toFixed(6));
+  const oZRs = oisData.map(d => +d._zr.toFixed(4));
+
+  charts.oisDF = new Chart(document.getElementById('ois-df-chart'), {
+    type: 'line',
+    data: { labels: oL, datasets: [Object.assign(lineDS(oDFs,'#22d3a0'), {label:'OIS DF'})] },
+    options: { responsive:true, maintainAspectRatio:false, animation:false, plugins:PLUGINS,
+      scales: { x:{...SCALE_X, title:{display:true,color:'#7a8faa',font:{size:10},text:'Tenor'}},
+                y:{...SCALE_Y, title:{display:true,color:'#7a8faa',font:{size:10},text:'P(0,T)'}} } }
+  });
+
+  charts.oisZR = new Chart(document.getElementById('ois-zr-chart'), {
+    type: 'line',
+    data: { labels: oL, datasets: [Object.assign(lineDS(oZRs,'#4a9eff'), {label:'OIS Zero Rate %'})] },
+    options: { responsive:true, maintainAspectRatio:false, animation:false, plugins:PLUGINS,
+      scales: { x:{...SCALE_X, title:{display:true,color:'#7a8faa',font:{size:10},text:'Tenor'}},
+                y:{...SCALE_Y, title:{display:true,color:'#7a8faa',font:{size:10},text:'Rate (%)'}} } }
+  });
+
+  const eL = eurData.map(d => d.tenor);
+  const eFwds = eurData.map(d => +d._fwd.toFixed(4));
+
+  charts.eurFwd = new Chart(document.getElementById('eur-fwd-chart'), {
+    type: 'bar',
+    data: { labels: eL, datasets: [{ label:'3M Fwd', data:eFwds, backgroundColor:'rgba(167,139,250,.45)', borderColor:'#a78bfa', borderWidth:1 }] },
+    options: { responsive:true, maintainAspectRatio:false, animation:false, plugins:PLUGINS,
+      scales: { x:{...SCALE_X, title:{display:true,color:'#7a8faa',font:{size:10},text:'Period'}},
+                y:{...SCALE_Y, title:{display:true,color:'#7a8faa',font:{size:10},text:'Rate (%)'}} } }
+  });
+
+  const compLabels = oisData.map(d => d.tenor);
+  const compOIS = oisData.map(d => +d._zr.toFixed(4));
+  const eurPillars = eurData.map(d => ({ T:d.T, zr:d._zr/100 }));
+  const compEUR = oisData.map(d => {
+    const df = interpDF(eurPillars, d.T);
+    return df > 0 ? +(-Math.log(df)/d.T*100).toFixed(4) : 0;
+  });
+
+  charts.compare = new Chart(document.getElementById('compare-chart'), {
+    type: 'line',
+    data: { labels: compLabels, datasets: [
+      Object.assign(lineDS(compOIS,'#22d3a0'), {label:'OIS (ESTR)'}),
+      Object.assign(lineDS(compEUR,'#a78bfa'), {label:'EURIBOR 3M'})
+    ]},
+    options: { responsive:true, maintainAspectRatio:false, animation:false, plugins:PLUGINS_LEGEND,
+      scales: { x:{...SCALE_X, title:{display:true,color:'#7a8faa',font:{size:10},text:'Tenor'}},
+                y:{...SCALE_Y, title:{display:true,color:'#7a8faa',font:{size:10},text:'Zero Rate (%)'}} } }
+  });
+
+  charts.liveZR = new Chart(document.getElementById('live-zr-chart'), {
+    type: 'line',
+    data: { labels: compLabels, datasets: [
+      Object.assign(lineDS([...compOIS],'#22d3a0'), {label:'OIS'}),
+      Object.assign(lineDS([...compEUR],'#a78bfa'), {label:'EURIBOR 3M'})
+    ]},
+    options: { responsive:true, maintainAspectRatio:false, animation:false, plugins:PLUGINS_LEGEND,
+      scales: { x:{...SCALE_X, title:{display:true,color:'#7a8faa',font:{size:10},text:'Tenor'}},
+                y:{...SCALE_Y, title:{display:true,color:'#7a8faa',font:{size:10},text:'Zero Rate (%)'}} } }
+  });
+
+  const oisDFsLive = oisData.map(d => +d._df.toFixed(6));
+  const eurDFsLive = oisData.map(d => {
+    const df = interpDF(eurPillars, d.T);
+    return +df.toFixed(6);
+  });
+
+  charts.liveDF = new Chart(document.getElementById('live-df-chart'), {
+    type: 'line',
+    data: { labels: compLabels, datasets: [
+      Object.assign(lineDS(oisDFsLive,'#22d3a0'), {label:'OIS DF'}),
+      Object.assign(lineDS(eurDFsLive,'#a78bfa'), {label:'EURIBOR Proj. DF'})
+    ]},
+    options: { responsive:true, maintainAspectRatio:false, animation:false, plugins:PLUGINS_LEGEND,
+      scales: { x:{...SCALE_X, title:{display:true,color:'#7a8faa',font:{size:10},text:'Tenor'}},
+                y:{...SCALE_Y, title:{display:true,color:'#7a8faa',font:{size:10},text:'Discount Factor'}} } }
+  });
+}
+
+function updateLiveCharts() {
+  if (!charts.liveZR) return;
+  const compLabels = oisData.map(d => d.tenor);
+  const compOIS = oisData.map(d => +d._zr.toFixed(4));
+  const eurPillars = eurData.map(d => ({ T:d.T, zr:d._zr/100 }));
+  const compEUR = oisData.map(d => {
+    const df = interpDF(eurPillars, d.T);
+    return df > 0 ? +(-Math.log(df)/d.T*100).toFixed(4) : 0;
+  });
+  const oisDFs = oisData.map(d => +d._df.toFixed(6));
+  const eurDFs = oisData.map(d => +interpDF(eurPillars, d.T).toFixed(6));
+
+  charts.liveZR.data.labels = compLabels;
+  charts.liveZR.data.datasets[0].data = compOIS;
+  charts.liveZR.data.datasets[1].data = compEUR;
+  charts.liveZR.update('none');
+
+  charts.liveDF.data.labels = compLabels;
+  charts.liveDF.data.datasets[0].data = oisDFs;
+  charts.liveDF.data.datasets[1].data = eurDFs;
+  charts.liveDF.update('none');
+}
+
+// ─── Tabs ────────────────────────────────────────────────────────────────────
+
+function setBuilderTab(btn, id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  requestAnimationFrame(() => Object.values(charts).forEach(c => c && c.resize && c.resize()));
+}
+
+// ─── Scenarios ───────────────────────────────────────────────────────────────
+
+const SCENARIOS = {
+  flat: {
+    ois: [2.40,2.40,2.40,2.40,2.40,2.40,2.40,2.40,2.40,2.40,2.40,2.40,2.40,2.40],
+    eur: [2.65,2.65,2.65,2.65,2.65,2.65,2.65,2.65,2.65,2.65,2.65,2.65,2.65,2.65],
+  },
+  inversion: {
+    ois: [3.90,3.85,3.78,3.65,3.45,3.50,3.20,3.00,2.85,2.82,2.80,2.79,2.78,2.75],
+    eur: [4.12,3.98,3.82,3.68,3.52,3.52,3.25,3.05,2.90,2.87,2.85,2.84,2.83,2.80],
+  },
+  steepening: {
+    ois: [1.50,1.52,1.55,1.72,1.92,2.15,2.42,2.65,2.90,3.00,3.10,3.10,3.10,3.05],
+    eur: [1.75,1.90,2.00,2.22,2.42,2.62,2.82,2.98,3.12,3.22,3.32,3.32,3.30,3.25],
+  },
+  tightening: {
+    ois: [4.25,4.22,4.18,4.05,3.95,3.80,3.65,3.55,3.50,3.45,3.48,3.49,3.48,3.45],
+    eur: [4.50,4.42,4.32,4.18,4.02,3.88,3.72,3.62,3.56,3.52,3.54,3.54,3.53,3.50],
+  },
+  widening: {
+    ois: [2.40,2.41,2.42,2.38,2.25,2.10,2.15,2.20,2.30,2.38,2.45,2.49,2.50,2.48],
+    eur: [3.15,3.10,3.05,2.98,2.90,2.80,2.78,2.76,2.74,2.73,2.72,2.72,2.72,2.70],
+  },
+};
+
+function loadScenario(name, el) {
+  const sc = SCENARIOS[name];
+  if (!sc) return;
+  document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active-scenario'));
+  if (el) el.classList.add('active-scenario');
+  sc.ois.forEach((r, i) => { if (oisData[i]) oisData[i].rate = r; });
+  sc.eur.forEach((r, i) => { if (eurData[i]) eurData[i].rate = r; });
+  rebuildAll();
+  document.querySelectorAll('[data-curve="ois"]').forEach(inp => {
+    const i = +inp.dataset.idx;
+    if (oisData[i]) inp.value = oisData[i].rate.toFixed(3);
+  });
+  document.querySelectorAll('[data-curve="eur"]').forEach(inp => {
+    const i = +inp.dataset.idx;
+    if (eurData[i]) inp.value = eurData[i].rate.toFixed(3);
+  });
+  document.getElementById('builder').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  oisData = bootstrapOIS(oisData);
+  eurData = bootstrapEURIBOR(eurData);
+  renderOISStatic();
+  renderEURStatic();
+  renderOISInteractive();
+  renderEURInteractive();
+  requestAnimationFrame(initCharts);
+  window.addEventListener('resize', () =>
+    Object.values(charts).forEach(c => c && c.resize && c.resize())
+  );
+});
+</script>
+</body>
+</html>
