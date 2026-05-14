@@ -106,6 +106,22 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .tog-btn.active{background:var(--accent);color:#fff}
 .shock-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:20px}
 .shock-indicator{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-top:12px;font-size:13px;color:var(--text);min-height:42px;line-height:1.6}
+.hedge-panel{background:var(--surface2);border:1px solid rgba(74,158,255,.25);border-radius:var(--r);padding:20px 24px;margin-top:24px}
+.hedge-panel-title{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--accent);text-transform:uppercase;margin-bottom:6px}
+.hedge-summary{font-size:14px;color:var(--text);margin-bottom:18px;line-height:1.6}
+.hedge-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:16px}
+.hedge-card{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.hedge-card-name{font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:4px}
+.hedge-card-action{font-size:12px;color:var(--text);margin-bottom:8px;line-height:1.5}
+.hedge-card-meta{display:flex;flex-direction:column;gap:4px}
+.hedge-pro{font-size:11px;color:var(--green);line-height:1.4}
+.hedge-con{font-size:11px;color:var(--red);line-height:1.4}
+.hedge-cost{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:2px 7px;border-radius:3px;margin-top:6px}
+.cost-low{background:rgba(34,211,160,.12);color:var(--green)}
+.cost-med{background:rgba(251,191,36,.12);color:var(--yellow)}
+.cost-high{background:rgba(248,113,113,.12);color:var(--red)}
+.hedge-consideration{font-size:13px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;line-height:1.6}
+.hedge-consideration strong{color:var(--text)}
 </style>
 </head>
 <body>
@@ -239,6 +255,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <p>The delta ladder stacks key rate DV01s by bucket. A flat net DV01 row in the ladder means that specific point on the curve is hedged. A flat <em>total</em> means the book is parallel-shift neutral — but the individual rows tell you whether you're exposed to curve steepening, flattening, or belly moves.</p>
     </div>
   </details>
+
+  <div id="delta-hedge-panel"></div>
 </section>
 
 <!-- ═══════════════════════════════ GAMMA ═══════════════════════════════ -->
@@ -317,6 +335,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <p>Delta re-hedging: after a 30bp move with Γ = +$2,000/bp², your 5Y DV01 shifts by 2,000 × 30 = $60,000. You sell $60k DV01 of 5Y bonds to re-flatten. That re-hedging trade at the new level locks in the gamma P&L — this is why long gamma positions get re-hedged frequently.</p>
     </div>
   </details>
+
+  <div id="gamma-hedge-panel"></div>
 </section>
 
 <!-- ═══════════════════════════════ TOGETHER ═══════════════════════════════ -->
@@ -558,6 +578,135 @@ let shockBp = 0;
 
 let deltaChart, gammaChart, shockChart;
 
+const DELTA_HEDGES = [
+  {
+    summary: "You're long the 2Y and short the 10Y — net flat but exposed to curve flattening. A 15bp flattening (2Y rates up, 10Y unchanged) costs you ~$1.2M on a $100M notional book. The hedge target is the curve spread, not the level.",
+    options: [
+      { name: 'Short 2Y SOFR Futures', action: 'Sell front 2Y futures contracts to offset the long 2Y DV01 bucket by bucket.', pro: 'Extremely liquid, tight bid/offer (~0.1bp equivalent), no counterparty credit.', con: 'Quarterly roll risk; CTD basket introduces small basis vs par swap rate.', cost: 'low' },
+      { name: 'Pay Fixed 2Y IRS', action: 'Enter a 2Y pay-fixed interest rate swap to directly cancel the 2Y long.', pro: 'Precise tenor and DV01 match; no roll; OTC flexibility on fixing date.', con: 'Bid/offer ~0.5bp; adds counterparty exposure; harder to unwind in size.', cost: 'low' },
+      { name: 'Buy 10Y Bond Futures', action: 'Long 10Y futures (or Ultra) to cover the short 10Y bucket.', pro: 'Very liquid; single instrument covers the 10Y point cleanly.', con: 'CTD convexity at long end; roll every quarter; imperfect key-rate match.', cost: 'low' },
+      { name: '2Y Receiver Swaption', action: 'Buy a 2Y receiver swaption — profits if 2Y rates rally, adding positive gamma to the steepener.', pro: 'Limits loss if the steepener extends sharply; keeps directional view intact.', con: 'Premium cost; introduces theta drag and vega exposure.', cost: 'med' },
+    ],
+    consideration: '<strong>Key choice:</strong> futures are cheapest for parallel reduction; swaps give a cleaner key-rate match. If the steepener is a structural view (held weeks), accept the quarterly roll and use futures. If precision matters, use swaps. The swaption is only worth it if implied vol is cheap and you expect a large move.',
+  },
+  {
+    summary: "A parallel-shift book: every basis point up costs you across every tenor. The 10Y–30Y concentration is the main vulnerability. A 50bp sell-off costs ~$24M. The priority is reducing duration at the long end without disrupting the short-end P&L.",
+    options: [
+      { name: 'Pay Fixed Long-Dated Swap', action: 'Pay fixed on 10Y, 20Y, or 30Y IRS to offset the largest DV01 buckets first.', pro: 'Exact tenor match; no roll; straightforward Greeks.', con: 'Large notionals required at long tenors; 30Y swap market is thinner; wide bid/offer.', cost: 'low' },
+      { name: 'Short Bond Futures (Ultra / 30Y)', action: 'Short ultra-long or 30Y futures to reduce duration at the long end efficiently.', pro: 'Very liquid; small margin requirement; easy to scale in/out.', con: 'CTD convexity diverges from par bonds at 30Y; quarterly roll adds cost; imperfect long-end match.', cost: 'low' },
+      { name: 'Buy Payer Swaptions', action: 'Buy ATM payer swaptions at 10Y and 30Y — profit accelerates if the sell-off is large.', pro: 'Adds positive gamma: the bigger the sell-off, the more the hedge pays. Limits basis risk vs linear hedge.', con: 'Significant premium; theta drag every day the sell-off doesn\'t arrive.', cost: 'high' },
+      { name: 'Zero-Cost Collar', action: 'Buy payer swaption, sell receiver swaption at same expiry — zero net premium.', pro: 'No upfront cost; protects against sell-off; surrenders rally upside.', con: 'Caps gains if rates fall sharply; complex Greeks; spread between strikes affects protection level.', cost: 'med' },
+    ],
+    consideration: '<strong>Key choice:</strong> futures for speed and liquidity; swaps for precision. For a bond fund manager who needs to reduce duration quickly before a data release, futures are the answer. For a bank managing structural long-end exposure, pay-fixed swaps avoid the roll. Payer swaptions add value only when vol is cheap relative to realised.',
+  },
+  {
+    summary: "Small residuals from delta-hedging options positions — each bucket is only a few $k. The cost of hedging every residual (bid/offer on 10 small swaps) typically exceeds the risk. The decision is which residuals to clean up and which to leave.",
+    options: [
+      { name: 'Threshold Netting', action: 'Define a minimum hedge threshold (e.g. $5k DV01 per bucket). Only hedge buckets above it. Net residuals across nearby tenors where possible.', pro: 'Avoids paying bid/offer on immaterial risk; reduces book complexity.', con: 'Small residuals accumulate over time; discipline on threshold is needed.', cost: 'low' },
+      { name: 'Targeted Swap per Bucket', action: 'Enter small notional swaps precisely at each residual tenor to zero out the ladder.', pro: 'Perfect DV01 match; clean risk report for audit and compliance.', con: 'Multiple small OTC trades; each has bid/offer cost; notionals may be too small for dealer interest.', cost: 'med' },
+      { name: '2Y / 10Y Futures Fine-Tune', action: 'Use liquid 2Y and 10Y futures to absorb most of the residual DV01 in a single trade.', pro: 'Low cost, liquid, no credit; consolidates multiple small residuals into two positions.', con: 'Won\'t match each tenor exactly; leaves some residual curve mis-match.', cost: 'low' },
+    ],
+    consideration: '<strong>Key choice:</strong> for a delta-hedged options book, residuals below $5k DV01 per bucket are often cheaper to accept than to trade. Review the full book at end-of-day and net across adjacent tenors first — a +$3k at 2Y and −$2k at 3Y are nearly the same risk and can be addressed with one swap rather than two.',
+  },
+  {
+    summary: "Long 5Y belly, short 2Y and 10Y wings. The trade profits if the 5Y yield falls more than the 2Y/10Y average. Hedging the butterfly flattens the view — so the question is which risk to reduce without destroying the trade.",
+    options: [
+      { name: 'Reduce 5Y Long (Pay Fixed 5Y)', action: 'Partially pay fixed on a 5Y swap to reduce the belly DV01 without touching the wings.', pro: 'Reduces the largest single-bucket risk; book stays butterfly-shaped.', con: 'Reduces P&L if the belly does outperform; partial hedge needs monitoring.', cost: 'low' },
+      { name: 'Buy 5Y Straddle (Add Gamma)', action: 'Overlay a long 5Y straddle to add positive gamma at the belly — keep the delta, add convexity.', pro: 'Protects against large belly moves in either direction; doesn\'t change the directional view.', con: 'Daily theta cost; adds vega; effective only if realised vol exceeds break-even.', cost: 'med' },
+      { name: 'Rebalance Wing Ratios', action: 'If the 2Y or 10Y legs have drifted (rates moved), re-size the short wing to maintain DV01 neutrality.', pro: 'Keeps the butterfly DV01-flat without adding new risk types; simple to execute.', con: 'Transaction costs on rebalance; frequency depends on how fast rates move.', cost: 'low' },
+      { name: 'Parallel Shift Overlay', action: 'Add a small parallel hedge (short futures) if worried about a sharp parallel move drowning out the butterfly.', pro: 'Isolates the curve view from the level view; useful before a central bank meeting.', con: 'Adds a position that competes with the butterfly view if rates also shift in parallel.', cost: 'low' },
+    ],
+    consideration: '<strong>Key choice:</strong> don\'t fully hedge the butterfly unless you\'ve abandoned the trade. Instead, add gamma at the 5Y to protect against large moves while preserving the relative-value view. Rebalancing the wings to stay DV01-neutral is routine maintenance, not a hedge — do it whenever the wing DV01s drift more than 10% from target.',
+  },
+  {
+    summary: "Long 3M–3Y (asset swap floater side), short 5Y–15Y (fixed bond hedge). The curve exposure is a classic 2s5s or 2s10s flattener embedded in the asset swap. A curve steepening (front rates fall, back rates rise) causes double pain.",
+    options: [
+      { name: 'Front-End Futures (Short)', action: 'Short SOFR or Euribor futures at the 3M–1Y point to offset the short-term long DV01.', pro: 'Very liquid; daily margining keeps exposure current; low bid/offer.', con: 'Quarterly rolls at every IMM date; limited precision beyond 2Y.', cost: 'low' },
+      { name: '2s5s Flattener Swap', action: 'Rather than hedging each bucket, put on a 2s5s swap spread — receive 5Y fixed, pay 2Y fixed in DV01-weighted ratio.', pro: 'Single trade hedges the curve slope directly; cleaner P&L attribution.', con: 'Doesn\'t address residual non-parallel mismatches; requires DV01 ratio calculation.', cost: 'low' },
+      { name: 'Buy 5Y Receiver Swaption', action: 'Buy a 5Y receiver — profit if 5Y rates fall (covering the short 5Y position) and add positive gamma.', pro: 'Asymmetric payoff: limits loss if 5Y rallies hard; keeps short-term carry.', con: 'Premium; theta; only helps one leg of the curve trade.', cost: 'med' },
+      { name: 'Accept Natural Offset', action: 'Review whether the long front-end and short back-end are genuinely correlated in the book\'s mandate — some asset swap books are designed to hold this exposure.', pro: 'No transaction cost; if the book\'s mandate allows curve risk, holding it earns the curve carry.', con: 'Curve risk is real; a 30bp steepening can cost $500k–$1M in a moderate-size book.', cost: 'low' },
+    ],
+    consideration: '<strong>Key choice:</strong> asset swap books often run this curve exposure intentionally as part of the carry strategy. The key question is whether the steepening risk is within limits. If it is, a 2s5s flattener swap is the cleanest hedge — one trade, precisely captures the slope. Futures for the front end are cheaper but require roll management.',
+  },
+];
+
+const GAMMA_HEDGES = [
+  {
+    summary: "A linear book has no meaningful gamma — bonds and swaps have negligible convexity. No gamma hedge is needed. If rates move, your delta shifts only from the mark-to-market of the positions themselves, not from options. The only gamma management is ensuring the delta ladder stays within limits after a rate move.",
+    options: [
+      { name: 'Monitor Delta Drift', action: 'Set automated alerts when any tenor bucket\'s DV01 drifts more than a threshold (e.g. $10k) from target after a rate move.', pro: 'Zero cost; addresses the only gamma risk a linear book faces — rate-move-driven repricing.', con: 'Requires real-time risk system; alerts can be noisy in volatile markets.', cost: 'low' },
+      { name: 'Add Optionality Selectively', action: 'If market vol is cheap, buy a small straddle at the most concentrated tenor to gain positive gamma.', pro: 'Converts a pure linear book into one with convexity benefit; theta cost is low when vol is cheap.', con: 'Changes the risk profile; introduces vega and theta as new risk dimensions to manage.', cost: 'med' },
+    ],
+    consideration: '<strong>Note:</strong> linear books don\'t need gamma hedges — they need active delta management. The discipline is re-running the delta ladder after every 10bp move and adjusting positions that breach limits.',
+  },
+  {
+    summary: "Long gamma at the 5Y point is a risk you're paying for (via theta). The goal is not to eliminate it but to optimise it: reduce theta drag where gamma is abundant, ensure the re-hedging frequency captures the P&L, and consider whether the gamma profile matches the expected rate move.",
+    options: [
+      { name: 'Sell OTM 5Y Strangle', action: 'Sell out-of-the-money receiver + payer at 5Y to reduce gamma in the wings while keeping ATM gamma.', pro: 'Collects premium; reduces net theta; keeps gamma for moderate moves.', con: 'Caps the convexity benefit if rates move very far; creates short gamma at OTM strikes.', cost: 'low' },
+      { name: 'Optimise Re-Hedge Frequency', action: 'Re-hedge delta whenever the 5Y bucket drifts by more than 1/Γ × target_max_drift. With Γ = $3,500/bp², re-hedge every ~8bp move to capture gamma P&L systematically.', pro: 'Zero instrument cost; the gamma P&L is realised through disciplined delta hedging.', con: 'Requires active management; transaction costs scale with frequency.', cost: 'low' },
+      { name: 'Roll to Shorter Expiry', action: 'Replace the straddle with a shorter-dated version (1M vs 3M) for the same notional — higher gamma per dollar, lower total theta.', pro: 'More gamma concentration around near-term events (central bank meetings); lower theta drag between events.', con: 'Must roll more frequently; gamma disappears quickly after the event.', cost: 'med' },
+    ],
+    consideration: '<strong>Key insight:</strong> long gamma doesn\'t need hedging — it needs managing. The P&L from positive gamma is realised by re-hedging delta regularly. The risk is paying theta without realising enough gamma P&L. Track daily: (realised gamma P&L) vs (theta paid). If the ratio falls below 1.0 consistently, reduce the gamma position.',
+  },
+  {
+    summary: "Short gamma across all tenors is the most dangerous gamma profile. Every large rate move forces you to re-hedge at a loss — buying high and selling low. The priority is protecting against tail moves while preserving the option premium income that created this position.",
+    options: [
+      { name: 'Buy ATM Straddles (Worst Bucket)', action: 'Buy ATM straddles at the tenors with the most negative gamma (3Y–5Y in this case) to directly offset the worst exposure.', pro: 'Direct gamma neutralisation; most efficient use of premium dollar.', con: 'Significant premium cost; may consume most of the original option premium earned.', cost: 'high' },
+      { name: 'Buy OTM Strangles (Tail Protection)', action: 'Buy cheaper out-of-the-money strangles — lower gamma per dollar but activates only on large moves (>15bp).', pro: 'Lower premium; protects specifically against the blow-up scenario; allows small moves to be absorbed.', con: 'No gamma benefit for moderate moves (5–10bp); still pays theta.', cost: 'med' },
+      { name: 'Tighten Delta Re-Hedge Bands', action: 'Re-hedge delta more frequently — every 2bp instead of every 5bp. Reduces the path-dependency loss from negative gamma.', pro: 'No instrument cost; limits the delta drift between re-hedges.', con: 'Transaction costs scale quadratically with re-hedge frequency; in fast markets, execution is difficult.', cost: 'low' },
+      { name: 'Gamma VaR Limit', action: 'Set a maximum gamma VaR: the P&L impact of a 2-sigma rate move across all buckets. If breached, buy straddles until back within limit.', pro: 'Systematic risk discipline; prevents gradual build-up of dangerous short gamma.', con: 'Reactive — only triggers after the risk has already grown; needs real-time monitoring.', cost: 'low' },
+    ],
+    consideration: '<strong>Critical trade-off:</strong> short gamma cannot be fully hedged without giving back the premium income that created it. The professional approach: (1) set a maximum loss per bucket for a 30bp move, (2) buy tail protection (OTM strangles) for anything beyond that, (3) accept moderate-move re-hedging costs as the cost of running a short-vol book, (4) monitor theta vs realised gamma P&L weekly.',
+  },
+  {
+    summary: "Front-end gamma (3M–2Y) from the cap book is large and positive. The 5Y–7Y shows small negative gamma from sold floors. The priority: the negative belly gamma is manageable; the large front-end gamma is a theta drag that can be partially monetised.",
+    options: [
+      { name: 'Sell Front-End OTM Caps', action: 'Sell out-of-the-money caps at 1Y–2Y to reduce the large positive gamma in those buckets and collect premium.', pro: 'Offsets theta drag; keeps some gamma for large moves; monetises rich implied vol in front end.', con: 'Caps the cap book\'s P&L on extreme moves; adds short gamma at OTM strikes.', cost: 'low' },
+      { name: 'Buy 5Y Swaption (Belly Fix)', action: 'Buy a small notional 5Y ATM straddle to directly address the negative gamma in the 5Y–7Y bucket.', pro: 'Clean fix; gamma-neutral across all buckets; minimal size needed given the small negative gamma.', con: 'Premium cost; adds theta drag; may not be worth the cost for a small negative gamma bucket.', cost: 'med' },
+      { name: 'Manage 5Y–7Y via Delta Re-Hedging', action: 'The belly negative gamma (−$500–$200/bp²) is small. Accept it and re-hedge the delta every 5bp move rather than buying options.', pro: 'Zero premium cost; re-hedging at small intervals limits the P&L drag.', con: 'Requires active monitoring; works only if vol stays moderate (< 10bp/day realised).', cost: 'low' },
+    ],
+    consideration: '<strong>Key decision:</strong> the small negative belly gamma (−$500/bp²) produces only −$12,500 in delta drift per 25bp move — small relative to the P&L of the cap book. The cost of buying a 5Y straddle to fix it may exceed the expected loss. Use re-hedging rather than options for this bucket, and focus gamma management on the front end where the exposure is large.',
+  },
+  {
+    summary: "Complex profile: long gamma at 3M–2Y and 7Y–10Y, short at 3Y–5Y. The negative belly gamma is sandwiched between two long-gamma positions — creating a profile that loses money on moderate belly moves but gains on extreme moves or when wings move independently.",
+    options: [
+      { name: 'Gamma Swap (Sell Front, Buy Belly)', action: 'Sell some 1Y gamma (where you\'re long) via a short straddle, use proceeds to buy 5Y gamma (where you\'re short). Net theta close to zero.', pro: 'Self-financing; reshapes the gamma ladder without net premium cost; reduces the mixed profile.', con: 'Complex to size exactly; two OTC trades; introduces basis between 1Y and 5Y vol surfaces.', cost: 'med' },
+      { name: 'Buy 5Y ATM Straddle', action: 'Directly buy 5Y gamma to flip the −$1,200/bp² bucket to neutral or positive.', pro: 'Simplest fix; direct neutralisation of the problem bucket.', con: 'Premium cost; if 1Y–2Y long gamma is already paying theta, adding more theta at 5Y increases the break-even vol.', cost: 'high' },
+      { name: 'Sell 1Y–2Y Gamma (Monetise the Long)', action: 'Sell some of the long front-end gamma via short straddles. Use the premium to fund the belly gamma buy, or simply take the theta income.', pro: 'Generates premium income; reduces theta drag from the front-end long gamma.', con: 'Increases vulnerability at 1Y–2Y if rates move sharply; reduces the natural hedge for the belly short.', cost: 'low' },
+      { name: 'Accept the Profile for Event Risk', action: 'The current profile is long wings, short belly — it profits on large parallel moves and on wing-only moves, but loses if only the belly moves. This may be intentional.', pro: 'Zero cost; the profile has a natural positive P&L for most central bank surprises (parallel moves).', con: 'Loses on curve butterfly moves (belly moves without wings); requires monitoring the cross-gamma terms.', cost: 'low' },
+    ],
+    consideration: '<strong>Key insight:</strong> a long-wing, short-belly gamma profile is not always bad. It profits when parallel rate moves are large (central bank surprises) and loses only when the belly outperforms in isolation. Before hedging, ask: what is the likely source of rate volatility? If it\'s macro-driven (central bank), the current profile may be the right one to hold.',
+  },
+];
+
+function hedgeCostLabel(c) {
+  if (c === 'low') return '<span class="hedge-cost cost-low">Low Cost</span>';
+  if (c === 'med') return '<span class="hedge-cost cost-med">Medium Cost</span>';
+  return '<span class="hedge-cost cost-high">Higher Cost</span>';
+}
+
+function renderHedge(panelId, data) {
+  const panel = document.getElementById(panelId);
+  if (!data) { panel.innerHTML = ''; return; }
+  const cards = data.options.map(o => `
+    <div class="hedge-card">
+      <div class="hedge-card-name">${o.name}</div>
+      <div class="hedge-card-action">${o.action}</div>
+      <div class="hedge-card-meta">
+        <div class="hedge-pro">✓ ${o.pro}</div>
+        <div class="hedge-con">✗ ${o.con}</div>
+        ${hedgeCostLabel(o.cost)}
+      </div>
+    </div>`).join('');
+  panel.innerHTML = `
+    <div class="hedge-panel">
+      <div class="hedge-panel-title">Hedging Options & Considerations</div>
+      <div class="hedge-summary">${data.summary}</div>
+      <div class="hedge-cards">${cards}</div>
+      <div class="hedge-consideration">${data.consideration}</div>
+    </div>`;
+}
+
 function fmt(v, unit) {
   if (v === 0) return '—';
   const sign = v > 0 ? '+' : '−';
@@ -791,12 +940,14 @@ function setDeltaScenario(i) {
   document.querySelectorAll('#delta-btns .sc-btn').forEach((b, j) => b.classList.toggle('active', i === j));
   renderDelta();
   renderShock();
+  renderHedge('delta-hedge-panel', DELTA_HEDGES[i]);
 }
 
 function setGammaScenario(i) {
   gammaScenario = i;
   document.querySelectorAll('#gamma-btns .sc-btn').forEach((b, j) => b.classList.toggle('active', i === j));
   renderGamma();
+  renderHedge('gamma-hedge-panel', GAMMA_HEDGES[i]);
 }
 
 function setDeltaView(v) {
@@ -819,6 +970,8 @@ window.addEventListener('load', () => {
     initShockChart();
     renderDelta();
     renderGamma();
+    renderHedge('delta-hedge-panel', DELTA_HEDGES[0]);
+    renderHedge('gamma-hedge-panel', GAMMA_HEDGES[0]);
 
     window.addEventListener('resize', () => {
       deltaChart.resize();
