@@ -1234,11 +1234,11 @@ function sameLocation(o, d) {
 
 function initMap() {
   const map = L.map('map', {
-    center: [36.2, 137.5],
-    zoom: 6,
     zoomControl: true,
     scrollWheelZoom: true,
   });
+  // setView separately so it always applies regardless of container height at init time
+  map.setView([36.2, 137.5], 6);
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -1291,6 +1291,16 @@ function initMap() {
     originM.bindPopup(buildPopup(fig, color, 'origin'), { maxWidth: 280, minWidth: 200 });
     originM.on('click', () => openModal(bioNode, geo));
   });
+
+  // If the container had 0 height during init (common when script runs before layout),
+  // recalculate and snap back to Japan. Retry a few times to be safe.
+  function fixView() {
+    map.invalidateSize();
+    map.setView([36.2, 137.5], 6);
+  }
+  setTimeout(fixView, 0);
+  setTimeout(fixView, 300);
+  setTimeout(fixView, 800);
 }
 
 function buildPopup(fig, color, type) {
@@ -1332,8 +1342,9 @@ window.addEventListener('resize', () => {
   resizeTimer = setTimeout(init, 120);
 });
 
-// Defer map init until layout is painted so #map has its CSS height
-requestAnimationFrame(initMap);
+// Call synchronously — container height is set by CSS (vh units).
+// Then force a size recalculation after layout settles to correct any 0px init.
+initMap();
 </script>
 </body>
 </html>
