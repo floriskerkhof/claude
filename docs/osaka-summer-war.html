@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Osaka Summer War 1615 — Family Trees</title>
+<title>Osaka Summer War 1615 — Family Trees &amp; Map</title>
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root {
   --bg:#07090f; --surface:#0d1117; --surface2:#161b27; --surface3:#1e2637;
@@ -19,16 +21,13 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Segoe UI', system-ui, sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
+/* ── Header ── */
 header {
   text-align: center;
   padding: 36px 20px 20px;
   border-bottom: 1px solid var(--border);
-  background: linear-gradient(to bottom, rgba(13,17,23,0.9), transparent);
 }
 
 header h1 {
@@ -46,7 +45,7 @@ header .subtitle {
   color: var(--muted);
   font-size: 1rem;
   max-width: 640px;
-  margin: 0 auto 16px;
+  margin: 0 auto 14px;
   line-height: 1.5;
 }
 
@@ -62,16 +61,12 @@ header .subtitle {
   color: var(--accent2);
 }
 
+/* ── Trees ── */
 .trees-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  flex: 1;
-  min-height: 0;
-}
-
-.divider {
-  width: 1px;
-  background: var(--border);
+  height: 65vh;
+  min-height: 480px;
 }
 
 .tree-panel {
@@ -90,69 +85,180 @@ header .subtitle {
 
 .panel-header {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   padding: 14px 20px 30px;
   z-index: 5;
   background: linear-gradient(to bottom, var(--bg) 55%, transparent);
   pointer-events: none;
 }
 
-.panel-header h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
+.panel-header h2 { font-size: 1.1rem; font-weight: 600; }
 .tokugawa .panel-header h2 { color: var(--accent); }
 .toyotomi .panel-header h2 { color: var(--yellow); }
+.panel-header p { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
 
-.panel-header p {
-  font-size: 0.78rem;
-  color: var(--muted);
-  margin-top: 3px;
-}
+svg { width: 100%; height: 100%; display: block; }
 
-svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.node circle {
-  stroke-width: 2;
-  cursor: pointer;
-  transition: filter 0.2s, r 0.15s;
-}
-
+.node circle { stroke-width: 2; cursor: pointer; transition: filter 0.2s; }
 .node:hover circle { filter: brightness(1.4); }
-
-.node text {
-  font-size: 10.5px;
-  fill: var(--text);
-  pointer-events: none;
-  font-weight: 500;
-}
-
-.tokugawa-node circle {
-  fill: rgba(74,158,255,0.18);
-  stroke: var(--accent);
-}
-
-.toyotomi-node circle {
-  fill: rgba(251,191,36,0.18);
-  stroke: var(--yellow);
-}
-
-.link {
-  fill: none;
-  stroke-width: 1.5;
-  opacity: 0.35;
-  stroke-dasharray: none;
-}
-
+.node text { font-size: 10.5px; fill: var(--text); pointer-events: none; font-weight: 500; }
+.tokugawa-node circle { fill: rgba(74,158,255,0.18); stroke: var(--accent); }
+.toyotomi-node circle { fill: rgba(251,191,36,0.18); stroke: var(--yellow); }
+.link { fill: none; stroke-width: 1.5; opacity: 0.35; }
 .tokugawa-link { stroke: var(--accent); }
 .toyotomi-link { stroke: var(--yellow); }
+
+/* ── Map section ── */
+.map-section {
+  border-top: 1px solid var(--border);
+}
+
+.map-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.map-section-header h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.map-section-header p {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.map-legend-inline {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.map-legend-inline .leg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.leg-circle {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid;
+  flex-shrink: 0;
+}
+
+.leg-circle.origin { background: transparent; }
+.leg-circle.domain { opacity: 0.85; }
+.leg-circle.tok { border-color: var(--accent); background: transparent; }
+.leg-circle.tok.domain { background: rgba(74,158,255,0.65); }
+.leg-circle.toy { border-color: var(--yellow); background: transparent; }
+.leg-circle.toy.domain { background: rgba(251,191,36,0.65); }
+
+.leg-line {
+  width: 20px; height: 2px;
+  border-top: 2px dashed var(--muted);
+  opacity: 0.5;
+}
+
+#map {
+  height: 55vh;
+  min-height: 400px;
+  background: #07090f;
+}
+
+/* Keep Leaflet controls below modal */
+.leaflet-top, .leaflet-bottom { z-index: 10 !important; }
+.leaflet-pane { z-index: 5 !important; }
+
+/* Leaflet popup dark theme */
+.leaflet-popup-content-wrapper {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+  color: var(--text) !important;
+  font-family: 'Segoe UI', system-ui, sans-serif !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  width: auto !important;
+}
+
+.leaflet-popup-tip-container { display: none; }
+
+.leaflet-popup-close-button {
+  color: var(--muted) !important;
+  top: 6px !important;
+  right: 8px !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+}
+
+.map-popup {
+  padding: 12px 16px;
+  min-width: 200px;
+  max-width: 260px;
+  cursor: pointer;
+}
+
+.map-popup .pop-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.map-popup .pop-role {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.map-popup .pop-geo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pop-geo-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 0.75rem;
+  color: #96b0c8;
+  line-height: 1.3;
+}
+
+.pop-geo-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pop-geo-dot.origin-dot { background: transparent; }
+.pop-geo-dot.domain-dot { opacity: 0.9; }
+
+.map-popup .pop-cta {
+  margin-top: 10px;
+  font-size: 0.7rem;
+  color: var(--accent2);
+  opacity: 0.8;
+}
 
 /* ── Modal ── */
 .modal-overlay {
@@ -187,7 +293,6 @@ svg {
 
 .modal-stripe {
   height: 3px;
-  border-radius: 3px 3px 0 0;
   position: absolute;
   top: 0; left: 0; right: 0;
   border-radius: var(--r) var(--r) 0 0;
@@ -198,13 +303,11 @@ svg {
 
 .modal-close {
   position: absolute;
-  top: 14px;
-  right: 14px;
+  top: 14px; right: 14px;
   background: none;
   border: 1px solid var(--border);
   color: var(--muted);
-  width: 26px;
-  height: 26px;
+  width: 26px; height: 26px;
   border-radius: 50%;
   cursor: pointer;
   font-size: 13px;
@@ -217,21 +320,10 @@ svg {
 
 .modal-close:hover { color: var(--text); border-color: var(--text); }
 
-.modal-top {
-  margin-bottom: 14px;
-}
+.modal-top { margin-bottom: 14px; }
 
-.modal h3 {
-  font-size: 1.35rem;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 4px;
-}
-
-.modal .role-line {
-  font-size: 0.85rem;
-  color: var(--muted);
-}
+.modal h3 { font-size: 1.35rem; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
+.modal .role-line { font-size: 0.85rem; color: var(--muted); }
 
 .modal .years-badge {
   display: inline-block;
@@ -245,11 +337,39 @@ svg {
 .years-badge.tokugawa { background: rgba(74,158,255,0.14); color: var(--accent2); }
 .years-badge.toyotomi { background: rgba(251,191,36,0.14); color: var(--yellow); }
 
-.modal .desc {
-  font-size: 0.9rem;
-  line-height: 1.72;
-  color: #b8cbe0;
-  margin: 14px 0;
+.modal .desc { font-size: 0.9rem; line-height: 1.72; color: #b8cbe0; margin: 14px 0; }
+
+.modal .geo-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.geo-card {
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-size: 0.78rem;
+}
+
+.geo-card .geo-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  opacity: 0.6;
+  margin-bottom: 3px;
+}
+
+.geo-card .geo-val { color: var(--text); line-height: 1.35; }
+
+.lineage-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 4px;
+  opacity: 0.7;
 }
 
 .modal .lineage-box {
@@ -262,16 +382,7 @@ svg {
   line-height: 1.5;
 }
 
-.lineage-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-  margin-bottom: 4px;
-  opacity: 0.7;
-}
-
-/* ── Legend ── */
+/* ── Legend bar ── */
 .legend {
   display: flex;
   justify-content: center;
@@ -282,32 +393,20 @@ svg {
   border-top: 1px solid var(--border);
   font-size: 0.8rem;
   color: var(--muted);
-  flex-shrink: 0;
 }
 
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.legend-dot {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  border: 2px solid;
-  flex-shrink: 0;
-}
-
+.legend-item { display: flex; align-items: center; gap: 7px; }
+.legend-dot { width: 11px; height: 11px; border-radius: 50%; border: 2px solid; flex-shrink: 0; }
 .legend-dot.tokugawa { border-color: var(--accent); background: rgba(74,158,255,0.2); }
 .legend-dot.toyotomi { border-color: var(--yellow); background: rgba(251,191,36,0.2); }
-
 .legend-sep { width: 1px; height: 14px; background: var(--border); }
 
 @media (max-width: 700px) {
-  .trees-container { grid-template-columns: 1fr; }
+  .trees-container { grid-template-columns: 1fr; height: auto; }
+  .tree-panel { height: 50vh; min-height: 360px; }
   .tree-panel.tokugawa { border-right: none; border-bottom: 1px solid var(--border); }
   header h1 { font-size: 1.5rem; }
+  .map-legend-inline { display: none; }
 }
 </style>
 </head>
@@ -315,10 +414,11 @@ svg {
 
 <header>
   <h1>Osaka Summer War, 1615</h1>
-  <p class="subtitle">The final clash between Tokugawa and Toyotomi — two great clans whose lineages shaped Japan's future. Explore their genealogies below.</p>
-  <span class="hint">&#9654; Click any figure to learn more</span>
+  <p class="subtitle">The final clash between Tokugawa and Toyotomi — two great clans whose lineages shaped Japan's future. Explore their genealogies and geography below.</p>
+  <span class="hint">&#9654; Click any figure in the trees or map to learn more</span>
 </header>
 
+<!-- ── Family Trees ── -->
 <div class="trees-container">
   <div class="tree-panel tokugawa" id="tokugawa-panel">
     <div class="panel-header">
@@ -336,6 +436,40 @@ svg {
   </div>
 </div>
 
+<!-- ── Map ── -->
+<div class="map-section">
+  <div class="map-section-header">
+    <div>
+      <h2>Regional Map — Origins &amp; Domains</h2>
+      <p>Where each figure was born and where they held power · Click a marker for full biography</p>
+    </div>
+    <div class="map-legend-inline">
+      <div class="leg">
+        <div class="leg-circle tok origin"></div>
+        <span>Tokugawa birthplace</span>
+      </div>
+      <div class="leg">
+        <div class="leg-circle tok domain"></div>
+        <span>Tokugawa domain</span>
+      </div>
+      <div class="leg">
+        <div class="leg-circle toy origin"></div>
+        <span>Toyotomi birthplace</span>
+      </div>
+      <div class="leg">
+        <div class="leg-circle toy domain"></div>
+        <span>Toyotomi domain</span>
+      </div>
+      <div class="leg">
+        <div class="leg-line"></div>
+        <span>Migration</span>
+      </div>
+    </div>
+  </div>
+  <div id="map"></div>
+</div>
+
+<!-- ── Legend bar ── -->
 <div class="legend">
   <div class="legend-item">
     <div class="legend-dot tokugawa"></div>
@@ -343,7 +477,7 @@ svg {
   </div>
   <div class="legend-sep"></div>
   <div class="legend-item">
-    <span>&#8635; Resize to reflow · Click nodes for bios</span>
+    <span>&#8635; Resize to reflow · Click nodes or markers for bios</span>
   </div>
   <div class="legend-sep"></div>
   <div class="legend-item">
@@ -352,7 +486,7 @@ svg {
   </div>
 </div>
 
-<!-- Modal -->
+<!-- ── Modal ── -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal" id="modal">
     <div class="modal-stripe" id="modal-stripe"></div>
@@ -364,6 +498,17 @@ svg {
       <div class="years-badge" id="modal-years"></div>
     </div>
 
+    <div class="geo-section" id="modal-geo" style="display:none">
+      <div class="geo-card">
+        <div class="geo-label">Birthplace / Origin</div>
+        <div class="geo-val" id="modal-origin"></div>
+      </div>
+      <div class="geo-card">
+        <div class="geo-label">Domain / Power Base</div>
+        <div class="geo-val" id="modal-domain"></div>
+      </div>
+    </div>
+
     <p class="desc" id="modal-desc"></p>
 
     <div class="lineage-label">Lineage &amp; Fate</div>
@@ -372,7 +517,7 @@ svg {
 </div>
 
 <script>
-// ── Data ─────────────────────────────────────────────────────────────────────
+// ── Bio Data ──────────────────────────────────────────────────────────────────
 
 const tokugawaData = {
   name: "Tokugawa Ieyasu",
@@ -569,6 +714,116 @@ const toyotomiData = {
   ]
 };
 
+// ── Geographic Data ────────────────────────────────────────────────────────────
+// origin = birthplace/homeland  |  domain = castle/territory they ruled or commanded
+
+const mapFigures = [
+  // ── Tokugawa ──
+  {
+    name: "Tokugawa Ieyasu",
+    bioData: tokugawaData.data,
+    origin: { lat: 34.9577, lng: 137.1762, label: "Okazaki, Mikawa" },
+    domain: { lat: 34.9756, lng: 138.3826, label: "Sunpu Castle, Suruga (retirement seat)" },
+  },
+  {
+    name: "Tokugawa Hidetada",
+    bioData: tokugawaData.children[0].data,
+    origin: { lat: 34.7103, lng: 137.7261, label: "Hamamatsu, Tōtōmi" },
+    domain: { lat: 35.6895, lng: 139.6917, label: "Edo Castle (Tokyo)" },
+  },
+  {
+    name: "Tokugawa Iemitsu",
+    bioData: tokugawaData.children[0].children[0].data,
+    origin: { lat: 35.6895, lng: 139.6917, label: "Edo Castle (Tokyo)" },
+    domain: { lat: 35.6895, lng: 139.6917, label: "Edo Castle (Tokyo)" },
+  },
+  {
+    name: "Yuki Hideyasu",
+    bioData: tokugawaData.children[1].data,
+    origin: { lat: 34.7103, lng: 137.7261, label: "Hamamatsu, Tōtōmi" },
+    domain: { lat: 36.0652, lng: 136.2217, label: "Fukui Castle, Echizen" },
+  },
+  {
+    name: "Matsudaira Tadanao",
+    bioData: tokugawaData.children[1].children[0].data,
+    origin: { lat: 36.0652, lng: 136.2217, label: "Fukui, Echizen" },
+    domain: { lat: 36.0652, lng: 136.2217, label: "Fukui Castle, Echizen" },
+  },
+  {
+    name: "Ii Naotaka",
+    bioData: tokugawaData.children[2].data,
+    origin: { lat: 34.7800, lng: 137.9400, label: "Ii Valley, Tōtōmi" },
+    domain: { lat: 35.2762, lng: 136.2596, label: "Hikone Castle, Ōmi" },
+  },
+  {
+    name: "Date Masamune",
+    bioData: tokugawaData.children[3].data,
+    origin: { lat: 37.9219, lng: 140.1175, label: "Yonezawa, Dewa" },
+    domain: { lat: 38.2682, lng: 140.8694, label: "Sendai Castle, Mutsu" },
+  },
+  {
+    name: "Honda Tadamasa",
+    bioData: tokugawaData.children[4].data,
+    origin: { lat: 34.9577, lng: 137.1762, label: "Okazaki, Mikawa" },
+    domain: { lat: 34.8394, lng: 134.6939, label: "Himeji Castle, Harima" },
+  },
+  // ── Toyotomi ──
+  {
+    name: "Toyotomi Hideyoshi",
+    bioData: toyotomiData.data,
+    origin: { lat: 35.1671, lng: 136.8820, label: "Nakamura, Owari (Nagoya)" },
+    domain: { lat: 34.9950, lng: 135.7851, label: "Fushimi Castle, Yamashiro" },
+  },
+  {
+    name: "Toyotomi Hideyori",
+    bioData: toyotomiData.children[0].data,
+    origin: { lat: 34.6873, lng: 135.5259, label: "Osaka Castle" },
+    domain: { lat: 34.6873, lng: 135.5259, label: "Osaka Castle" },
+  },
+  {
+    name: "Kunimatsu",
+    bioData: toyotomiData.children[0].children[0].data,
+    origin: { lat: 34.6873, lng: 135.5259, label: "Osaka Castle" },
+    domain: { lat: 35.0116, lng: 135.7681, label: "Sanjogawara, Kyoto (executed here)" },
+  },
+  {
+    name: "Sanada Yukimura",
+    bioData: toyotomiData.children[1].data,
+    origin: { lat: 36.4028, lng: 138.2493, label: "Ueda, Shinano (Nagano)" },
+    domain: { lat: 36.4028, lng: 138.2493, label: "Ueda Castle, Shinano" },
+  },
+  {
+    name: "Sanada Masayuki",
+    bioData: toyotomiData.children[1].children[0].data,
+    origin: { lat: 36.4028, lng: 138.2493, label: "Ueda, Shinano (Nagano)" },
+    domain: { lat: 36.4028, lng: 138.2493, label: "Ueda Castle, Shinano" },
+  },
+  {
+    name: "Goto Mototsugu",
+    bioData: toyotomiData.children[2].data,
+    origin: { lat: 34.6551, lng: 133.9195, label: "Bizen, Okayama" },
+    domain: { lat: 33.5584, lng: 131.1877, label: "Nakatsu Castle, Buzen (Kuroda service)" },
+  },
+  {
+    name: "Chosokabe Morichika",
+    bioData: toyotomiData.children[3].data,
+    origin: { lat: 33.5597, lng: 133.5311, label: "Tosa, Shikoku (Kochi)" },
+    domain: { lat: 33.5597, lng: 133.5311, label: "Kochi Castle, Tosa (until 1600)" },
+  },
+  {
+    name: "Kimura Shigenari",
+    bioData: toyotomiData.children[4].data,
+    origin: { lat: 34.6873, lng: 135.5259, label: "Osaka" },
+    domain: { lat: 34.6873, lng: 135.5259, label: "Osaka Castle garrison" },
+  },
+  {
+    name: "Ono Harunaga",
+    bioData: toyotomiData.children[5].data,
+    origin: { lat: 35.1500, lng: 136.1000, label: "Ōmi Province (Lake Biwa)" },
+    domain: { lat: 34.6873, lng: 135.5259, label: "Osaka Castle (chief councillor)" },
+  },
+];
+
 // ── Tree Renderer ─────────────────────────────────────────────────────────────
 
 function renderTree(svgId, data, faction) {
@@ -581,30 +836,23 @@ function renderTree(svgId, data, faction) {
   const iW = W - margin.left - margin.right;
   const iH = H - margin.top - margin.bottom;
 
-  const sel = d3.select(svg)
-    .attr('width', W)
-    .attr('height', H);
-
+  const sel = d3.select(svg).attr('width', W).attr('height', H);
   sel.selectAll('*').remove();
 
-  const g = sel.append('g')
-    .attr('transform', `translate(${margin.left},${margin.top})`);
+  const g = sel.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
   const root = d3.hierarchy(data);
   const treeLayout = d3.tree()
     .size([iW, iH])
     .separation((a, b) => (a.parent === b.parent ? 1.2 : 1.8));
-
   treeLayout(root);
 
-  // Draw links
   g.selectAll('.link')
     .data(root.links())
     .join('path')
     .attr('class', `link ${faction}-link`)
     .attr('d', d3.linkVertical().x(d => d.x).y(d => d.y));
 
-  // Draw nodes
   const node = g.selectAll('.node')
     .data(root.descendants())
     .join('g')
@@ -614,39 +862,25 @@ function renderTree(svgId, data, faction) {
     .on('click', (event, d) => openModal(d.data));
 
   const radii = d => d.depth === 0 ? 17 : d.children && d.children.length ? 13 : 10;
+  node.append('circle').attr('r', radii);
 
-  node.append('circle')
-    .attr('r', radii);
-
-  // Name labels — split long names over two lines
   node.each(function(d) {
     const el = d3.select(this);
     const below = !d.children || d.children.length === 0;
     const parts = d.data.name.split(' ');
-    const midpoint = Math.ceil(parts.length / 2);
-    const line1 = parts.slice(0, midpoint).join(' ');
-    const line2 = parts.slice(midpoint).join(' ');
+    const mid = Math.ceil(parts.length / 2);
+    const line1 = parts.slice(0, mid).join(' ');
+    const line2 = parts.slice(mid).join(' ');
     const yBase = below ? radii(d) + 4 : -(radii(d) + 4);
-    const fontSize = d.depth === 0 ? 12 : 10;
-    const weight = d.depth === 0 ? '700' : '500';
-
     const t = el.append('text')
-      .style('font-size', fontSize + 'px')
-      .style('font-weight', weight)
+      .style('font-size', (d.depth === 0 ? 12 : 10) + 'px')
+      .style('font-weight', d.depth === 0 ? '700' : '500')
       .attr('text-anchor', 'middle');
-
     if (line2) {
-      t.append('tspan')
-        .attr('x', 0)
-        .attr('dy', below ? yBase : yBase - 13)
-        .text(line1);
-      t.append('tspan')
-        .attr('x', 0)
-        .attr('dy', 13)
-        .text(line2);
+      t.append('tspan').attr('x', 0).attr('dy', below ? yBase : yBase - 13).text(line1);
+      t.append('tspan').attr('x', 0).attr('dy', 13).text(line2);
     } else {
-      t.append('tspan')
-        .attr('x', 0)
+      t.append('tspan').attr('x', 0)
         .attr('dy', below ? yBase + 9 : yBase)
         .attr('dominant-baseline', below ? 'hanging' : 'auto')
         .text(line1);
@@ -656,7 +890,7 @@ function renderTree(svgId, data, faction) {
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
 
-function openModal(d) {
+function openModal(d, geo) {
   document.getElementById('modal-stripe').className = `modal-stripe ${d.data.faction}`;
   document.getElementById('modal-name').textContent = d.name;
   document.getElementById('modal-role').textContent = d.data.role;
@@ -664,6 +898,16 @@ function openModal(d) {
   document.getElementById('modal-years').className = `years-badge ${d.data.faction}`;
   document.getElementById('modal-desc').textContent = d.data.desc;
   document.getElementById('modal-lineage').textContent = d.data.lineage;
+
+  const geoSection = document.getElementById('modal-geo');
+  if (geo) {
+    document.getElementById('modal-origin').textContent = geo.origin.label;
+    document.getElementById('modal-domain').textContent = geo.domain.label;
+    geoSection.style.display = 'grid';
+  } else {
+    geoSection.style.display = 'none';
+  }
+
   document.getElementById('modal-overlay').classList.add('visible');
 }
 
@@ -677,6 +921,97 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
+// ── Map ───────────────────────────────────────────────────────────────────────
+
+function sameLocation(o, d) {
+  return Math.abs(o.lat - d.lat) < 0.01 && Math.abs(o.lng - d.lng) < 0.01;
+}
+
+function initMap() {
+  const map = L.map('map', {
+    center: [36.2, 137.5],
+    zoom: 6,
+    zoomControl: true,
+    scrollWheelZoom: true,
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(map);
+
+  const tokColor = '#4a9eff';
+  const toyColor = '#fbbf24';
+
+  mapFigures.forEach(fig => {
+    const isTok = fig.bioData.faction === 'tokugawa';
+    const color = isTok ? tokColor : toyColor;
+    const bioNode = { name: fig.name, data: fig.bioData };
+    const geo = { origin: fig.origin, domain: fig.domain };
+
+    // Line connecting origin → domain (if different)
+    if (!sameLocation(fig.origin, fig.domain)) {
+      L.polyline(
+        [[fig.origin.lat, fig.origin.lng], [fig.domain.lat, fig.domain.lng]],
+        { color, weight: 1.5, opacity: 0.3, dashArray: '4 6' }
+      ).addTo(map);
+    }
+
+    // Origin marker (hollow circle)
+    const originM = L.circleMarker([fig.origin.lat, fig.origin.lng], {
+      radius: 7,
+      color,
+      weight: 2,
+      fillColor: '#07090f',
+      fillOpacity: 1,
+      opacity: 0.9,
+    }).addTo(map);
+
+    // Domain marker (filled circle) — skip if same as origin
+    if (!sameLocation(fig.origin, fig.domain)) {
+      const domainM = L.circleMarker([fig.domain.lat, fig.domain.lng], {
+        radius: 8,
+        color,
+        weight: 2,
+        fillColor: color,
+        fillOpacity: 0.65,
+        opacity: 0.95,
+      }).addTo(map);
+
+      domainM.bindPopup(buildPopup(fig, color, 'domain'), { maxWidth: 280, minWidth: 200 });
+      domainM.on('click', () => openModal(bioNode, geo));
+    }
+
+    originM.bindPopup(buildPopup(fig, color, 'origin'), { maxWidth: 280, minWidth: 200 });
+    originM.on('click', () => openModal(bioNode, geo));
+  });
+}
+
+function buildPopup(fig, color, type) {
+  const isTok = fig.bioData.faction === 'tokugawa';
+  const cls = isTok ? 'tok' : 'toy';
+  const locationLabel = type === 'origin'
+    ? `<b>Birthplace:</b> ${fig.origin.label}`
+    : `<b>Domain:</b> ${fig.domain.label}`;
+  return `
+    <div class="map-popup">
+      <div class="pop-name" style="color:${color}">${fig.name}</div>
+      <div class="pop-role">${fig.bioData.role}</div>
+      <div class="pop-geo">
+        <div class="pop-geo-row">
+          <div class="pop-geo-dot origin-dot" style="border-color:${color}"></div>
+          <span><b>Born:</b> ${fig.origin.label}</span>
+        </div>
+        <div class="pop-geo-row">
+          <div class="pop-geo-dot domain-dot" style="border-color:${color};background:${color}"></div>
+          <span><b>Domain:</b> ${fig.domain.label}</span>
+        </div>
+      </div>
+      <div class="pop-cta">Click marker to open full biography →</div>
+    </div>`;
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 function init() {
@@ -684,7 +1019,6 @@ function init() {
   renderTree('toyotomi-svg', toyotomiData, 'toyotomi');
 }
 
-// Defer until layout is painted so panel sizes are correct
 requestAnimationFrame(init);
 
 let resizeTimer;
@@ -692,6 +1026,9 @@ window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(init, 120);
 });
+
+// Map initialises once — Leaflet handles its own resize
+initMap();
 </script>
 </body>
 </html>
