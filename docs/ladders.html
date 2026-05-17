@@ -122,12 +122,35 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .cost-high{background:rgba(248,113,113,.12);color:var(--red)}
 .hedge-consideration{font-size:13px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;line-height:1.6}
 .hedge-consideration strong{color:var(--text)}
+.ctrl-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px}
+@media(max-width:640px){.ctrl-grid-3{grid-template-columns:1fr}}
+.sl-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.sl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.sl-name{font-size:13px;font-weight:700;color:var(--accent2)}
+.sl-num{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+.sl-tip{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.4}
+.steps-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;align-items:start}
+@media(max-width:660px){.steps-grid{grid-template-columns:1fr}}
+.step-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.step-num{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.step-title{font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:8px}
+.step-formula{font-family:monospace;font-size:12px;background:var(--surface3);border-radius:6px;padding:8px 10px;color:var(--accent2);margin-bottom:8px;line-height:1.6}
+.step-result{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text);margin-bottom:4px}
+.step-note{font-size:12px;color:var(--muted);line-height:1.45}
+.dv01-hero{background:var(--surface2);border:1px solid rgba(34,211,160,.35);border-radius:var(--r);padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.dv01-num{font-size:48px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--green);flex-shrink:0;line-height:1}
+.dv01-explain{flex:1;min-width:200px}
+.dv01-explain-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.dv01-explain-text{font-size:13px;color:var(--muted);line-height:1.55}
+.bump-check{font-size:12px;color:var(--muted);margin-top:6px}
+.bump-check span{font-family:monospace;color:var(--accent2)}
 </style>
 </head>
 <body>
 
 <nav>
   <span class="nav-logo">Rates Risk</span>
+  <a href="#dv01">DV01 Explained</a>
   <a href="#delta">Delta Ladder</a>
   <a href="#gamma">Gamma Ladder</a>
   <a href="#together">Together</a>
@@ -173,6 +196,133 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <li><strong>Together:</strong> Understand the four quadrants of combined delta/gamma risk and the key ratios traders monitor daily.</li>
         <li><strong>Scenarios:</strong> Five real desk stories showing where the ladders catch risk that P&L attribution misses.</li>
       </ol>
+    </div>
+  </details>
+</section>
+
+<!-- ═══════════════════════════════ DV01 ═══════════════════════════════ -->
+<section id="dv01">
+  <div class="badge">Foundation</div>
+  <h2>How DV01 is Calculated</h2>
+  <p class="lead">DV01 is the dollar change in a position's value when its yield moves by exactly 1 basis point (0.01%). Understanding where the number comes from makes every figure in the ladder concrete rather than abstract.</p>
+
+  <div class="callout">
+    <div class="callout-label">Start Here — The Intuition Before Any Formula</div>
+    <p>Imagine you own a bond that pays you $4M per year (4% on $100M face value) for 5 years, then returns your $100M. You paid $100M for it today because 4% is exactly the market rate — a fair deal.</p>
+    <p style="margin-top:10px">Now the market moves and new bonds yield 4.01% (one basis point more). Your bond is now slightly unattractive — it still pays 4%, but someone could get 4.01% elsewhere. To sell your bond, you'd need to drop the price slightly. That price drop is your DV01: roughly $43,000 on a $100M, 5Y bond.</p>
+    <p style="margin-top:10px">The key driver is <strong>time</strong>. A 1bp change in yield affects every future cash flow — but cash flows far in the future are affected much more than near-term ones, because the discount factor compounds over more periods. That's why a 30Y bond has a DV01 roughly 5× larger than a 5Y bond with the same notional: it has far more future cash flows sitting at the end of a long discount chain.</p>
+  </div>
+
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;margin-bottom:24px">
+    <h3 style="margin-bottom:12px">Why Bond Prices Fall When Yields Rise</h3>
+    <p style="color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:10px">This trips up almost everyone at first. Think of it this way: the bond's coupon is <em>fixed</em> at the time of issue. If market rates then rise, the bond's fixed coupon looks less attractive — it's paying below the new market rate. So buyers will only buy it at a discount. The higher the yield rise, the bigger the discount needed. That's the inverse relationship.</p>
+    <p style="color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:10px">Mathematically: the price of a bond is the <em>present value</em> of all its future cash flows. Present value means discounting: a cash flow of $1 received in 5 years is worth less than $1 today, because you could have invested $1 today and earned interest. The discount rate is the yield. A higher yield → heavier discounting → lower present values → lower price.</p>
+    <p style="color:var(--muted);font-size:14px;line-height:1.7">DV01 is simply how much the total present value changes when the yield moves 1bp. The calculator below shows this step by step.</p>
+  </div>
+
+  <div class="sc-btns" id="inst-btns">
+    <button class="sc-btn active" onclick="setInstrument('bond')">Fixed-Rate Bond (par)</button>
+    <button class="sc-btn" onclick="setInstrument('swap')">Receive-Fixed Swap</button>
+  </div>
+
+  <div class="ctrl-grid-3">
+    <div class="sl-card">
+      <div class="sl-head"><span class="sl-name">Notional</span><span class="sl-num" id="c-notional">$100M</span></div>
+      <div class="sl-tip">Face value of the bond or swap.</div>
+      <input type="range" id="sl-notional" min="10" max="500" step="10" value="100" oninput="onCalcChange()">
+    </div>
+    <div class="sl-card">
+      <div class="sl-head"><span class="sl-name">Maturity</span><span class="sl-num" id="c-maturity">5Y</span></div>
+      <div class="sl-tip">Years to final cash flow. Longer = higher DV01.</div>
+      <input type="range" id="sl-maturity" min="1" max="30" step="1" value="5" oninput="onCalcChange()">
+    </div>
+    <div class="sl-card">
+      <div class="sl-head"><span class="sl-name">Yield / Rate</span><span class="sl-num" id="c-yield">4.00%</span></div>
+      <div class="sl-tip">Current yield (= coupon for a par bond).</div>
+      <input type="range" id="sl-yield" min="0.5" max="10" step="0.25" value="4" oninput="onCalcChange()">
+    </div>
+  </div>
+
+  <div class="dv01-hero">
+    <div class="dv01-num" id="c-dv01-big">—</div>
+    <div class="dv01-explain">
+      <div class="dv01-explain-title">DV01 — dollar value of 1 basis point</div>
+      <div class="dv01-explain-text" id="c-dv01-sentence">—</div>
+      <div class="bump-check" id="c-bump-check"></div>
+    </div>
+  </div>
+
+  <h3 style="margin-bottom:16px">Step-by-Step Calculation</h3>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">Step 1</div>
+      <div class="step-title">Cash Flows</div>
+      <div class="step-formula" id="s1-formula">—</div>
+      <div class="step-note" id="s1-note">—</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">Step 2</div>
+      <div class="step-title">Present Value Each Cash Flow</div>
+      <div class="step-formula">PV(t) = CF<sub>t</sub> / (1 + y/2)<sup>2t</sup></div>
+      <div class="step-result" id="s2-result">—</div>
+      <div class="step-note" id="s2-note">—</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">Step 3</div>
+      <div class="step-title">Macaulay Duration</div>
+      <div class="step-formula">MacD = Σ(t × PV<sub>t</sub>) / Price</div>
+      <div class="step-result" id="s3-result">—</div>
+      <div class="step-note" id="s3-note">—</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">Step 4 → DV01</div>
+      <div class="step-title">Modified Duration → DV01</div>
+      <div class="step-formula" id="s4-formula">ModD = MacD / (1 + y/2)<br>DV01 = Price × ModD × 0.0001</div>
+      <div class="step-result" id="s4-result">—</div>
+      <div class="step-note" id="s4-note">—</div>
+    </div>
+  </div>
+
+  <h3>Cash Flow Table <span style="font-size:12px;font-weight:400;color:var(--muted)" id="cf-showing"></span></h3>
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>Period</th>
+          <th>Time (yrs)</th>
+          <th>Cash Flow</th>
+          <th>Present Value</th>
+          <th>t × PV</th>
+          <th>% of Price</th>
+        </tr>
+      </thead>
+      <tbody id="cf-tbody"></tbody>
+      <tfoot id="cf-tfoot"></tfoot>
+    </table>
+  </div>
+
+  <details>
+    <summary>Deep Dive: Macaulay Duration, Modified Duration, and Why They're Different</summary>
+    <div class="details-body">
+      <p><strong style="color:var(--text)">Macaulay Duration: the weighted average waiting time</strong></p>
+      <p>Imagine a 5Y bond pays you 10 semiannual coupons plus the principal at the end. Some of that money arrives in 6 months, some in 1 year, some in 5 years. Macaulay Duration asks: <em>on average, when do you get paid?</em> It weights each cash flow by its present value, then averages the timing. The result is always less than the bond's maturity — because coupons arrive before maturity and pull the average forward. A zero-coupon bond has Macaulay Duration = maturity exactly, because all cash flow arrives at the end.</p>
+      <p>Why does this matter? Bonds with longer Macaulay Duration are more sensitive to yield changes, because more of their value is sitting far out in the future where discount factors magnify the rate change.</p>
+      <p style="margin-top:4px"><strong style="color:var(--text)">Modified Duration: the direct price-sensitivity measure</strong></p>
+      <p>Macaulay Duration is elegant but you can't directly multiply it by a yield change to get a price change. You need a small adjustment:</p>
+      <div class="code-block">Modified Duration = Macaulay Duration / (1 + yield / m)</div>
+      <p>where m is the compounding frequency (2 for semiannual). For a 5Y bond at 4% yield: Modified Duration ≈ Macaulay / 1.02. The difference is small but matters for precision. Modified Duration tells you the <em>percentage</em> change in price for a 100bp (1%) change in yield. So if Modified Duration = 4.5 years and yields rise 1%, the bond loses approximately 4.5% of its value.</p>
+      <p style="margin-top:4px"><strong style="color:var(--text)">From Modified Duration to DV01</strong></p>
+      <p>DV01 is just Modified Duration scaled to a 1bp (0.01%) move instead of 100bp:</p>
+      <div class="code-block">DV01 = Price × Modified Duration × 0.0001</div>
+      <p>Example: $100M bond, Modified Duration = 4.5 years. DV01 = $100,000,000 × 4.5 × 0.0001 = $45,000. Every basis point move costs or earns $45,000.</p>
+      <p style="margin-top:4px"><strong style="color:var(--text)">Why DV01 is not constant: convexity</strong></p>
+      <p>DV01 assumes a linear relationship between yield and price. In reality, for large moves, the relationship curves — a 100bp fall in yields gains slightly more than a 100bp rise in yields loses. This curvature is called <em>convexity</em> and it's why the gamma ladder matters: gamma is the second-order correction to the DV01 approximation.</p>
+      <p style="margin-top:4px"><strong style="color:var(--text)">For a receive-fixed interest rate swap</strong></p>
+      <p>A swap has no upfront cash exchange — only a series of future net payments (fixed minus floating). The floating leg resets to market rates at each period start, which means it always reprices to par immediately after each reset. Its "duration" is approximately the time to the next reset — nearly zero for frequent resets. So the whole swap's rate sensitivity comes from the fixed leg, making receive-fixed swap DV01 ≈ equivalent fixed-rate bond DV01. This is why traders treat swaps and bonds interchangeably when building the delta ladder.</p>
+      <p style="margin-top:4px"><strong style="color:var(--text)">Bump-and-reprice: the universal check</strong></p>
+      <p>For any instrument, you can always verify DV01 numerically without the analytical formula:</p>
+      <div class="code-block">DV01 = [ Price(yield − 0.5bp) − Price(yield + 0.5bp) ] / 2</div>
+      <p>Shift the yield down 0.5bp, reprice. Shift it up 0.5bp, reprice. The average dollar difference is your DV01. Trading systems use this for complex derivatives where analytical formulas become intractable. The calculator above shows this verification for the current inputs.</p>
     </div>
   </details>
 </section>
@@ -533,6 +683,168 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 </section>
 
 <script>
+// ─── DV01 CALCULATOR ───────────────────────────────────────────────────────
+
+let calcInstrument = 'bond';
+
+function setInstrument(v) {
+  calcInstrument = v;
+  document.querySelectorAll('#inst-btns .sc-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  onCalcChange();
+}
+
+function bondPrice(notional, years, y, yOverride) {
+  const rate = (yOverride !== undefined ? yOverride : y) / 100;
+  const coupon = y / 100 * notional / 2;
+  const n = years * 2;
+  let price = 0;
+  for (let i = 1; i <= n; i++) {
+    const cf = i === n ? coupon + notional : coupon;
+    price += cf / Math.pow(1 + rate / 2, i);
+  }
+  return price;
+}
+
+function calcDV01(notional, years, yieldPct) {
+  const y = yieldPct / 100;
+  const coupon = yieldPct / 100 * notional / 2;
+  const n = years * 2;
+  let cfs = [], totalPV = 0, totalPVt = 0;
+  for (let i = 1; i <= n; i++) {
+    const t = i / 2;
+    const cf = i === n ? coupon + notional : coupon;
+    const pv = cf / Math.pow(1 + y / 2, i);
+    cfs.push({ period: i, t, cf, pv, pvt: pv * t });
+    totalPV += pv;
+    totalPVt += pv * t;
+  }
+  const macaulay = totalPVt / totalPV;
+  const modified = macaulay / (1 + y / 2);
+  const dv01 = totalPV * modified * 0.0001;
+  // bump-and-reprice check
+  const pDown = bondPrice(notional, years, yieldPct, yieldPct - 0.01);
+  const pUp   = bondPrice(notional, years, yieldPct, yieldPct + 0.01);
+  const dv01Bump = (pDown - pUp) / 2;
+  return { cfs, totalPV, macaulay, modified, dv01, dv01Bump };
+}
+
+function fmtDol(v) {
+  const abs = Math.abs(v);
+  if (abs >= 1e6) return (v < 0 ? '−' : '') + '$' + (abs / 1e6).toFixed(2) + 'M';
+  if (abs >= 1e3) return (v < 0 ? '−' : '') + '$' + Math.round(abs).toLocaleString();
+  return (v < 0 ? '−' : '') + '$' + abs.toFixed(0);
+}
+
+function fmtPct(v) { return (v * 100).toFixed(2) + '%'; }
+
+function onCalcChange() {
+  const notional = parseFloat(document.getElementById('sl-notional').value) * 1e6;
+  const years    = parseInt(document.getElementById('sl-maturity').value);
+  const yieldPct = parseFloat(document.getElementById('sl-yield').value);
+  const isSwap   = calcInstrument === 'swap';
+
+  document.getElementById('c-notional').textContent = '$' + (notional / 1e6).toFixed(0) + 'M';
+  document.getElementById('c-maturity').textContent  = years + 'Y';
+  document.getElementById('c-yield').textContent     = yieldPct.toFixed(2) + '%';
+
+  const { cfs, totalPV, macaulay, modified, dv01, dv01Bump } = calcDV01(notional, years, yieldPct);
+  const coupon = yieldPct / 100 * notional / 2;
+  const n = years * 2;
+
+  // Big DV01 display
+  const dv01Disp = fmtDol(dv01);
+  document.getElementById('c-dv01-big').textContent = dv01Disp;
+
+  const instName = isSwap ? 'receive-fixed swap' : 'bond';
+  const dirNote  = isSwap
+    ? 'A 1bp rise in rates means you lose this amount (you receive fixed, which is now worth less). A 1bp fall earns you this.'
+    : 'A 1bp rise in yield means the bond loses this value. A 1bp fall gains this amount.';
+  document.getElementById('c-dv01-sentence').textContent =
+    `On a $${(notional / 1e6).toFixed(0)}M notional ${years}Y ${instName} at ${yieldPct.toFixed(2)}%, every 1bp move in rates changes the value by ${dv01Disp}. A 10bp move = ${fmtDol(dv01 * 10)}. A 100bp move = ${fmtDol(dv01 * 100)}.`;
+
+  document.getElementById('c-bump-check').innerHTML =
+    `Verified via bump-and-reprice: <span>P(y−0.5bp) − P(y+0.5bp) = ${fmtDol(dv01Bump)}</span> ✓`;
+
+  // Step 1
+  const couponAnn = yieldPct / 100 * notional;
+  document.getElementById('s1-formula').innerHTML =
+    isSwap
+      ? `Fixed leg coupon = $${(notional/1e6).toFixed(0)}M × ${yieldPct.toFixed(2)}% = ${fmtDol(couponAnn)}/yr\n(semiannual = ${fmtDol(coupon)} per period)\nFloating leg ≈ par at each reset → duration ≈ 0`
+      : `Semiannual coupon = $${(notional/1e6).toFixed(0)}M × ${yieldPct.toFixed(2)}% / 2 = ${fmtDol(coupon)}\nFinal period: coupon + principal = ${fmtDol(coupon + notional)}\nTotal periods: ${n}`;
+  document.getElementById('s1-note').textContent =
+    isSwap
+      ? 'A receive-fixed swap is economically a long fixed bond + short floating bond. Since the floating bond resets to par, its DV01 ≈ 0, so the swap DV01 = fixed-leg DV01.'
+      : `Par bond: price = notional because coupon rate = yield. All ${n} semiannual periods shown in the table below.`;
+
+  // Step 2
+  document.getElementById('s2-result').textContent = fmtDol(totalPV);
+  document.getElementById('s2-note').textContent =
+    `Sum of all ${n} discounted cash flows. ` +
+    (Math.abs(totalPV - notional) < 1
+      ? 'Equals notional exactly — confirming this is a par instrument.'
+      : `Differs from notional because yield ≠ coupon rate.`);
+
+  // Step 3
+  document.getElementById('s3-result').textContent = macaulay.toFixed(4) + ' years';
+  document.getElementById('s3-note').textContent =
+    `The weighted-average time to receive cash flows. Shorter than ${years}Y because coupons arrive before maturity. A zero-coupon bond would have Macaulay Duration = ${years}Y exactly.`;
+
+  // Step 4
+  document.getElementById('s4-result').textContent =
+    `ModDur = ${modified.toFixed(4)} yrs → DV01 = ${fmtDol(dv01)}`;
+  document.getElementById('s4-note').innerHTML =
+    `ModDur = ${macaulay.toFixed(4)} / (1 + ${(yieldPct/2).toFixed(2)}%) = <strong style="color:var(--text)">${modified.toFixed(4)}</strong>. ` +
+    `DV01 = ${fmtDol(Math.round(totalPV))} × ${modified.toFixed(4)} × 0.0001 = <strong style="color:var(--green)">${fmtDol(dv01)}</strong>.`;
+
+  // Cash flow table (show first 12 + last 1 if long)
+  const SHOW = 12;
+  const tbody = document.getElementById('cf-tbody');
+  const tfoot = document.getElementById('cf-tfoot');
+  tbody.innerHTML = '';
+  let shown = cfs;
+  let truncated = false;
+  if (cfs.length > SHOW + 1) {
+    shown = cfs.slice(0, SHOW);
+    truncated = true;
+  }
+  document.getElementById('cf-showing').textContent =
+    truncated ? `(showing first ${SHOW} of ${n} periods)` : `(${n} periods)`;
+
+  shown.forEach(r => {
+    const pctPrice = (r.pv / totalPV * 100).toFixed(1) + '%';
+    tbody.innerHTML += `<tr>
+      <td style="color:var(--muted)">${r.period}</td>
+      <td>${r.t.toFixed(1)}</td>
+      <td>${fmtDol(r.cf)}</td>
+      <td>${fmtDol(r.pv)}</td>
+      <td class="pos">${fmtDol(r.pvt)}</td>
+      <td style="color:var(--muted)">${pctPrice}</td>
+    </tr>`;
+  });
+  if (truncated) {
+    const last = cfs[cfs.length - 1];
+    tbody.innerHTML += `<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:6px">… ${cfs.length - SHOW - 1} periods omitted …</td></tr>`;
+    tbody.innerHTML += `<tr>
+      <td style="color:var(--muted)">${last.period}</td>
+      <td>${last.t.toFixed(1)}</td>
+      <td>${fmtDol(last.cf)}</td>
+      <td>${fmtDol(last.pv)}</td>
+      <td class="pos">${fmtDol(last.pvt)}</td>
+      <td style="color:var(--muted)">${(last.pv / totalPV * 100).toFixed(1)}%</td>
+    </tr>`;
+  }
+  tfoot.innerHTML = `<tr style="border-top:1px solid var(--border);font-weight:700">
+    <td colspan="2" style="color:var(--muted)">Total</td>
+    <td>—</td>
+    <td style="color:var(--text)">${fmtDol(totalPV)}</td>
+    <td class="pos">${fmtDol(cfs.reduce((a,r)=>a+r.pvt,0))}</td>
+    <td style="color:var(--muted)">100%</td>
+  </tr>`;
+}
+
+// ─── END DV01 CALCULATOR ────────────────────────────────────────────────────
+
 const TENORS = ['3M','6M','1Y','2Y','3Y','5Y','7Y','10Y','15Y','20Y','30Y'];
 
 const DELTA_DATA = [
@@ -965,6 +1277,7 @@ function onShockChange(v) {
 
 window.addEventListener('load', () => {
   requestAnimationFrame(() => {
+    onCalcChange();
     initDeltaChart();
     initGammaChart();
     initShockChart();
