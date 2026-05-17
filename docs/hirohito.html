@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hirohito & the Making of Modern Japan — Reading Companion</title>
+<style>
+:root {
+  --bg:#07090f; --surface:#0d1117; --surface2:#161b27; --surface3:#1e2637;
+  --border:#2a3347; --text:#e2e8f0; --muted:#7a8faa;
+  --accent:#4a9eff; --accent2:#7bc4ff; --green:#22d3a0; --red:#f87171;
+  --yellow:#fbbf24; --purple:#a78bfa; --orange:#fb923c; --r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;line-height:1.6;min-height:100vh}
+
+/* NAV */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:16px}
+.topbar-logo{font-weight:700;font-size:15px;color:var(--text);padding:14px 0;white-space:nowrap}
+.topbar-logo span{color:var(--yellow)}
+.nav-tabs{display:flex;gap:0;overflow-x:auto;flex:1}
+.nav-tabs a{padding:16px 18px;color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;display:block}
+.nav-tabs a:hover,.nav-tabs a.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* SECTIONS */
+.section{display:none;padding:40px 20px;max-width:1100px;margin:0 auto}
+.section.active{display:block}
+
+/* HERO */
+.hero{text-align:center;padding:60px 20px 20px;max-width:1100px;margin:0 auto}
+.hero h1{font-size:clamp(22px,4vw,40px);font-weight:800;margin-bottom:6px;line-height:1.2}
+.hero .book-author{color:var(--muted);font-size:16px;margin-bottom:6px}
+.hero .book-year{display:inline-block;background:rgba(251,191,36,.12);color:var(--yellow);font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600;margin-bottom:24px}
+
+/* CALLOUT */
+.callout{background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.18);border-radius:var(--r);padding:18px 22px;margin:20px 0;text-align:left}
+.callout-title{color:var(--accent);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.callout p{color:var(--muted);font-size:14px;line-height:1.7}
+.callout.yellow{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.2)}
+.callout.yellow .callout-title{color:var(--yellow)}
+.callout.red{background:rgba(248,113,113,.06);border-color:rgba(248,113,113,.2)}
+.callout.red .callout-title{color:var(--red)}
+.callout.purple{background:rgba(167,139,250,.06);border-color:rgba(167,139,250,.2)}
+.callout.purple .callout-title{color:var(--purple)}
+
+/* CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin:24px 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.card-icon{font-size:26px;margin-bottom:10px}
+.card h3{font-size:15px;margin-bottom:6px}
+.card p{color:var(--muted);font-size:13px;line-height:1.6}
+
+/* SECTION HEADER */
+h2{font-size:24px;font-weight:700;margin-bottom:6px}
+.lead{color:var(--muted);font-size:15px;margin-bottom:24px;line-height:1.7}
+
+/* FILTER TABS */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.ftab{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:13px;transition:all .2s}
+.ftab:hover,.ftab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.ftab.yellow:hover,.ftab.yellow.active{background:var(--yellow);border-color:var(--yellow);color:#000}
+.ftab.red:hover,.ftab.red.active{background:var(--red);border-color:var(--red);color:#000}
+.ftab.green:hover,.ftab.green.active{background:var(--green);border-color:var(--green);color:#000}
+.ftab.purple:hover,.ftab.purple.active{background:var(--purple);border-color:var(--purple);color:#fff}
+
+/* TIMELINE */
+.timeline{position:relative;padding:10px 0}
+.timeline::before{content:'';position:absolute;left:160px;top:0;bottom:0;width:2px;background:var(--border)}
+.tl-item{display:flex;gap:0;margin-bottom:20px;position:relative;align-items:flex-start}
+.tl-item.hidden{display:none}
+.tl-date{width:145px;text-align:right;padding-right:20px;color:var(--accent);font-weight:700;font-size:14px;padding-top:14px;flex-shrink:0}
+.tl-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:15px;position:relative;z-index:1;border:2px solid var(--bg)}
+.tl-dot.political{background:var(--yellow)}
+.tl-dot.military{background:var(--red)}
+.tl-dot.personal{background:var(--green)}
+.tl-dot.international{background:var(--purple)}
+.tl-content{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;margin-left:18px}
+.tl-tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+.tag-political{background:rgba(251,191,36,.15);color:var(--yellow)}
+.tag-military{background:rgba(248,113,113,.15);color:var(--red)}
+.tag-personal{background:rgba(34,211,160,.15);color:var(--green)}
+.tag-international{background:rgba(167,139,250,.15);color:var(--purple)}
+.tl-content h4{font-size:15px;margin-bottom:4px}
+.tl-content p{color:var(--muted);font-size:13px;line-height:1.6}
+
+/* PEOPLE HIERARCHY */
+.hierarchy-wrap{overflow-x:auto;padding:20px 0}
+.hierarchy-svg-wrap{position:relative;min-width:800px}
+.h-node{position:absolute;transform:translate(-50%,-50%);cursor:pointer;transition:all .2s}
+.h-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;text-align:center;transition:all .2s;min-width:110px}
+.h-node:hover .h-box{border-color:var(--accent);background:var(--surface3)}
+.h-box.emperor{border-color:var(--yellow);background:rgba(251,191,36,.08)}
+.h-box.ancestor{border-color:rgba(74,158,255,.3);background:rgba(74,158,255,.04)}
+.h-box.advisor{border-color:rgba(34,211,160,.3);background:rgba(34,211,160,.04)}
+.h-box.military{border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.04)}
+.h-box.government{border-color:rgba(251,191,36,.25);background:rgba(251,191,36,.04)}
+.h-box.foreign{border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.04)}
+.h-box.family{border-color:rgba(251,146,60,.3);background:rgba(251,146,60,.04)}
+.h-name{font-size:13px;font-weight:600;white-space:nowrap}
+.h-role{font-size:11px;color:var(--muted);white-space:nowrap}
+.h-legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.h-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.h-legend-dot{width:10px;height:10px;border-radius:50%}
+
+/* CONCEPTS */
+.concept-section-title{font-size:17px;font-weight:700;color:var(--accent2);margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.concepts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:8px}
+.concept-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;transition:border-color .2s}
+.concept-card:hover{border-color:var(--accent)}
+.concept-card.hidden{display:none}
+.c-term{font-size:16px;font-weight:700;color:var(--accent2);margin-bottom:2px}
+.c-japanese{font-size:13px;color:var(--muted);margin-bottom:8px}
+.c-body{color:var(--muted);font-size:13px;line-height:1.6}
+.c-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.3px}
+.c-political{background:rgba(251,191,36,.12);color:var(--yellow)}
+.c-military{background:rgba(248,113,113,.12);color:var(--red)}
+.c-cultural{background:rgba(167,139,250,.12);color:var(--purple)}
+.c-economic{background:rgba(34,211,160,.12);color:var(--green)}
+.c-religious{background:rgba(251,146,60,.12);color:var(--orange)}
+
+/* SHINTO */
+.deity-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+.deity-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 14px;cursor:pointer;transition:all .2s;text-align:center}
+.deity-card:hover{border-color:var(--purple);background:var(--surface2);transform:translateY(-3px);box-shadow:0 8px 24px rgba(167,139,250,.15)}
+.deity-card.hidden{display:none}
+.d-icon{font-size:38px;margin-bottom:10px}
+.d-name{font-size:14px;font-weight:700;margin-bottom:4px}
+.d-domain{font-size:11px;color:var(--purple);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);max-width:580px;width:100%;max-height:85vh;overflow-y:auto;padding:28px;position:relative;animation:slideUp .2s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;transition:color .2s}
+.modal-close:hover{color:var(--text)}
+.modal-icon{font-size:40px;margin-bottom:12px}
+.modal h2{font-size:22px;font-weight:800;margin-bottom:4px}
+.modal-sub{color:var(--accent);font-size:14px;margin-bottom:4px;font-weight:600}
+.modal-dates{color:var(--muted);font-size:13px;margin-bottom:16px}
+.modal-divider{height:1px;background:var(--border);margin:16px 0}
+.modal-body p{color:var(--muted);font-size:14px;line-height:1.75;margin-bottom:12px}
+.modal-body h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text);margin:16px 0 6px}
+.modal-body ul{color:var(--muted);font-size:13px;padding-left:18px}
+.modal-body ul li{margin-bottom:5px}
+.modal-body .book-quote{background:rgba(74,158,255,.06);border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 6px 6px 0;font-style:italic;color:var(--muted);font-size:13px;margin:12px 0}
+
+/* COLLAPSIBLE */
+details{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin:14px 0}
+summary{padding:14px 16px;cursor:pointer;font-weight:600;font-size:14px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+summary::after{content:'▸';color:var(--muted);transition:transform .2s}
+details[open] summary::after{transform:rotate(90deg)}
+details .details-body{padding:0 16px 16px;color:var(--muted);font-size:13px;line-height:1.7}
+
+/* GLOSSARY */
+.glossary{background:var(--surface);border-top:1px solid var(--border);padding:40px 20px;margin-top:0}
+.glossary-inner{max-width:1100px;margin:0 auto}
+.glossary h3{font-size:16px;font-weight:700;margin-bottom:20px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-size:12px}
+.gloss-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.gloss-item{position:relative}
+.gloss-term{color:var(--accent);text-decoration:underline dotted;cursor:help;font-size:14px;font-weight:500}
+.gloss-tip{display:none;position:absolute;bottom:calc(100% + 4px);left:0;background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--muted);width:230px;z-index:50;line-height:1.5;pointer-events:none}
+.gloss-item:hover .gloss-tip{display:block}
+
+/* READING PROGRESS */
+.progress-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:24px}
+.progress-section h4{font-size:14px;margin-bottom:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-size:12px}
+.chapters{display:flex;flex-wrap:wrap;gap:8px}
+.ch-btn{padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:12px;transition:all .2s}
+.ch-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ch-btn.read{background:rgba(34,211,160,.1);border-color:var(--green);color:var(--green)}
+
+/* CHIP */
+.chip{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;margin:2px}
+.chip-blue{background:rgba(74,158,255,.12);color:var(--accent2)}
+.chip-red{background:rgba(248,113,113,.12);color:var(--red)}
+.chip-yellow{background:rgba(251,191,36,.12);color:var(--yellow)}
+.chip-green{background:rgba(34,211,160,.12);color:var(--green)}
+.chip-purple{background:rgba(167,139,250,.12);color:var(--purple)}
+
+/* RESPONSIVE */
+@media(max-width:640px){
+  .timeline::before{left:90px}
+  .tl-date{width:76px;font-size:12px}
+  .topbar{padding:0 12px}
+  .nav-tabs a{padding:14px 12px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">昭和 <span>Shōwa</span></div>
+  <nav class="nav-tabs" id="navTabs">
+    <a href="#" class="active" onclick="showSection('overview',this)">Overview</a>
+    <a href="#" onclick="showSection('timeline',this)">Timeline</a>
+    <a href="#" onclick="showSection('people',this)">Key People</a>
+    <a href="#" onclick="showSection('concepts',this)">Concepts</a>
+    <a href="#" onclick="showSection('shinto',this)">Shinto Pantheon</a>
+    <a href="#" onclick="showSection('context',this)">Historical Context</a>
+  </nav>
+</div>
+
+<!-- ═══════════════════════════════════ OVERVIEW ═══════════════════════════════════ -->
+<div class="hero">
+  <div class="book-year">Herbert P. Bix · Pulitzer Prize 2001</div>
+  <h1>Hirohito and the Making of Modern Japan</h1>
+  <p class="book-author">A Reading Companion</p>
+</div>
+
+<div id="section-overview" class="section active">
+  <div class="callout">
+    <div class="callout-title">Why this companion?</div>
+    <p>Bix's central argument is that Hirohito was not a passive figurehead but an active political and military decision-maker who shaped Japan's wars — and then escaped accountability under American occupation. The book is dense with names, institutions, and ideology. This companion maps the web of people, ideas, and events so you can track Bix's argument as it unfolds across 800 pages.</p>
+  </div>
+
+  <details open>
+    <summary>How to use this companion</summary>
+    <div class="details-body">
+      <ol style="padding-left:18px;line-height:2">
+        <li><strong>Timeline</strong> — See where you are chronologically. Filter by political, military, or personal events.</li>
+        <li><strong>Key People</strong> — Click any figure in the power map to read their biography and role in the book.</li>
+        <li><strong>Concepts</strong> — Look up Japanese terms, institutions, and ideologies as you encounter them.</li>
+        <li><strong>Shinto Pantheon</strong> — Understand the religious framework that underpinned imperial divinity claims.</li>
+        <li><strong>Historical Context</strong> — Maps, war phases, and comparative notes.</li>
+        <li><strong>Glossary</strong> — Quick hover-definitions at the bottom of every page.</li>
+      </ol>
+    </div>
+  </details>
+
+  <div style="margin-top:28px">
+    <h2>The Three Core Arguments</h2>
+    <p class="lead">What Bix wants you to take away — each tied to evidence across multiple chapters.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">👑</div>
+      <h3>Hirohito Was No Puppet</h3>
+      <p>Bix documents 44 years of imperial conferences, war diaries, and aide memoirs showing Hirohito actively approved military operations, questioned generals, and shaped strategy — contradicting the "passive emperor" myth Japan cultivated after 1945.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🛡️</div>
+      <h3>MacArthur's Bargain</h3>
+      <p>To use the emperor as a tool for occupation governance, MacArthur shielded Hirohito from war-crimes prosecution. The cover-up required destroying evidence, coaching testimony, and constructing the "peaceful emperor" persona that endures today.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🧬</div>
+      <h3>Meiji Ideology as Weapon</h3>
+      <p>The Meiji system fused Shinto divinity, Confucian hierarchy, and modern nationalism into a political theology of imperial loyalty. Understanding this ideology is the key to understanding why Japan's military machine was so hard to stop from within.</p>
+    </div>
+  </div>
+
+  <div class="callout yellow">
+    <div class="callout-title">Book Structure at a Glance</div>
+    <p>The book covers 1901–1989, but divides roughly into three acts: <strong>Formation</strong> (1901–1926, Hirohito trained as a divine sovereign), <strong>War</strong> (1931–1945, the militarist state and its wars), and <strong>Reconstruction</strong> (1945–1989, the occupation and remade identity). The densest and most argued section is the war years — Chapters 7–17.</p>
+  </div>
+
+  <div style="margin-top:28px">
+    <h2>Chapter Guide</h2>
+    <p class="lead">Track your reading progress. Click chapters you've finished.</p>
+    <div class="progress-section">
+      <h4>Mark chapters as read</h4>
+      <div class="chapters" id="chapterBtns"></div>
+    </div>
+  </div>
+
+  <div class="callout red">
+    <div class="callout-title">Key Historiographical Debate</div>
+    <p>Bix wrote against the dominant "shielded emperor" school (historians like Hata Ikuhiko who argued Hirohito was constitutionally constrained). His use of the <em>Shōwa Tennō Dokuhakuroku</em> (Hirohito's own post-war monologue) as evidence that the emperor knew everything is the book's most controversial methodological choice.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ TIMELINE ═══════════════════════════════════ -->
+<div id="section-timeline" class="section">
+  <h2>Timeline of the Shōwa Era</h2>
+  <p class="lead">From Hirohito's birth to the end of his reign — filtered by event type to trace the threads Bix weaves together.</p>
+
+  <div class="filter-row">
+    <button class="ftab active" onclick="filterTimeline('all',this)">All Events</button>
+    <button class="ftab yellow" onclick="filterTimeline('political',this)">Political</button>
+    <button class="ftab red" onclick="filterTimeline('military',this)">Military</button>
+    <button class="ftab green" onclick="filterTimeline('personal',this)">Personal</button>
+    <button class="ftab purple" onclick="filterTimeline('international',this)">International</button>
+  </div>
+
+  <div class="timeline" id="timelineEl"></div>
+</div>
+
+<!-- ═══════════════════════════════════ PEOPLE ═══════════════════════════════════ -->
+<div id="section-people" class="section">
+  <h2>Power Map — Key Figures</h2>
+  <p class="lead">Every person who shaped Hirohito's decisions or was shaped by them. Click any figure to read their biography and role in Bix's argument.</p>
+
+  <div class="callout">
+    <div class="callout-title">How to read this map</div>
+    <p>The emperor sits at the centre. Lines show chains of influence and command. Colour indicates institutional role. Size indicates relative prominence in the book. <strong>Click any node</strong> to open a full profile.</p>
+  </div>
+
+  <div class="h-legend">
+    <div class="h-legend-item"><div class="h-legend-dot" style="background:var(--yellow)"></div> Imperial / Emperor</div>
+    <div class="h-legend-item"><div class="h-legend-dot" style="background:var(--accent)"></div> Imperial Ancestors</div>
+    <div class="h-legend-item"><div class="h-legend-dot" style="background:var(--green)"></div> Inner Circle / Advisors</div>
+    <div class="h-legend-item"><div class="h-legend-dot" style="background:var(--red)"></div> Military Commanders</div>
+    <div class="h-legend-item"><div class="h-legend-dot" style="background:var(--orange)"></div> Imperial Family</div>
+    <div class="h-legend-item"><div class="h-legend-dot" style="background:var(--purple)"></div> Foreign Powers</div>
+  </div>
+
+  <div class="hierarchy-wrap">
+    <div class="hierarchy-svg-wrap" id="hierarchySvg" style="height:620px"></div>
+  </div>
+
+  <div style="margin-top:32px">
+    <h2>All Figures — Quick Reference</h2>
+    <div class="concepts-grid" id="peopleList"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ CONCEPTS ═══════════════════════════════════ -->
+<div id="section-concepts" class="section">
+  <h2>Key Concepts &amp; Terms</h2>
+  <p class="lead">Japanese political, military, cultural, and religious vocabulary essential for following Bix's argument. Many of these terms have no clean English equivalent — understanding them changes how you read the source material.</p>
+
+  <div class="filter-row">
+    <button class="ftab active" onclick="filterConcepts('all',this)">All</button>
+    <button class="ftab yellow" onclick="filterConcepts('political',this)">Political</button>
+    <button class="ftab red" onclick="filterConcepts('military',this)">Military</button>
+    <button class="ftab purple" onclick="filterConcepts('cultural',this)">Cultural</button>
+    <button class="ftab" style="color:var(--orange);border-color:var(--orange)" onclick="filterConcepts('religious',this)">Religious</button>
+    <button class="ftab green" onclick="filterConcepts('economic',this)">Economic</button>
+  </div>
+
+  <div class="concepts-grid" id="conceptsGrid"></div>
+</div>
+
+<!-- ═══════════════════════════════════ SHINTO ═══════════════════════════════════ -->
+<div id="section-shinto" class="section">
+  <h2>Shinto Pantheon</h2>
+  <p class="lead">Shinto is the indigenous religion of Japan — not a fixed creed but a living relationship between humans, nature, and kami (神, divine spirits). For Hirohito's Japan, these myths were not folklore but constitutional fact: the imperial family descended directly from Amaterasu, the sun goddess. That claim underpinned every war the book describes.</p>
+
+  <div class="callout purple">
+    <div class="callout-title">Why the Pantheon Matters to Bix</div>
+    <p>State Shinto, formalised after the Meiji Restoration, elevated these mythological genealogies into political ideology. Hirohito's divinity was not metaphorical — it was the legal basis of imperial sovereignty enshrined in Article 3 of the Meiji Constitution. Understanding the pantheon explains why the emperor's "humanity declaration" of January 1946 was such a seismic political event.</p>
+  </div>
+
+  <div class="filter-row">
+    <button class="ftab active" onclick="filterDeities('all',this)">All Deities</button>
+    <button class="ftab" style="color:var(--yellow);border-color:rgba(251,191,36,.3)" onclick="filterDeities('creation',this)">Creation</button>
+    <button class="ftab" style="color:var(--red);border-color:rgba(248,113,113,.3)" onclick="filterDeities('war',this)">War &amp; Storms</button>
+    <button class="ftab" style="color:var(--accent);border-color:rgba(74,158,255,.3)" onclick="filterDeities('celestial',this)">Celestial</button>
+    <button class="ftab" style="color:var(--green);border-color:rgba(34,211,160,.3)" onclick="filterDeities('nature',this)">Nature &amp; Earth</button>
+    <button class="ftab purple" onclick="filterDeities('imperial',this)">Imperial Line</button>
+  </div>
+
+  <div class="deity-grid" id="deityGrid"></div>
+
+  <div style="margin-top:40px">
+    <h2>The Imperial Genealogy</h2>
+    <p class="lead">The mythological chain that runs from the age of gods to Emperor Hirohito — the very legitimacy Bix argues was weaponised by the Meiji state.</p>
+    <div class="callout yellow">
+      <div class="callout-title">The Divine Chain</div>
+      <p>Izanagi & Izanami → <strong>Amaterasu</strong> (Sun Goddess) → <strong>Ame-no-Oshihomimi</strong> → <strong>Ninigi-no-Mikoto</strong> (descends to earth with the Three Sacred Treasures) → <strong>Hoori</strong> → <strong>Ugayafukiaezu</strong> → <strong>Jimmu</strong> (first human emperor, ca. 660 BCE in legend) → … → <strong>Meiji Emperor</strong> → <strong>Taisho Emperor</strong> → <strong>Emperor Hirohito (Shōwa)</strong></p>
+    </div>
+    <div class="callout red">
+      <div class="callout-title">The Three Sacred Treasures (三種の神器)</div>
+      <p>Passed from Amaterasu to Ninigi and thence to each emperor: <strong>Kusanagi-no-Tsurugi</strong> (sword — valor), <strong>Yata no Kagami</strong> (mirror — wisdom), <strong>Yasakani no Magatama</strong> (jewel — benevolence). Possession of these treasures legitimised each succession. Their loss would have ended the dynasty — one reason Japan fought to the final shore rather than risk invasion of the home islands.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ CONTEXT ═══════════════════════════════════ -->
+<div id="section-context" class="section">
+  <h2>Historical Context</h2>
+  <p class="lead">The larger forces — ideological, geopolitical, and structural — that shaped the world Hirohito ruled.</p>
+
+  <div class="callout">
+    <div class="callout-title">The Meiji System as Architecture</div>
+    <p>Bix returns repeatedly to how the Meiji Constitution of 1889 was designed to concentrate power in the emperor while insulating him from accountability. Ministers served the emperor, not parliament. The military reported to the emperor directly, bypassing civilian government. Understanding this architecture is essential — Hirohito's power was real but deliberately obscured.</p>
+  </div>
+
+  <div class="cards" style="margin-top:24px">
+    <div class="card">
+      <div class="card-icon">📜</div>
+      <h3>The Meiji Constitution (1889)</h3>
+      <p>Article 1: The Empire of Japan shall be reigned over and governed by a line of Emperors unbroken for ages eternal. Article 3: The Emperor is sacred and inviolable. The military answered directly to him — creating a command structure that no civilian PM could override.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚔️</div>
+      <h3>Phases of Japan's Wars</h3>
+      <p><strong>1931</strong> Manchurian Incident → <strong>1937</strong> Second Sino-Japanese War → <strong>1941</strong> Pacific War begins (Pearl Harbor) → <strong>1942</strong> Midway turns the tide → <strong>1945</strong> Surrender. Each escalation had Hirohito's sanction.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏛️</div>
+      <h3>The February 26 Incident (1936)</h3>
+      <p>Young Army officers killed senior officials and seized central Tokyo for 4 days, demanding a "Shōwa Restoration." Hirohito's decisive suppression of the coup is one of the clearest demonstrations of his real authority — he personally ordered its end.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏳️</div>
+      <h3>The Surrender &amp; Its Terms</h3>
+      <p>Japan surrendered August 15, 1945 — but the key question Bix poses is: why didn't it happen sooner? By June 1945 the situation was hopeless. Hirohito delayed, hoping for a negotiated peace that preserved kokutai (the imperial system). Hundreds of thousands died in that interval.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌐</div>
+      <h3>The Occupation (1945–1952)</h3>
+      <p>SCAP (Supreme Commander for Allied Powers, MacArthur) governed Japan through Japanese institutions — meaning through the emperor. MacArthur needed Hirohito cooperative and in place. The Tokyo War Crimes Tribunal deliberately excluded the emperor from prosecution despite evidence of his involvement.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📰</div>
+      <h3>Post-War Memory Politics</h3>
+      <p>Japan's textbook controversies, Yasukuni Shrine visits, and the "comfort women" debate are all downstream of the impunity the occupation granted. Bix's book was published in 2000, into this still-active political landscape — which is why it caused such controversy in Japan.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:32px">
+    <h2>Japan's Military Command Structure</h2>
+    <p class="lead">How the Meiji Constitution created parallel chains of command that made the emperor both powerful and deniable.</p>
+  </div>
+
+  <div class="callout yellow">
+    <div class="callout-title">The "Supreme Command Independence" Problem</div>
+    <p>The right of supreme command (<em>tōsuiken</em>) was constitutionally separate from the right of government (<em>tōchiken</em>). This meant the Army and Navy could take military actions without civilian ministerial approval — they answered only to the emperor. Bix argues this was not a bug but a feature: it allowed the emperor to be involved in war planning while civilian officials could claim ignorance.</p>
+  </div>
+
+  <details>
+    <summary>The Genrō System — Japan's Shadow Government</summary>
+    <div class="details-body">
+      <p>The <em>genrō</em> (元老, "elder statesmen") were a small group of Meiji-era oligarchs with no constitutional basis but immense informal power. They recommended prime ministers to the emperor, advised on major decisions, and served as the real architects of Meiji Japan's political system.</p>
+      <p style="margin-top:10px">By Hirohito's reign, the last surviving genrō was Saionji Kinmochi (died 1940). After him, informal influence shifted to the Lord Keeper of the Privy Seal — a position Kido Kōichi held during the war years. Understanding genrō influence explains why so many crucial decisions appear undocumented in official records: they happened in private audiences with the emperor.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>The Tokyo War Crimes Tribunal — What Was Excluded</summary>
+    <div class="details-body">
+      <p>The International Military Tribunal for the Far East (1946–1948) convicted 28 defendants, executing 7 including Tōjō Hideki. Notably absent from the dock: Emperor Hirohito, Unit 731 personnel (in exchange for biological warfare data), and any defendant whose testimony might implicate the emperor.</p>
+      <p style="margin-top:10px">Bix documents how SCAP staff coached witnesses, confiscated diaries, and shaped testimony to construct a firewall around Hirohito. The prosecution's evidence files were selectively declassified — key documents linking Hirohito to specific decisions were withheld until decades later.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>The "Humanity Declaration" of January 1, 1946</summary>
+    <div class="details-body">
+      <p>Hirohito's New Year's rescript denying divine status (<em>Ningen Sengen</em>) is widely misread. Bix points out that the original Japanese never actually claims divinity — it quotes a Meiji-era oath about governance, and the denial of godhood appears only in the SCAP-authored English translation. In Japanese, the text is deliberately ambiguous.</p>
+      <p style="margin-top:10px">The real purpose was to dismantle State Shinto as a mobilisation ideology under occupation pressure — not to make a sincere theological statement. Hirohito's private beliefs about his divine lineage are never clearly stated in the historical record.</p>
+    </div>
+  </details>
+</div>
+
+<!-- ═══════════════════════════════════ GLOSSARY ═══════════════════════════════════ -->
+<div class="glossary">
+  <div class="glossary-inner">
+    <h3>Quick Glossary — hover for definitions</h3>
+    <div class="gloss-grid" id="glossaryGrid"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MODAL ═══════════════════════════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+// ─── NAV ───
+function showSection(id, el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tabs a').forEach(a=>a.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  el.classList.add('active');
+  return false;
+}
+
+// ─── CHAPTER PROGRESS ───
+const chapters = [
+  'Prologue','Ch 1: The Boy','Ch 2: Youth','Ch 3: Europe','Ch 4: Regency',
+  'Ch 5: Enthronement','Ch 6: Manchuria','Ch 7: Shanghai','Ch 8: Nanjing',
+  'Ch 9: Reforms','Ch 10: China War','Ch 11: The New Order','Ch 12: Alliances',
+  'Ch 13: Pearl Harbor','Ch 14: Pacific War','Ch 15: Turning Point',
+  'Ch 16: Defeat','Ch 17: Surrender','Ch 18: Occupation','Ch 19: New Monarchy',
+  'Epilogue'
+];
+const chapEl = document.getElementById('chapterBtns');
+chapters.forEach((c,i)=>{
+  const key='ch_'+i;
+  const btn=document.createElement('button');
+  btn.className='ch-btn'+(localStorage.getItem(key)?' read':'');
+  btn.textContent=c;
+  btn.onclick=()=>{
+    const isRead=btn.classList.toggle('read');
+    isRead?localStorage.setItem(key,'1'):localStorage.removeItem(key);
+  };
+  chapEl.appendChild(btn);
+});
+
+// ─── TIMELINE DATA ───
+const tlData=[
+  {y:'1852',cat:'personal',title:'Meiji Emperor Born',text:'Mutsuhito born — the grandfather whose modernising reign would shape everything Hirohito inherited.'},
+  {y:'1868',cat:'political',title:'Meiji Restoration',text:'The Tokugawa shogunate falls. Emperor Meiji is restored to nominal power. Japan begins rapid industrialisation and military build-up under oligarchic rule.'},
+  {y:'1889',cat:'political',title:'Meiji Constitution Enacted',text:'Establishes the emperor as sacred and inviolable, with direct command of the military. Creates the structural ambiguity Bix argues allowed Hirohito to exercise real power with plausible deniability.'},
+  {y:'1894–95',cat:'military',title:'First Sino-Japanese War',text:'Japan defeats China, gains Taiwan and influence over Korea. Marks Japan\'s emergence as a regional military power.'},
+  {y:'1901',cat:'personal',title:'Hirohito Born',text:'Born April 29 to Crown Prince Yoshihito (future Taisho Emperor). Immediately separated from his parents and raised by a surrogate family — standard imperial practice.'},
+  {y:'1904–05',cat:'military',title:'Russo-Japanese War',text:'Japan shockingly defeats Russia, the first Asian nation to defeat a European power. Shapes Hirohito\'s generation\'s belief in imperial invincibility.'},
+  {y:'1912',cat:'political',title:'Meiji Emperor Dies — Taisho Era Begins',text:'General Nogi Maresuke commits ritual suicide (junshi) to follow the emperor in death. Hirohito witnesses the extremity of imperial loyalty ideology from age 11.'},
+  {y:'1914–18',cat:'international',title:'World War I — Japan on Allied Side',text:'Japan seizes German Pacific territories. The war\'s aftermath — Wilson\'s self-determination rhetoric vs. racial equality rebuffed at Paris — deepens nationalist grievance.'},
+  {y:'1921',cat:'political',title:'Hirohito Becomes Regent',text:'As his father\'s mental health deteriorates, Hirohito is named Prince Regent. He also tours Europe — his only time outside Japan — forming his views on modern statecraft.'},
+  {y:'1923',cat:'personal',title:'Great Kantō Earthquake',text:'Kills over 100,000 in Tokyo-Yokohama. Korean and Chinese residents are massacred by mobs and military. The crisis accelerates Hirohito\'s entry into real governance.'},
+  {y:'1925',cat:'political',title:'Peace Preservation Law',text:'Makes advocacy against the imperial system or private property illegal. Establishes the legal infrastructure of political repression that will deepen through the 1930s.'},
+  {y:'1926',cat:'personal',title:'Taisho Emperor Dies — Shōwa Era Begins',text:'Hirohito becomes the 124th Emperor of Japan at age 25. He chooses "Shōwa" (Radiant Japan / Enlightened Peace) as his era name — a profound irony given what follows.'},
+  {y:'1928',cat:'political',title:'Tanaka Memorial Controversy',text:'PM Tanaka\'s handling of the Huanggutun Incident (Kwantung Army assassinates Chinese warlord without imperial approval) leads to a tense confrontation with Hirohito. Tanaka resigns. Early evidence of Hirohito\'s assertiveness.'},
+  {y:'1931',cat:'military',title:'Manchurian Incident (September 18)',text:'Kwantung Army officers stage a false-flag attack on the South Manchuria Railway and use it to invade all of Manchuria. Hirohito knew and did not stop it. Bix sees this as a crucial moment of imperial complicity.'},
+  {y:'1932',cat:'military',title:'Manchukuo Established; Shanghai Battle',text:'Japan creates the puppet state of Manchukuo under Pu Yi. Meanwhile, battle erupts in Shanghai. Hirohito receives regular briefings and approves operational orders.'},
+  {y:'1933',cat:'international',title:'Japan Leaves League of Nations',text:'After League condemns Manchurian invasion. Japan\'s diplomatic isolation begins. Hirohito privately expressed reservations but did not reverse the course.'},
+  {y:'1936',cat:'military',title:'February 26 Incident',text:'1,400 soldiers under ultra-nationalist officers seize central Tokyo, assassinate senior officials. Hirohito is furious and personally demands suppression — one of the clearest demonstrations of his real authority. Leaders are executed.'},
+  {y:'1937',cat:'military',title:'Second Sino-Japanese War Begins; Nanjing Massacre',text:'The Marco Polo Bridge Incident triggers full-scale invasion of China. December: Japanese forces capture Nanjing and kill 100,000–300,000 civilians. Hirohito approved the operations and received regular reports.'},
+  {y:'1938',cat:'political',title:'National Mobilization Law',text:'Gives the government sweeping emergency powers over the economy and labour — effectively ending parliamentary governance in any meaningful sense.'},
+  {y:'1940',cat:'political',title:'Tripartite Pact Signed; Konoe\'s New Order',text:'Japan allies formally with Nazi Germany and Fascist Italy. Konoe Fumimaro announces the "Greater East Asia Co-Prosperity Sphere" ideology. Hirohito approves both moves.'},
+  {y:'1941',cat:'military',title:'Pearl Harbor Attack (December 7)',text:'Japan attacks the US Pacific Fleet simultaneously with invasions of Malaya, the Philippines, Hong Kong, and Wake Island. The Imperial Conference that approved war was chaired by Hirohito. Bix documents his active role in planning.'},
+  {y:'1942',cat:'military',title:'Battle of Midway — The Turn',text:'Japan loses four fleet carriers in June 1942. Hirohito is told the truth, unlike the Japanese public. From this point, Japan is strategically on the defensive — but Hirohito pursues the war for three more years.'},
+  {y:'1944',cat:'military',title:'Saipan Falls; Tōjō Resigns',text:'Loss of Saipan puts the home islands within B-29 range. Tōjō Hideki resigns as PM. Hirohito privately admits the war situation is "truly grave" but refuses surrender negotiations.'},
+  {y:'1945',cat:'military',title:'Firebombing; Okinawa; Atomic Bombs; Surrender',text:'March: Tokyo firebombing kills 80,000+ in one night. June: Okinawa falls after 12,000 US and 100,000+ Japanese deaths. August 6 & 9: Atomic bombs on Hiroshima and Nagasaki. August 15: Hirohito\'s recorded surrender broadcast.'},
+  {y:'1945',cat:'political',title:'Hirohito Meets MacArthur (September 27)',text:'The famous photograph. Hirohito offers to take personal responsibility for the war. MacArthur declines — he needs the emperor to govern Japan peacefully. The cover-up begins.'},
+  {y:'1946',cat:'political',title:'"Humanity Declaration" &amp; New Constitution',text:'January 1: Hirohito\'s rescript renouncing divinity (ambiguously in Japanese). November: New constitution drafted by SCAP makes Japan a constitutional monarchy with a pacifist Article 9 clause.'},
+  {y:'1948',cat:'international',title:'Tokyo Trials End — Tōjō Executed',text:'Seven war criminals hanged, including Tōjō. Hirohito is not prosecuted. SCAP has destroyed or suppressed key evidence. The impunity that Bix\'s entire book documents is now institutionalised.'},
+  {y:'1952',cat:'international',title:'Occupation Ends — San Francisco Treaty',text:'Japan regains sovereignty. The US-Japan Security Treaty is signed simultaneously. Hirohito continues to reign under the new constitutional framework.'},
+  {y:'1971',cat:'personal',title:'Hirohito\'s First Post-War European Tour',text:'His reception in Europe is cold — protesters in the Netherlands and UK remind him that for them, the war\'s memory is not abstract. He is visibly shaken.'},
+  {y:'1989',cat:'personal',title:'Emperor Hirohito Dies',text:'Hirohito dies January 7 after a long illness. His posthumous name becomes Emperor Shōwa — "Enlightened Peace." He reigned 62 years, the longest of any Japanese emperor. The cover-up of his wartime role remained largely intact.'},
+];
+
+function renderTimeline(){
+  const el=document.getElementById('timelineEl');
+  el.innerHTML=tlData.map(e=>`
+    <div class="tl-item" data-cat="${e.cat}">
+      <div class="tl-date">${e.y}</div>
+      <div class="tl-dot ${e.cat}"></div>
+      <div class="tl-content">
+        <div class="tl-tag tag-${e.cat}">${e.cat}</div>
+        <h4>${e.title}</h4>
+        <p>${e.text}</p>
+      </div>
+    </div>`).join('');
+}
+
+function filterTimeline(cat,btn){
+  document.querySelectorAll('.filter-row .ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tl-item').forEach(item=>{
+    item.classList.toggle('hidden', cat!=='all' && item.dataset.cat!==cat);
+  });
+}
+
+// ─── PEOPLE DATA ───
+const people=[
+  {id:'hirohito',name:'Emperor Hirohito',jp:'昭和天皇',dates:'1901–1989',role:'124th Emperor of Japan',group:'emperor',icon:'👑',
+   bio:'Born April 29, 1901, Hirohito became Japan\'s 124th emperor in 1926, taking the era name Shōwa (Radiant Japan). Bix\'s central thesis is that Hirohito was not a passive constitutional monarch but an active participant in Japan\'s military decisions from Manchuria through the surrender.',
+   bookRole:'The protagonist and villain of Bix\'s narrative. The book reconstructs his political thought, military involvement, and post-war repackaging as a peaceful scientist-emperor. His marine biology hobby and gentle public demeanour contrasted sharply with his private decisiveness in imperial conferences.',
+   keyFacts:['Approved the Manchurian Incident in 1931 after the fact','Chaired the Imperial Conference that approved Pearl Harbor','Personally ended the war by recording the surrender broadcast','Escaped war-crimes prosecution through MacArthur\'s protection','Reigned 62 years — longest in Japanese history'],
+   quote:'"He was not the passive, reluctant, sad emperor of legend, but a man who actively shaped events and lived comfortably with the terrible consequences." — Bix'},
+
+  {id:'meiji',name:'Meiji Emperor',jp:'明治天皇',dates:'1852–1912',role:'122nd Emperor, Moderniser of Japan',group:'ancestor',icon:'🏯',
+   bio:'Mutsuhito, Emperor Meiji, oversaw Japan\'s transformation from feudal shogunate to industrial empire. The Meiji Restoration (1868) is the foundational event of modern Japan. He consolidated imperial authority, abolished the samurai class, and built the military-industrial state that Hirohito would inherit.',
+   bookRole:'Appears primarily as a formative influence — the ideal Hirohito was trained to emulate. The Meiji Constitution and State Shinto ideology were his era\'s creations. Hirohito grew up in the shadow of his grandfather\'s achievements.',
+   keyFacts:['Meiji Restoration ended Tokugawa shogunate','Commissioned the 1889 Meiji Constitution','Built Japan\'s modern army and navy','Died 1912 — General Nogi committed suicide to follow him'],
+   quote:''},
+
+  {id:'taisho',name:'Taisho Emperor',jp:'大正天皇',dates:'1879–1926',role:'123rd Emperor, Hirohito\'s Father',group:'ancestor',icon:'🎭',
+   bio:'Yoshihito, the Taisho Emperor, suffered from meningitis that increasingly impaired his mental capacity. His reign (1912–1926) saw relative liberalisation ("Taisho Democracy") but he played little active political role. His incapacity made Hirohito regent from 1921.',
+   bookRole:'Largely absent from Bix\'s narrative except as contrast — his weakness made Hirohito\'s emergence as an active sovereign more striking. The Taisho era\'s democratic experiments were crushed by the militarism that Hirohito\'s Showa era unleashed.',
+   keyFacts:['Suffered neurological illness from childhood','Hirohito named regent in 1921','Died December 25, 1926'],
+   quote:''},
+
+  {id:'nagako',name:'Empress Nagako',jp:'香淳皇后',dates:'1903–2000',role:'Empress Consort',group:'family',icon:'🌸',
+   bio:'Born Kuni Nagako, she married Hirohito in 1924 after a political controversy over whether she carried a gene for colour blindness. She bore six children, including Crown Prince Akihito. She outlived Hirohito by 11 years.',
+   bookRole:'Bix portrays her as a conservative nationalist influence on Hirohito, supportive of the war and resistant to post-war accountability. She reportedly pressured Hirohito against the humanity declaration.',
+   keyFacts:['Married Hirohito January 26, 1924','Mother of six children','Deeply conservative political views','Opposed Hirohito\'s post-war reconciliation gestures to Korea'],
+   quote:''},
+
+  {id:'kido',name:'Kido Kōichi',jp:'木戸幸一',dates:'1889–1977',role:'Lord Keeper of the Privy Seal (1940–45)',group:'advisor',icon:'📜',
+   bio:'Kido served as Lord Keeper of the Privy Seal from 1940 to 1945, effectively functioning as Hirohito\'s chief political aide and gatekeeper. He kept a detailed diary throughout the war years — the <em>Kido Nikki</em> — which became one of Bix\'s most important sources.',
+   bookRole:'One of the book\'s central figures. His diary provides direct evidence of what information Hirohito received and when. Kido was tried at Tokyo as a Class A war criminal but received life imprisonment, later paroled. His post-war testimony consistently minimised Hirohito\'s involvement.',
+   keyFacts:['Kept the Kido Diary — critical primary source','Arranged Hirohito\'s meetings with military and political leaders','Convicted as Class A war criminal; sentenced to life; paroled 1955','His diary records Hirohito discussing surrender conditions as early as February 1945'],
+   quote:'"Without Kido\'s diary, the emperor\'s role in the decision-making process would be almost entirely hidden." — Bix'},
+
+  {id:'saionji',name:'Saionji Kinmochi',jp:'西園寺公望',dates:'1849–1940',role:'Last Genrō (Elder Statesman)',group:'advisor',icon:'🌿',
+   bio:'The last surviving member of the Meiji-era genrō oligarchs, Saionji was a relative liberal who recommended prime ministers to the emperor and tried to restrain military influence. His death in 1940 removed the last institutional check on militarist escalation.',
+   bookRole:'Represents the failing liberal alternative within the Meiji system. Bix uses Saionji\'s declining influence to show how the political space for moderation closed in the 1930s. After his death, no single figure could balance military-civilian tensions.',
+   keyFacts:['Studied in France in the 1870s — shaped liberal sympathies','Recommended PMs to the emperor as sole surviving genrō','Deeply opposed Tōjō\'s appointment','Died November 1940 — months before Pearl Harbor'],
+   quote:''},
+
+  {id:'makino',name:'Makino Nobuaki',jp:'牧野伸顕',dates:'1861–1949',role:'Lord Keeper of the Privy Seal (1925–35)',group:'advisor',icon:'🏛️',
+   bio:'Preceded Kido as Lord Keeper of the Privy Seal. Son-in-law of the Meiji oligarch Ōkubo Toshimichi. A moderate, he was a target of the February 26, 1936 coup plotters, narrowly escaping assassination.',
+   bookRole:'Represents the moderate court faction that Hirohito relied on in the early Shōwa years. His replacement by more militarist figures tracks Japan\'s political trajectory.',
+   keyFacts:['Attended the Paris Peace Conference in 1919','Target of February 26, 1936 assassination attempt','Close personal relationship with Hirohito'],
+   quote:''},
+
+  {id:'tojo',name:'Tōjō Hideki',jp:'東條英機',dates:'1884–1948',role:'Prime Minister & Army General (1941–44)',group:'military',icon:'⚔️',
+   bio:'General Tōjō served simultaneously as Prime Minister, Army Minister, and Army Chief of Staff during the Pacific War\'s critical period. He was a hard-line expansionist who approved the Pearl Harbor attack. After Japan\'s defeat he attempted suicide, survived, was convicted at Tokyo and hanged.',
+   bookRole:'Bix\'s portrait complicates the Western view of Tōjō as a dictator. He was not — he was subject to Hirohito\'s authority. The emperor appointed him, tolerated his policies, and eventually dismissed him when Saipan fell. Blaming Tōjō exclusively allows Hirohito\'s role to be obscured.',
+   keyFacts:['Simultaneously held three cabinet positions during the war','Approved the Pearl Harbor attack plan','Lost Hirohito\'s confidence after fall of Saipan (1944)','Attempted suicide with a pistol; shot himself in the chest but survived','Hanged December 23, 1948'],
+   quote:'"Had Tōjō been a true dictator, the emperor would have been irrelevant. The fact that Hirohito dismissed him shows who actually held power." — Bix (paraphrase)'},
+
+  {id:'konoe',name:'Konoe Fumimaro',jp:'近衛文麿',dates:'1891–1945',role:'Prime Minister (three terms)',group:'government',icon:'🎌',
+   bio:'A court aristocrat of the highest rank (Fujiwara), Konoe served as Prime Minister three times between 1937 and 1941. He launched the second Sino-Japanese war, proclaimed the "Greater East Asia Co-Prosperity Sphere," and signed the Tripartite Pact. He committed suicide the night before he was to be arrested by SCAP.',
+   bookRole:'A tragic figure in Bix\'s account — cultured and conflicted, seeking a negotiated peace but repeatedly enabling escalation. His suicide prevented his testimony at Tokyo. His relationship with Hirohito was complex: the emperor distrusted him even while depending on him.',
+   keyFacts:['Launched the Sino-Japanese War in 1937','Created the "Greater East Asia Co-Prosperity Sphere" concept','Three separate terms as Prime Minister','Tried to arrange a personal summit with Roosevelt (rejected)','Committed suicide December 16, 1945'],
+   quote:''},
+
+  {id:'suzuki',name:'Suzuki Kantarō',jp:'鈴木貫太郎',dates:'1867–1948',role:'Final Wartime Prime Minister (April–August 1945)',group:'government',icon:'🕊️',
+   bio:'An elderly retired admiral, Suzuki was appointed PM in April 1945 as Japan sought a way to end the war while preserving the imperial system. He navigated the impossible politics of the peace faction versus the military diehards, ultimately facilitating Japan\'s surrender.',
+   bookRole:'Bix uses Suzuki\'s tenure to show why the war dragged on for months after it was militarily lost. The "kokutai preservation" demand — keeping the imperial system — was the sticking point that delayed surrender and cost hundreds of thousands of lives.',
+   keyFacts:['Survived assassination attempt in February 26 Incident (1936)','Appointed PM April 7, 1945','Facilitated Hirohito\'s "sacred decision" to surrender','Resigned immediately after the surrender announcement'],
+   quote:''},
+
+  {id:'anami',name:'Anami Korechika',jp:'阿南惟幾',dates:'1887–1945',role:'War Minister at Surrender',group:'military',icon:'🗡️',
+   bio:'Army Minister during the final months of the war, Anami was the strongest voice against surrender within the cabinet. He argued Japan should fight a final decisive battle on the home islands. After the surrender rescript was signed, he committed ritual suicide (seppuku).',
+   bookRole:'Represents the logic of the military die-hards that Hirohito had to override. His suicide was seen as an apology to the emperor for failing to achieve victory. Bix uses the episode to show the depth of imperial ideology — men died rather than face the emperor\'s judgment.',
+   keyFacts:['Strongest cabinet voice against surrender','Participated in the final imperial conference accepting surrender','Committed seppuku August 15, 1945 — the morning of the surrender broadcast','Left a note: "I face death believing firmly in Japan\'s sacred destiny"'],
+   quote:''},
+
+  {id:'yamamoto',name:'Yamamoto Isoroku',jp:'山本五十六',dates:'1884–1943',role:'Commander of Combined Fleet',group:'military',icon:'⚓',
+   bio:'The architect of the Pearl Harbor attack and the Midway strategy, Yamamoto was Japan\'s most celebrated naval commander. He was personally opposed to war with the United States, believing Japan could not sustain a prolonged conflict, but planned the attack once ordered to do so.',
+   bookRole:'Illustrates the contradiction at the heart of Japan\'s war: its top strategic minds knew the war was unwinnable long-term, but the imperial system made opposition impossible. Yamamoto was killed when US intelligence decoded Japanese communication revealing his inspection tour (April 1943).',
+   keyFacts:['Studied at Harvard; Naval Attaché in Washington','Designed the Pearl Harbor surprise attack','Warned: "I shall run wild for six months or a year...after that I have no expectations"','Shot down and killed April 18, 1943'],
+   quote:''},
+
+  {id:'macarthur',name:'Douglas MacArthur',jp:'ダグラス・マッカーサー',dates:'1880–1964',role:'Supreme Commander Allied Powers (SCAP)',group:'foreign',icon:'⭐',
+   bio:'MacArthur commanded Allied forces in the Pacific and then governed Japan as SCAP during the occupation (1945–1951). His decision to preserve and use Hirohito as an instrument of occupation governance is central to Bix\'s argument about post-war impunity.',
+   bookRole:'Bix argues MacArthur made a politically calculated bargain: use Hirohito to govern Japan peacefully, in exchange for protecting him from prosecution. This required active suppression of evidence, coaching of witnesses, and construction of the "peaceful emperor" myth.',
+   keyFacts:['Accepted Japan\'s surrender aboard USS Missouri','"You will have peace or utter destruction" — told Hirohito at their first meeting','Removed from Korean War command by Truman in 1951','Never formally prosecuted any Japanese for the Nanjing Massacre'],
+   quote:'"MacArthur needed an emperor who was a symbol, not a symbol who had been a commander." — Bix (paraphrase)'},
+
+  {id:'truman',name:'Harry S. Truman',jp:'ハリー・トルーマン',dates:'1884–1972',role:'US President (1945–1953)',group:'foreign',icon:'🇺🇸',
+   bio:'Truman authorised the atomic bombings of Hiroshima and Nagasaki and oversaw the beginning of the occupation. His administration\'s Cold War priorities shaped the decision to rehabilitate Japan as an ally, which reinforced the protection of Hirohito.',
+   bookRole:'The geopolitical context that made Hirohito\'s protection possible. As the Cold War began, Japan became strategically essential. Prosecuting the emperor would destabilise the country and push it toward communism — a calculation Bix argues overrode justice.',
+   keyFacts:['Authorised atomic bombings August 6 and 9, 1945','Overrode MacArthur in the Korean War (1951)','Cold War strategy shaped occupation policy toward Japan'],
+   quote:''},
+
+  {id:'akihito',name:'Crown Prince Akihito',jp:'明仁',dates:'1933–',role:'Hirohito\'s Son & Successor',group:'family',icon:'🌺',
+   bio:'Born December 23, 1933, Akihito was the first post-war crown prince, educated by an American tutor (Elizabeth Gray Vining) as part of the occupation\'s democratisation programme. He became emperor upon Hirohito\'s death in 1989, reigning until his abdication in 2019.',
+   bookRole:'Appears at the book\'s margins as the symbol of Japan\'s post-war reinvention. His American education and marriage to a commoner (Michiko Shōda) embodied the new democratic imperial image MacArthur\'s occupation helped create.',
+   keyFacts:['Tutored by American Elizabeth Gray Vining','First emperor to marry a commoner (1959)','Reigned as Emperor Heisei 1989–2019','Abdicated in favour of Emperor Naruhito'],
+   quote:''},
+];
+
+function renderPeople(){
+  // Render quick reference list
+  const list=document.getElementById('peopleList');
+  list.innerHTML=people.map(p=>`
+    <div class="concept-card" onclick="openPersonModal('${p.id}')" style="cursor:pointer">
+      <div style="font-size:24px;margin-bottom:6px">${p.icon}</div>
+      <div class="c-term">${p.name}</div>
+      <div class="c-japanese">${p.jp} · ${p.dates}</div>
+      <div class="c-body">${p.role}</div>
+    </div>`).join('');
+
+  // Render SVG hierarchy
+  renderHierarchySVG();
+}
+
+function renderHierarchySVG(){
+  const wrap=document.getElementById('hierarchySvg');
+  const W=Math.max(wrap.offsetWidth,800);
+  const H=620;
+
+  // Define node positions
+  const nodes=[
+    // Ancestors — top
+    {id:'meiji',x:.18,y:.09},{id:'taisho',x:.5,y:.09},
+    // Family
+    {id:'nagako',x:.82,y:.2},{id:'akihito',x:.82,y:.45},
+    // Emperor — centre
+    {id:'hirohito',x:.5,y:.35},
+    // Advisors — left
+    {id:'saionji',x:.12,y:.35},{id:'makino',x:.12,y:.55},{id:'kido',x:.22,y:.55},
+    // Government — bottom left
+    {id:'konoe',x:.3,y:.72},{id:'suzuki',x:.5,y:.72},
+    // Military — bottom right
+    {id:'tojo',x:.65,y:.72},{id:'anami',x:.78,y:.72},{id:'yamamoto',x:.9,y:.55},
+    // Foreign — right
+    {id:'macarthur',x:.88,y:.35},{id:'truman',x:.88,y:.2},
+  ];
+
+  // Map id to person
+  const pMap={};
+  people.forEach(p=>pMap[p.id]=p);
+
+  // Edges [from, to]
+  const edges=[
+    ['meiji','hirohito'],['taisho','hirohito'],['hirohito','nagako'],['hirohito','akihito'],
+    ['saionji','hirohito'],['kido','hirohito'],['makino','hirohito'],
+    ['hirohito','konoe'],['hirohito','suzuki'],['hirohito','tojo'],['hirohito','anami'],
+    ['yamamoto','hirohito'],['macarthur','hirohito'],['truman','macarthur'],
+  ];
+
+  const groupColor={emperor:'#fbbf24',ancestor:'#4a9eff',advisor:'#22d3a0',military:'#f87171',government:'#fbbf24',foreign:'#a78bfa',family:'#fb923c'};
+
+  const svgEdges=edges.map(([a,b])=>{
+    const na=nodes.find(n=>n.id===a), nb=nodes.find(n=>n.id===b);
+    if(!na||!nb) return '';
+    return `<line x1="${na.x*W}" y1="${na.y*H}" x2="${nb.x*W}" y2="${nb.y*H}" stroke="#2a3347" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  }).join('');
+
+  wrap.innerHTML=`<svg width="${W}" height="${H}" style="position:absolute;inset:0;pointer-events:none">${svgEdges}</svg>`;
+
+  nodes.forEach(n=>{
+    const p=pMap[n.id];
+    if(!p) return;
+    const div=document.createElement('div');
+    div.className='h-node';
+    div.style.left=`${n.x*W}px`;
+    div.style.top=`${n.y*H}px`;
+    const isEmperor=n.id==='hirohito';
+    div.innerHTML=`<div class="h-box ${p.group}" style="${isEmperor?'padding:12px 20px;font-size:15px':''}">
+      <div style="font-size:${isEmperor?20:16}px;margin-bottom:3px">${p.icon}</div>
+      <div class="h-name" style="${isEmperor?'font-size:15px':'font-size:12px'}">${p.name.split(' ').slice(-1)[0]}</div>
+      <div class="h-role" style="font-size:10px">${p.role.split('(')[0].trim().substring(0,22)}</div>
+    </div>`;
+    div.onclick=()=>openPersonModal(n.id);
+    wrap.appendChild(div);
+  });
+}
+
+function openPersonModal(id){
+  const p=people.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('modalContent').innerHTML=`
+    <div class="modal-icon">${p.icon}</div>
+    <h2>${p.name}</h2>
+    <div class="modal-sub">${p.role}</div>
+    <div class="modal-dates">${p.jp} · ${p.dates}</div>
+    <div class="modal-divider"></div>
+    <div class="modal-body">
+      <p>${p.bio}</p>
+      ${p.bookRole?`<h4>In Bix's Argument</h4><p>${p.bookRole}</p>`:''}
+      ${p.keyFacts?.length?`<h4>Key Facts</h4><ul>${p.keyFacts.map(f=>`<li>${f}</li>`).join('')}</ul>`:''}
+      ${p.quote?`<div class="book-quote">${p.quote}</div>`:''}
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ─── CONCEPTS DATA ───
+const concepts=[
+  {term:'Kokutai',jp:'国体',cat:'political',def:'National polity — the unique form of Japan\'s state centred on the imperial institution. Preserving kokutai (specifically, keeping the emperor on the throne) was Japan\'s key condition for surrender in 1945. The Allies\' ambiguous response to this demand delayed the surrender by weeks.'},
+  {term:'Tennō',jp:'天皇',cat:'political',def:'Emperor — literally "Heavenly Sovereign." The title combines the characters for heaven (天) and sovereign (皇). Under the Meiji Constitution the tennō was sacred and inviolable — his person could not be legally questioned or prosecuted.'},
+  {term:'Shōwa',jp:'昭和',cat:'cultural',def:'The era name Hirohito chose: "Enlightened Peace" or "Radiant Japan." Era names (gengō) mark imperial reigns in Japan\'s calendar system. The bitter irony — the Shōwa era produced Japan\'s most destructive wars — was not lost on Bix.'},
+  {term:'Genrō',jp:'元老',cat:'political',def:'Elder statesmen — the informal council of Meiji-era oligarchs who advised the emperor and recommended prime ministers. They had no constitutional basis but immense informal power. Saionji was the last, dying in 1940.'},
+  {term:'Tōsuiken',jp:'統帥権',cat:'military',def:'The right of supreme command — constitutionally separate from civilian government. The Army and Navy answered to the emperor directly through this provision, allowing military operations to bypass cabinet oversight.'},
+  {term:'Zaibatsu',jp:'財閥',cat:'economic',def:'Industrial-financial conglomerates (Mitsui, Mitsubishi, Sumitomo, Yasuda) that funded Japan\'s military expansion. The Meiji state and zaibatsu were interdependent. SCAP ordered their dissolution during the occupation, though many reconstituted as keiretsu.'},
+  {term:'Kempeitai',jp:'憲兵隊',cat:'military',def:'Military police — Japan\'s feared secret police force with jurisdiction over civilians as well as soldiers. Used to suppress political dissent, investigate thought crimes, and enforce military discipline. Comparable in function to the Gestapo.'},
+  {term:'Hakko Ichiu',jp:'八紘一宇',cat:'cultural',def:'"Eight corners of the world under one roof" — the imperial expansionist ideology that framed Japan\'s conquest of Asia as unification under the emperor\'s benevolent rule. Used to justify every theatre of the war.'},
+  {term:'Gyokuon Hōsō',jp:'玉音放送',cat:'political',def:'"Jewel voice broadcast" — Hirohito\'s recorded radio address of August 15, 1945, announcing Japan\'s acceptance of the Potsdam Declaration. The first time most Japanese had ever heard the emperor\'s voice. Deliberately oblique — it never used the word "surrender."'},
+  {term:'Rikken Seiyūkai',jp:'立憲政友会',cat:'political',def:'Constitutional Association of Friends of Political Parties — Japan\'s dominant conservative political party for much of the early Shōwa period. Often in conflict with the military faction.'},
+  {term:'Kōdōha',jp:'皇道派',cat:'military',def:'"Imperial Way" faction of the Army — ultra-nationalist officers who favoured a spiritual totalitarian state and a "Shōwa Restoration." Behind the February 26, 1936 coup attempt. Suppressed and destroyed by Hirohito\'s decisive response.'},
+  {term:'Tōseiha',jp:'統制派',cat:'military',def:'"Control Faction" of the Army — the winning faction after February 26, 1936. Favoured a more systematic, bureaucratic path to military control of the state. Tōjō Hideki was aligned with this faction.'},
+  {term:'State Shinto',jp:'国家神道',cat:'religious',def:'The Meiji-era fusion of Shinto religion with nationalist ideology and imperial veneration. Made it illegal to question the emperor\'s divine descent. Formally abolished by SCAP\'s Shinto Directive of December 1945.'},
+  {term:'Kami',jp:'神',cat:'religious',def:'Divine spirits or supernatural forces in Shinto belief. Not gods in the Abrahamic sense — kami inhabit natural features, ancestors, and phenomena. The emperor was considered a living kami, a direct descendant of Amaterasu.'},
+  {term:'Yasukuni Shrine',jp:'靖国神社',cat:'religious',def:'Tokyo Shinto shrine enshrining the spirits of Japan\'s war dead — including 14 Class A war criminals added in 1978. Post-war visits by Japanese prime ministers trigger diplomatic crises with China and South Korea. Symbol of Japan\'s unresolved war memory.'},
+  {term:'Greater East Asia Co-Prosperity Sphere',jp:'大東亜共栄圏',cat:'political',def:'Japan\'s imperial ideology framing its occupation of Asia as liberation from Western colonialism under Japanese leadership. In practice it meant resource extraction and brutal military occupation.'},
+  {term:'Senryoku Kaigi',jp:'戦力会議',cat:'military',def:'Liaison conferences between the government and military Supreme Command — the key decision-making bodies where war strategy was set. Hirohito attended in person as "imperial conferences" (Gozen Kaigi) and actively questioned and approved decisions.'},
+  {term:'Jinmu',jp:'神武',cat:'cultural',def:'The legendary first emperor of Japan (ca. 660 BCE), said to be a great-great-grandson of Ninigi-no-Mikoto and thus a direct descendant of Amaterasu. His mythological founding of Japan was taught as historical fact in pre-war schools.'},
+  {term:'Potsdam Declaration',jp:'ポツダム宣言',cat:'international',def:'The July 26, 1945 ultimatum from the Allied powers demanding Japan\'s unconditional surrender or face "prompt and utter destruction." Japan\'s initial rejection triggered the atomic bombs. Japan ultimately surrendered on the condition that the imperial system be preserved.'},
+  {term:'Genbaku',jp:'原爆',cat:'military',def:'"Atomic bomb" — Hiroshima (August 6) and Nagasaki (August 9), 1945. In the post-war Japanese narrative, these became the central symbols of Japanese victimhood — a framing Bix argues was deliberately cultivated to deflect attention from Japan\'s aggressor role.'},
+];
+
+function renderConcepts(){
+  const grid=document.getElementById('conceptsGrid');
+  grid.innerHTML=concepts.map(c=>`
+    <div class="concept-card" data-cat="${c.cat}">
+      <div class="c-tag c-${c.cat}">${c.cat}</div>
+      <div class="c-term">${c.term}</div>
+      <div class="c-japanese">${c.jp}</div>
+      <div class="c-body">${c.def}</div>
+    </div>`).join('');
+}
+
+function filterConcepts(cat,btn){
+  document.querySelectorAll('#section-concepts .filter-row .ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.concept-card').forEach(el=>{
+    el.classList.toggle('hidden', cat!=='all' && el.dataset.cat!==cat);
+  });
+}
+
+// ─── DEITY DATA ───
+const deities=[
+  {id:'amaterasu',name:'Amaterasu-Ōmikami',jp:'天照大御神',domain:'Sun, Heaven, Rulership',cat:'celestial',icon:'☀️',
+   bio:'The supreme deity of the Shinto pantheon and ruler of the heavenly realm (Takamagahara). Daughter of Izanagi, born when he washed his left eye after escaping the underworld. She is the ancestral goddess of the imperial family — the entire legitimacy of Hirohito\'s rule descended from her.',
+   imperialLink:'Amaterasu gave the Three Sacred Treasures (mirror, sword, jewel) to her grandson Ninigi when he descended to earth to rule Japan. Every emperor\'s legitimacy is ultimately traced to this grant. The Grand Shrine of Ise, Japan\'s most sacred site, houses her sacred mirror.',
+   myths:['The Cave of Heaven: Amaterasu hid in a cave after Susanoo\'s rampage, plunging the world into darkness. The gods lured her out with laughter at Ame-no-Uzume\'s dance.','Her weaving hall was desecrated by Susanoo, causing her to exile him — the origin of Japan\'s storm-rain cycle mythology.'],
+   shintoFact:'Ise Jingū (Ise Grand Shrine) is rebuilt identically every 20 years — a practice called Shikinen Sengū, embodying the Shinto concept that renewal preserves essence.'},
+
+  {id:'susanoo',name:'Susanoo-no-Mikoto',jp:'須佐之男命',domain:'Storms, Sea, Agriculture',cat:'war',icon:'🌪️',
+   bio:'Storm god and brother of Amaterasu, born from Izanagi\'s nose. His wild nature caused chaos in Takamagahara, leading to his exile to the earth (Ashihara-no-Nakatsukuni). On earth he slew the eight-headed serpent Yamata no Orochi and found the sword Kusanagi in its body.',
+   imperialLink:'Kusanagi-no-Tsurugi, one of the Three Sacred Treasures, was found by Susanoo and eventually given to Amaterasu, from whom it passed to the imperial line. Susanoo is thus indirectly part of the imperial legitimacy chain.',
+   myths:['Slew Yamata no Orochi (eight-headed serpent) by getting it drunk on sake, then cutting off each head','Found Kusanagi (the sacred sword) in the fourth tail of the serpent','His descendant Ōkuninushi built the earthly kingdom that Ninigi was sent to rule'],
+   shintoFact:'Susanoo is venerated at the Yasaka Shrine in Kyoto, whose Gion Matsuri festival — one of Japan\'s three great festivals — is an offering against plague and disaster.'},
+
+  {id:'tsukuyomi',name:'Tsukuyomi-no-Mikoto',jp:'月読命',domain:'Moon, Night, Tides',cat:'celestial',icon:'🌙',
+   bio:'The moon god, born from Izanagi\'s right eye. He killed the food goddess Ukemochi after being offended by her method of producing food, which led Amaterasu to banish him from her presence. This separation is the mythological explanation for why the sun and moon never appear together.',
+   imperialLink:'Less directly connected to the imperial line than Amaterasu or Susanoo, but worshipped at Tsukuyomi-no-Miya, an auxiliary shrine at Ise — indicating proximity to the imperial cult.',
+   myths:['Killed Ukemochi (food goddess) and was banished by Amaterasu — origin of the separation of day and night','Associated with the lunar calendar, critical for agricultural planning in ancient Japan'],
+   shintoFact:'Tsukuyomi is one of the least narratively developed of the major kami — the moon\'s yin quality meant fewer stories attached to it in male-dominated mythological traditions.'},
+
+  {id:'izanagi',name:'Izanagi-no-Mikoto',jp:'伊邪那岐命',domain:'Creation, Life, the Living World',cat:'creation',icon:'🌊',
+   bio:'Male creator deity and father of the three great kami (Amaterasu, Tsukuyomi, Susanoo). With Izanami he stirred the primordial ocean with a jewelled spear, creating the Japanese islands. After Izanami died giving birth to fire and became a death goddess, Izanagi\'s purification rituals after visiting the underworld produced the three sibling deities.',
+   imperialLink:'As ancestor of Amaterasu, Izanagi is the ultimate progenitor of the imperial lineage. The islands he created (the Eight Great Islands) are Japan itself.',
+   myths:['Created the Japanese islands by stirring the ocean with the Amenonuhoko spear','Descended to Yomi (underworld) to retrieve Izanami; fled in horror when he saw her decayed form','His purification after Yomi produced Amaterasu (left eye), Tsukuyomi (right eye), Susanoo (nose)'],
+   shintoFact:'Izanagi is enshrined at Awaji Island\'s Izanagi Jingū — traditionally considered the first land created when the spear was withdrawn from the ocean.'},
+
+  {id:'izanami',name:'Izanami-no-Mikoto',jp:'伊邪那美命',domain:'Death, the Underworld, Creation',cat:'creation',icon:'💀',
+   bio:'Female creator deity paired with Izanagi. Died giving birth to the fire god Kagutsuchi and became ruler of Yomi (the underworld). When Izanagi broke his promise not to look at her decayed form, she threatened to kill 1,000 people per day — he countered he would create 1,500 per day. This mythological debate explains the cycle of birth and death.',
+   imperialLink:'Izanami represents the death-principle that the emperor, as living kami, transcended or mediated. Shinto funeral rites deal extensively with purification from death-pollution (kegare) — the root of many imperial ritual requirements.',
+   myths:['Killed by fire during childbirth of Kagutsuchi','Rules Yomi (underworld) as death goddess','Her exchange with Izanagi explains why 1,000 people die and 1,500 are born daily'],
+   shintoFact:'The entrance to Yomi is said to be a cave at Rafu in Izumo Province — Izanagi blocked it with a great boulder after his escape, this boulder is Japan\'s first divorce document.'},
+
+  {id:'ninigi',name:'Ninigi-no-Mikoto',jp:'瓊瓊杵尊',domain:'Rice, Harvest, Imperial Descent',cat:'imperial',icon:'🌾',
+   bio:'Grandson of Amaterasu, sent by her to rule the earthly realm (Japan) when the land was pacified by Ōkuninushi\'s surrender. He descended through clouds to Mt. Takachiho in Kyushu carrying the Three Sacred Treasures. His descendants would become the first emperors of Japan.',
+   imperialLink:'The most direct divine ancestor of the imperial line. The Three Sacred Treasures — mirror (Amaterasu\'s gift), sword (Kusanagi from Susanoo via Amaterasu), jewel — passed from Ninigi through each emperor. His landing on Japanese soil is the mythological charter of imperial sovereignty.',
+   myths:['Descended from Takamagahara to Mt. Takachiho with the Three Sacred Treasures','Married Konohanasakuya-hime (cherry blossom goddess) — the cherry blossom\'s fragility reflects mortal beauty','His wife\'s fidelity test by fire produced three sons who would found the imperial line'],
+   shintoFact:'The cherry blossom (sakura) — Japan\'s national flower and the symbol of the imperial family — derives from Ninigi\'s wife Konohanasakuya-hime, whose name means "Princess Who Makes the Flowers of the Trees Bloom."'},
+
+  {id:'jimmu',name:'Emperor Jimmu',jp:'神武天皇',domain:'Imperial Foundation, War, Unity',cat:'imperial',icon:'👘',
+   bio:'The legendary first human emperor of Japan, traditionally dated to 660 BCE (a date calculated backwards from the Chinese sexagenary cycle). Great-great-grandson of Ninigi, he led an eastern military campaign from Kyushu to the Yamato region (Nara), founding the imperial dynasty.',
+   imperialLink:'Every subsequent emperor, including Hirohito, traces legitimacy through Jimmu. His accession on February 11 (Kigensetsu / National Foundation Day) was a major State Shinto holiday in imperial Japan — schoolchildren were taught his military campaign as historical fact.',
+   myths:['Led an eastward military campaign, guided by a golden kite (tobi) that blinded his enemies','Enshrined at Kashihara Jingū in Nara — site of the traditional capital','His founding year of 660 BCE gives the year 2026 CE as Kōki 2686 in the imperial calendar'],
+   shintoFact:'National Foundation Day (建国記念の日), February 11, commemorates Jimmu\'s traditional enthronement. It was abolished by SCAP after the war as militarist mythology, then reinstated in 1966 as a secular holiday.'},
+
+  {id:'okuninushi',name:'Ōkuninushi-no-Mikoto',jp:'大国主命',domain:'Nation-building, Farming, Medicine, Magic',cat:'nature',icon:'🏔️',
+   bio:'A descendant of Susanoo who built up the earthly kingdom through alliance, negotiation, and magic. He pacified Japan and established agriculture, medicine, and sericulture — but was asked to surrender his earthly rule to Ninigi\'s descendants. In exchange, he received an elaborate shrine at Izumo (Izumo Taisha).',
+   imperialLink:'His peaceful surrender of the earthly kingdom to Amaterasu\'s descendants (kuni-yuzuri) is the mythological precedent for the concept of loyal submission to imperial authority — a pattern Bix argues was central to how the imperial system functioned politically.',
+   myths:['Survived multiple assassination attempts by his brothers through magical assistance','Built a successful earthly kingdom through 81 brothers, crows, and hares','His peaceful surrender (kuni-譲り) negotiated the divine-human order'],
+   shintoFact:'Izumo Taisha is where all 8 million kami gather each October (the month known elsewhere as Kannazuki, "month without gods," but in Izumo as Kamiari-zuki, "month when the gods assemble") to discuss marriage matches for the coming year.'},
+
+  {id:'inari',name:'Inari Ōkami',jp:'稲荷大神',domain:'Rice, Foxes, Fertility, Industry, Swords',cat:'nature',icon:'🦊',
+   bio:'One of Japan\'s most widely worshipped kami — associated with rice, foxes (kitsune as divine messengers), fertility, worldly success, and swordsmanship. Approximately one-third of all Shinto shrines in Japan are dedicated to Inari. The famous Fushimi Inari Taisha in Kyoto with its thousands of vermilion torii gates is the head shrine.',
+   imperialLink:'Inari shrines were established throughout military installations and zaibatsu headquarters during the war years — the merging of divine protection for industry and the sword reflects Inari\'s dual nature.',
+   myths:['Originally a harvest deity who arrived from China or Korea with knowledge of rice cultivation','The kitsune (fox) messengers have white fur and become more powerful with each century they live','Inari\'s shrines are always marked by vermilion (red-orange) torii and stone fox statues'],
+   shintoFact:'Fushimi Inari-taisha\'s 10,000 torii gates (senbon-torii) were donated by businesses and individuals seeking commercial success — each gate bears the donor\'s name and the date of donation.'},
+
+  {id:'hachiman',name:'Hachiman',jp:'八幡神',domain:'War, Archery, Agriculture, Culture',cat:'war',icon:'🏹',
+   bio:'God of war and archery, patron deity of the samurai class, and guardian of Japan. Originally an agricultural deity and deified emperor (Ōjin), Hachiman was syncretised with Buddhism as a Bodhisattva (Hachiman Daibosatsu). The Iwashimizu Hachimangū in Kyoto was a guardian shrine of the imperial court.',
+   imperialLink:'Hachiman was the war-deity most invoked by the samurai class and imperial military throughout Japanese history. The kamikaze pilots of WWII wore headbands inscribed with "Hachiman Daibosatsu." He represents the direct link between imperial divine authority and military violence.',
+   myths:['Said to be the deification of Emperor Ōjin (4th century) — making him both human emperor and kami','The Mongol invasions of 1274 and 1281 were repelled by typhoons attributed to Hachiman\'s intervention (the original "divine winds" / kamikaze)','His dove messenger (hato) is a symbol of peace — an irony for Japan\'s god of war'],
+   shintoFact:'Tsurugaoka Hachimangū in Kamakura was founded by Minamoto no Yoritomo (the first shogun) — making Hachiman the patron deity of Japan\'s warrior government for seven centuries.'},
+
+  {id:'raijin',name:'Raijin',jp:'雷神',domain:'Thunder, Lightning, Storms',cat:'war',icon:'⚡',
+   bio:'God of thunder and lightning, often depicted as a demon-like figure beating drums arrayed in a circle to create thunder. Paired with Fūjin (wind god), they often appear together as guardians (zuijin) at shrine and temple gates.',
+   imperialLink:'Thunder kami were associated with military power and divine retribution throughout Japanese history. The B-29 "Superfortress" firebombing raids on Tokyo in March 1945, which killed 80,000+ in a single night, were described by survivors using religious imagery of divine wrath.',
+   myths:['Created thunder by beating his circular drum array','Eats the navels of sleeping children (hence the Japanese custom of covering the navel during thunderstorms)','Paired eternally with Fūjin, the wind god, in artistic tradition'],
+   shintoFact:'The famous Raijin and Fūjin screens by Tawaraya Sōtatsu (c.1600s) are one of Japan\'s most reproduced artworks — the two gods appear as the Rinpa school\'s most iconic images.'},
+
+  {id:'fujin',name:'Fūjin',jp:'風神',domain:'Wind, Breath of Life',cat:'nature',icon:'💨',
+   bio:'Wind god, typically depicted carrying a bag of winds on his back. Created winds that cleared the morning mist from Japan at the beginning of creation, according to the Nihon Shoki. Always paired with Raijin in artistic tradition.',
+   imperialLink:'Wind kami (kaze no kami) were propitiated by Japan\'s navy and maritime forces throughout history. The divine winds (kamikaze) that destroyed the Mongol fleets in 1274 and 1281 gave their name to the suicide pilots of 1944–45.',
+   myths:['His wind bag created the initial clearing of Japan\'s morning mist at the dawn of creation','Paired with Raijin as thunder and wind are inseparable in nature'],
+   shintoFact:'The kamikaze ("divine wind") pilots of 1944–45 took their name from these mythological storms — a deliberate invocation of divine protection that Bix argues shows how deeply State Shinto permeated military ideology.'},
+
+  {id:'benzaiten',name:'Benzaiten',jp:'弁才天',domain:'Knowledge, Art, Music, Water',cat:'nature',icon:'🎵',
+   bio:'Goddess of everything that flows — water, time, music, words, eloquence. One of the Seven Lucky Gods (Shichifukujin). Originally derived from the Hindu goddess Saraswati, she is the only female member of the Seven Lucky Gods. Associated with snakes, dragons, and musical instruments (particularly the biwa lute).',
+   imperialLink:'The Imperial court\'s literary and musical culture was sacred — artistic accomplishment was a mark of imperial virtue. Benzaiten\'s patronage of language and music connected to the imperial household\'s role as cultural centre of Japan.',
+   myths:['Tamed a dragon who was terrorising villagers by marrying him — the dragon became her mount','Plays the biwa (Japanese lute) at her most famous shrine, Enoshima-jinja near Kamakura','Associated with white snakes as divine messengers'],
+   shintoFact:'The three most famous Benzaiten shrines — Itsukushima, Chikubushima, and Enoshima — are all located on islands or near water, reflecting her water-goddess nature.'},
+
+  {id:'amenouzume',name:'Ame-no-Uzume',jp:'天宇受売命',domain:'Dawn, Revelry, Meditation, Arts',cat:'celestial',icon:'🎭',
+   bio:'Goddess of dawn, celebration, and performing arts. Famous for the dance she performed to lure Amaterasu out of the Ama-no-Iwato (Heavenly Rock Cave) — a comic, ecstatic performance that caused the assembled gods to laugh uproariously, drawing Amaterasu\'s curiosity.',
+   imperialLink:'Her role in restoring light and order by drawing Amaterasu from hiding is a mythological template for the imperial court\'s ritual functions — the emperor\'s ritual performance maintains cosmic order. Her descendant kami (the Sarume clan) served as ritual dancers in the imperial court.',
+   myths:['Performed the ecstatic dance that ended the world\'s darkness when Amaterasu hid','Later guided Ninigi safely to earth through her negotiations with the kami Sarutahiko','Her dance is the mythological origin of kagura (sacred Shinto dance) and by extension all Japanese performing arts'],
+   shintoFact:'Kagura (神楽), Shinto ritual dance, traces its origin directly to Ame-no-Uzume\'s dance — making her the patron goddess of all Japanese theatrical and musical traditions, including Noh, Kabuki, and Bunraku.'},
+
+  {id:'takemikazuchi',name:'Takemikazuchi-no-Kami',jp:'建御雷之男神',domain:'Lightning, Swords, Martial Arts',cat:'war',icon:'🗡️',
+   bio:'God of thunder and swords, born from the blood of Kagutsuchi (fire god) when Izanagi killed him. Sent by Amaterasu to pacify the earthly realm before Ninigi\'s descent — he negotiated Ōkuninushi\'s surrender. The Kashima Shrine (Ibaraki Prefecture) is his primary enshrinement.',
+   imperialLink:'The Kashima Shinto-ryū (one of Japan\'s oldest martial arts schools) and many sword-fighting traditions claim Takemikazuchi as their patron deity. The martial arts ideology that permeated Japan\'s officer corps had deep Shinto roots.',
+   myths:['His blood, dripping from Izanagi\'s sword after killing Kagutsuchi, became several lightning and water kami','Negotiated with Ōkuninushi\'s son Kotoshironushi to peacefully surrender Japan to Amaterasu\'s control','Sent the sacred sword Futsu-no-Mitama to earth during Emperor Jimmu\'s eastern campaign when Jimmu fell ill'],
+   shintoFact:'The Kashima Grand Shrine (Kashima Jingū) was the guardian shrine of the Fujiwara clan — Japan\'s dominant aristocratic family for five centuries. Its deer are considered sacred messengers and still roam freely through the shrine precinct.'},
+];
+
+function renderDeities(){
+  const grid=document.getElementById('deityGrid');
+  grid.innerHTML=deities.map(d=>`
+    <div class="deity-card" data-cat="${d.cat}" onclick="openDeityModal('${d.id}')">
+      <div class="d-icon">${d.icon}</div>
+      <div class="d-name">${d.name.split('-')[0]}</div>
+      <div class="d-domain">${d.domain.split(',')[0]}</div>
+    </div>`).join('');
+}
+
+function filterDeities(cat,btn){
+  document.querySelectorAll('#section-shinto .filter-row .ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.deity-card').forEach(el=>{
+    el.classList.toggle('hidden', cat!=='all' && el.dataset.cat!==cat);
+  });
+}
+
+function openDeityModal(id){
+  const d=deities.find(x=>x.id===id);
+  if(!d) return;
+  document.getElementById('modalContent').innerHTML=`
+    <div class="modal-icon">${d.icon}</div>
+    <h2>${d.name}</h2>
+    <div class="modal-sub">${d.domain}</div>
+    <div class="modal-dates">${d.jp} · ${d.cat.charAt(0).toUpperCase()+d.cat.slice(1)} deity</div>
+    <div class="modal-divider"></div>
+    <div class="modal-body">
+      <p>${d.bio}</p>
+      ${d.imperialLink?`<h4>Imperial Connection</h4><p>${d.imperialLink}</p>`:''}
+      ${d.myths?.length?`<h4>Key Myths</h4><ul>${d.myths.map(m=>`<li>${m}</li>`).join('')}</ul>`:''}
+      ${d.shintoFact?`<div class="book-quote"><strong>Shinto Fact:</strong> ${d.shintoFact}</div>`:''}
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ─── GLOSSARY ───
+const glossTerms=[
+  {term:'DV01',tip:'Not relevant here — see Hirohito!'},
+  {term:'Gyokuon',tip:'Literally "jewel voice" — the emperor\'s sacred voice, first broadcast publicly on August 15, 1945.'},
+  {term:'Gozen Kaigi',tip:'Imperial Conference — the formal meeting chaired by Hirohito where major state decisions were ratified in his presence.'},
+  {term:'Harakiri / Seppuku',tip:'Ritual self-disembowelment — a samurai and military officer practice Bix documents in multiple key figures including Anami Korechika.'},
+  {term:'Junshi',tip:'Following one\'s lord in death — General Nogi\'s suicide after Meiji\'s death exemplified this extreme form of imperial loyalty.'},
+  {term:'Kegare',tip:'Ritual impurity in Shinto — death, blood, and illness create it. Elaborate purification (harae/misogi) is required to restore ritual cleanliness.'},
+  {term:'Kyōiku Chokugo',tip:'"Imperial Rescript on Education" (1890) — the document schoolchildren memorised that enshrined loyalty to the emperor as the supreme virtue.'},
+  {term:'Meiji Ishin',tip:'"Meiji Restoration" (1868) — the political upheaval that ended the shogunate and restored nominal imperial rule, launching Japan\'s modernisation.'},
+  {term:'Nihon Shoki',tip:'"Chronicles of Japan" (720 CE) — one of two foundational texts (with Kojiki) recording Japan\'s mythological history and imperial genealogy.'},
+  {term:'Ojin Tenno',tip:'Emperor Ōjin — deified after death as the war god Hachiman, illustrating how imperial figures could become kami.'},
+  {term:'Seidan',tip:'"Sacred decision" — the term used for Hirohito\'s extraordinary intervention to break the deadlocked cabinet and order surrender in August 1945.'},
+  {term:'Shikinen Sengū',tip:'The ritual rebuilding of Ise Shrine every 20 years — embodying Shinto\'s concept that renewal preserves the sacred.'},
+  {term:'Takamagahara',tip:'"Plain of High Heaven" — the divine realm where Amaterasu and the other celestial kami dwell, governing the cosmos from above.'},
+  {term:'Tenno Heika',tip:'"His Imperial Majesty the Emperor" — the honorific formula used when addressing or referring to the emperor in formal contexts.'},
+  {term:'Torii',tip:'The gate marking the entrance to a Shinto shrine — the threshold between the sacred and profane. Its vermilion colour symbolises protection against evil.'},
+  {term:'Yomi-no-Kuni',tip:'"Land of the Dead" in Shinto cosmology — the shadowy underworld where Izanami became a death goddess after dying in childbirth.'},
+];
+
+function renderGlossary(){
+  document.getElementById('glossaryGrid').innerHTML=glossTerms.map(g=>`
+    <div class="gloss-item">
+      <span class="gloss-term">${g.term}</span>
+      <div class="gloss-tip">${g.tip}</div>
+    </div>`).join('');
+}
+
+// ─── MODAL CLOSE ───
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+// ─── INIT ───
+renderTimeline();
+renderConcepts();
+renderDeities();
+renderGlossary();
+renderPeople();
+
+window.addEventListener('resize',()=>{
+  const wrap=document.getElementById('hierarchySvg');
+  if(wrap){ wrap.innerHTML=''; renderHierarchySVG(); }
+});
+</script>
+</body>
+</html>
