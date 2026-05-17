@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Musical Education — Timeless Classics</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--surface:#0d1117;--surface2:#161b27;--surface3:#1e2637;
+  --border:#2a3347;--text:#e2e8f0;--muted:#7a8faa;
+  --accent:#4a9eff;--accent2:#7bc4ff;--green:#22d3a0;--red:#f87171;
+  --yellow:#fbbf24;--purple:#a78bfa;--orange:#fb923c;--r:10px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;line-height:1.65}
+
+/* Nav */
+nav{position:sticky;top:0;z-index:100;background:rgba(7,9,15,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:50px}
+.nav-logo{font-weight:800;font-size:14px;color:var(--accent);text-decoration:none}
+.nav-back{font-size:12px;color:var(--muted);text-decoration:none;transition:color .15s}
+.nav-back:hover{color:var(--text)}
+
+/* Hero */
+.hero{max-width:860px;margin:0 auto;padding:72px 24px 48px}
+.hero h1{font-size:clamp(32px,5vw,52px);font-weight:900;line-height:1.1;margin-bottom:14px;background:linear-gradient(135deg,#e2e8f0 30%,var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(14px,2vw,17px);color:var(--muted);max-width:600px;margin-bottom:32px;line-height:1.7}
+.callout{background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.18);border-radius:var(--r);padding:18px 22px;margin-bottom:32px;font-size:.93rem;line-height:1.75;color:#c6daef}
+.callout strong{color:var(--accent2)}
+
+/* Summary cards */
+.cards-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:32px}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.sum-card .sc-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
+.sum-card .sc-val{font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px}
+.sum-card .sc-sub{font-size:12px;color:var(--muted);line-height:1.45}
+
+/* How-to */
+details.howto{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:40px}
+details.howto summary{padding:14px 18px;cursor:pointer;font-weight:600;font-size:.93rem;list-style:none;display:flex;align-items:center;justify-content:space-between;user-select:none}
+details.howto summary::after{content:"▼";font-size:10px;color:var(--muted);transition:transform .2s}
+details.howto[open] summary::after{transform:rotate(180deg)}
+details.howto .howto-body{padding:0 18px 16px;font-size:.88rem;color:var(--muted);line-height:1.7}
+details.howto .howto-body ol{padding-left:18px}
+details.howto .howto-body li{margin-bottom:6px}
+details.howto .howto-body a{color:var(--accent);text-decoration:none}
+details.howto .howto-body a:hover{text-decoration:underline}
+
+/* Era filter bar */
+.filter-bar{max-width:1100px;margin:0 auto;padding:0 24px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filter-label{font-size:12px;color:var(--muted);margin-right:4px}
+.filter-btn{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s}
+.filter-btn:hover{border-color:var(--accent);color:var(--accent)}
+.filter-btn.active{background:rgba(74,158,255,.12);border-color:var(--accent);color:var(--accent2);font-weight:600}
+
+/* Search */
+.search-wrap{max-width:1100px;margin:0 auto;padding:0 24px 28px}
+.search-input{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;transition:border-color .15s}
+.search-input::placeholder{color:var(--muted)}
+.search-input:focus{border-color:var(--accent)}
+
+/* Progress banner */
+.progress-banner{max-width:1100px;margin:0 auto;padding:0 24px 28px;display:flex;align-items:center;gap:16px}
+.progress-bar-wrap{flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--accent));border-radius:3px;transition:width .4s}
+.progress-text{font-size:12px;color:var(--muted);white-space:nowrap}
+
+/* Timeline */
+.timeline-wrap{max-width:1100px;margin:0 auto;padding:0 24px 80px}
+.timeline{position:relative;padding-left:32px}
+.timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--border)}
+
+/* Era heading */
+.era-heading{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:16px;margin-top:8px;padding-left:2px;display:flex;align-items:center;gap:10px}
+.era-heading::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Entry */
+.entry{position:relative;margin-bottom:24px}
+.entry::before{content:'';position:absolute;left:-38px;top:18px;width:12px;height:12px;border-radius:50%;background:var(--border);border:2px solid var(--surface);z-index:1}
+.entry.listened::before{background:var(--green);border-color:var(--surface)}
+.entry.is-hidden{display:none}
+
+.entry-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;transition:border-color .15s}
+.entry-card:hover{border-color:var(--accent)}
+.entry-card.is-album{border-left:3px solid var(--purple)}
+.entry-card.is-song{border-left:3px solid var(--accent)}
+
+/* Card header */
+.entry-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.entry-meta{flex:1}
+.entry-year{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.entry-title{font-size:18px;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:3px}
+.entry-artist{font-size:13px;color:var(--accent2);font-weight:500}
+.entry-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+/* Spotify button */
+.spotify-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(30,215,96,.1);border:1px solid rgba(30,215,96,.25);border-radius:20px;padding:6px 14px;font-size:12px;color:#1ed760;text-decoration:none;font-weight:600;transition:all .15s;white-space:nowrap}
+.spotify-btn:hover{background:rgba(30,215,96,.18);border-color:#1ed760}
+.spotify-btn svg{width:14px;height:14px;fill:#1ed760;flex-shrink:0}
+
+/* Listened toggle */
+.listened-btn{background:none;border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+.listened-btn:hover{border-color:var(--green);color:var(--green)}
+.listened-btn.active{background:rgba(34,211,160,.1);border-color:var(--green);color:var(--green);font-weight:600}
+
+/* Tags row */
+.entry-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.tag{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:500}
+.tag.genre{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.2)}
+.tag.type-album{background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.25)}
+.tag.type-song{background:rgba(74,158,255,.1);color:var(--accent);border:1px solid rgba(74,158,255,.2)}
+.tag.era{background:rgba(251,191,36,.08);color:var(--yellow);border:1px solid rgba(251,191,36,.2)}
+
+/* Context text */
+.entry-context{font-size:.88rem;line-height:1.75;color:#b8cbe0;margin-bottom:10px}
+.entry-significance{font-size:.83rem;color:var(--muted);line-height:1.6;padding:10px 14px;background:var(--surface2);border-radius:6px;border-left:3px solid var(--border)}
+.entry-significance strong{color:var(--text)}
+
+/* No results */
+.no-results{color:var(--muted);font-size:.93rem;padding:24px 0;display:none}
+
+/* Glossary */
+.glossary-section{background:var(--surface);border-top:1px solid var(--border);padding:40px 24px}
+.glossary-inner{max-width:1100px;margin:0 auto}
+.glossary-inner h2{font-size:1.1rem;font-weight:700;margin-bottom:16px;color:var(--text)}
+.glossary-grid{display:flex;flex-wrap:wrap;gap:8px}
+.g-term{position:relative;cursor:default}
+.g-term span{padding:4px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--muted);display:inline-block}
+.g-term:hover span{border-color:var(--accent);color:var(--accent2)}
+.g-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a2235;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text);white-space:nowrap;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.5);pointer-events:none;line-height:1.5;max-width:260px;white-space:normal;text-align:center}
+.g-term:hover .g-tooltip{display:block}
+
+footer{text-align:center;padding:24px;font-size:12px;color:var(--muted);border-top:1px solid var(--border)}
+
+@media(max-width:640px){
+  .entry-header{flex-direction:column}
+  .entry-actions{width:100%;justify-content:flex-start}
+  .cards-row{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">FK</a>
+  <a href="/" class="nav-back">← All Tools</a>
+</nav>
+
+<section class="hero">
+  <h1>Musical Education</h1>
+  <p class="hero-sub">You want to understand why certain records changed everything — why a Beatles chord, a Miles Davis silence, or a Coltrane run still echoes in every song you hear today. Start here.</p>
+
+  <div class="callout">
+    <strong>How to use this list:</strong> These aren't "best-of" charts. Each entry is here because it shifted something — a genre, a technique, a cultural moment. Listen in order if you can: you'll hear how each record answers the one before it. Mark what you've heard, skip what you know, and follow the threads that interest you deepest.
+  </div>
+
+  <div class="cards-row">
+    <div class="sum-card">
+      <div class="sc-label">Entries</div>
+      <div class="sc-val" id="total-count">—</div>
+      <div class="sc-sub">Albums &amp; songs across eight decades</div>
+    </div>
+    <div class="sum-card">
+      <div class="sc-label">Listened</div>
+      <div class="sc-val" id="listened-count">0</div>
+      <div class="sc-sub">Mark entries as you go</div>
+    </div>
+    <div class="sum-card">
+      <div class="sc-label">Coverage</div>
+      <div class="sc-val" id="coverage-pct">0%</div>
+      <div class="sc-sub">Of the essential canon</div>
+    </div>
+  </div>
+
+  <details class="howto" open>
+    <summary>How to use this page</summary>
+    <div class="howto-body">
+      <ol>
+        <li>Browse the <a href="#timeline">timeline</a> chronologically, or filter by era using the buttons below.</li>
+        <li>Click <strong>Listen on Spotify</strong> to open any entry directly in Spotify.</li>
+        <li>Hit <strong>✓ Mark listened</strong> to track your progress — saved in your browser.</li>
+        <li>Use the <a href="#search">search bar</a> to find a specific artist or title.</li>
+        <li>Hover any term in the <a href="#glossary">glossary</a> for a quick definition.</li>
+      </ol>
+    </div>
+  </details>
+</section>
+
+<div class="filter-bar">
+  <span class="filter-label">Era:</span>
+  <button class="filter-btn active" data-era="all">All</button>
+  <button class="filter-btn" data-era="1920s-40s">1920s–40s</button>
+  <button class="filter-btn" data-era="1950s">1950s</button>
+  <button class="filter-btn" data-era="1960s">1960s</button>
+  <button class="filter-btn" data-era="1970s">1970s</button>
+  <button class="filter-btn" data-era="1980s">1980s</button>
+  <button class="filter-btn" data-era="1990s">1990s</button>
+  <button class="filter-btn" data-era="2000s+">2000s+</button>
+</div>
+
+<div class="search-wrap" id="search">
+  <input type="text" class="search-input" placeholder="Search by artist, title, or genre…" id="search-input">
+</div>
+
+<div class="progress-banner">
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="progress-text" id="progress-text">0 of 0 listened</div>
+</div>
+
+<div class="timeline-wrap" id="timeline">
+  <div class="timeline" id="timeline-root">
+    <!-- Populated by JS -->
+  </div>
+  <p class="no-results" id="no-results">No entries match your filter.</p>
+</div>
+
+<section class="glossary-section" id="glossary">
+  <div class="glossary-inner">
+    <h2>Glossary</h2>
+    <div class="glossary-grid">
+      <div class="g-term"><span>Blue note</span><div class="g-tooltip">A flattened 3rd, 5th, or 7th note used in blues and jazz to create emotional tension not found in standard Western scales.</div></div>
+      <div class="g-term"><span>Backbeat</span><div class="g-tooltip">Accent on beats 2 and 4 of a 4/4 bar — the defining pulse of rock and soul. Practically invented popular music as we know it.</div></div>
+      <div class="g-term"><span>Modal jazz</span><div class="g-tooltip">Improvising over scales (modes) rather than chord progressions. Miles Davis's Kind of Blue freed jazz from bebop's harmonic complexity.</div></div>
+      <div class="g-term"><span>Ostinato</span><div class="g-tooltip">A persistently repeated musical figure — the riff in rock, the vamp in jazz. Gives minimalist music its hypnotic power.</div></div>
+      <div class="g-term"><span>Overdrive / Distortion</span><div class="g-tooltip">Intentional clipping of an audio signal, turning clean guitar tone into the sound of rock and roll. Pioneered by accident and then embraced obsessively.</div></div>
+      <div class="g-term"><span>Polyphony</span><div class="g-tooltip">Multiple independent melodic lines sounding simultaneously. Bach's fugues are the supreme example; he could weave five independent voices into a single coherent structure.</div></div>
+      <div class="g-term"><span>Counterpoint</span><div class="g-tooltip">The art of combining distinct melodic lines that are harmonically interdependent. The foundational technique of Western classical composition.</div></div>
+      <div class="g-term"><span>Tritone substitution</span><div class="g-tooltip">Replacing a dominant chord with a chord whose root is a tritone away. The sleek harmonic movement in bebop that gives jazz its sophisticated tension-and-release.</div></div>
+      <div class="g-term"><span>Dynamics</span><div class="g-tooltip">The range between quiet and loud in a performance. Classical music exploits dynamics over a span of 60dB; most modern pop has had it compressed out entirely.</div></div>
+      <div class="g-term"><span>Call and response</span><div class="g-tooltip">A musical conversation between two voices or sections — rooted in West African music, brought into gospel, blues, and soul, and the backbone of rock riffing.</div></div>
+      <div class="g-term"><span>Syncopation</span><div class="g-tooltip">Stressing off-beats or unexpected rhythmic positions. Syncopation is what makes jazz, funk, and reggae feel like they swing rather than march.</div></div>
+      <div class="g-term"><span>Tone poem</span><div class="g-tooltip">An orchestral work that tells a story or evokes a scene without words. Debussy's La Mer describes the ocean; you can almost hear the waves.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Musical Education · All Spotify links open in Spotify or the web player · Progress saved in your browser
+</footer>
+
+<script>
+const ENTRIES = [
+  // ── 1920s–40s ────────────────────────────────────────────────────────────────
+  {
+    era: "1920s-40s",
+    year: 1924,
+    type: "song",
+    title: "Rhapsody in Blue",
+    artist: "George Gershwin",
+    genre: ["Classical / Jazz Fusion"],
+    spotify: "https://open.spotify.com/track/5XLsMLuoH5NhCJkB7HBpAj",
+    context: "Gershwin premiered this with Paul Whiteman's orchestra at New York's Aeolian Hall — a deliberate 'experiment in modern music' before an audience that included Stravinsky, Rachmaninoff, and Heifetz. The opening clarinet glissando is one of the most recognisable moments in 20th-century music. That smear was actually improvised by clarinetist Ross Gorman as a joke in rehearsal, and Gershwin told him to keep it.",
+    significance: "<strong>Why it matters:</strong> First serious attempt to fuse classical structure with jazz improvisation and American vernacular rhythm. It proved the two worlds weren't mutually exclusive, and opened a door that Bernstein, Ellington, and countless others would walk through."
+  },
+  {
+    era: "1920s-40s",
+    year: 1938,
+    type: "song",
+    title: "Sing, Sing, Sing",
+    artist: "Benny Goodman",
+    genre: ["Swing / Big Band"],
+    spotify: "https://open.spotify.com/track/4V7bshd4M9oFl1hFIJoJiw",
+    context: "Recorded live at Carnegie Hall on January 16, 1938 — a concert that legitimised jazz as an art form worthy of the most prestigious concert stage in America. Gene Krupa's tom-tom intro alone changed how drummers conceived their role in an ensemble. The audience was dancing in the aisles of Carnegie Hall for the first time in its history.",
+    significance: "<strong>Why it matters:</strong> The 'concert of the century' broke the racial barrier in American music — Goodman's band was integrated at a time when that was genuinely dangerous. It also established that jazz was not just dance-hall entertainment."
+  },
+  {
+    era: "1920s-40s",
+    year: 1941,
+    type: "album",
+    title: "The Billie Holiday Story",
+    artist: "Billie Holiday",
+    genre: ["Jazz / Blues Vocal"],
+    spotify: "https://open.spotify.com/album/6enrPdqB8bfOQAfVIefB7h",
+    context: "Holiday's voice was not technically perfect — her range was limited, her pitch sometimes precarious. None of that mattered. She sang behind the beat, bending notes into places no one had gone, turning her personal devastation into something that felt universal. Songs like 'Strange Fruit' (1939) were so politically incendiary that her label refused to release it; she recorded it anyway.",
+    significance: "<strong>Why it matters:</strong> Holiday redefined what it meant to be an interpreter. Before her, singers performed songs. She inhabited them. Every emotionally honest vocalist since — Nina Simone, Joni Mitchell, Amy Winehouse — owes her a direct debt."
+  },
+  {
+    era: "1920s-40s",
+    year: 1945,
+    type: "song",
+    title: "Ko-Ko",
+    artist: "Charlie Parker",
+    genre: ["Bebop"],
+    spotify: "https://open.spotify.com/track/3S7wKxPHNYQdlH2OQe3IJ8",
+    context: "Recorded in a single November session in 1945, Ko-Ko runs for just 2 minutes 53 seconds and contains more harmonic information than most composers pack into a symphony. Parker improvises over the chord changes of 'Cherokee' at a tempo of around 300 BPM — a speed at which most pianists are simply trying to hit the right notes, while Parker is sculpting architecture.",
+    significance: "<strong>Why it matters:</strong> Bebop's founding document. Parker and Dizzy Gillespie deliberately made the music too complex to steal — bebop was a private language that demanded total mastery. It split jazz into art music and entertainment music, and the consequences are still felt."
+  },
+
+  // ── 1950s ────────────────────────────────────────────────────────────────────
+  {
+    era: "1950s",
+    year: 1955,
+    type: "song",
+    title: "Maybellene",
+    artist: "Chuck Berry",
+    genre: ["Rock and Roll"],
+    spotify: "https://open.spotify.com/track/1Z6JXPI3X41zC6bI0LGpEY",
+    context: "Chuck Berry took the 12-bar blues, doubled the tempo, added a guitar lick that could be replicated by a teenager on a $40 guitar, and wrote lyrics about cars, girls, and schools — things teenagers actually cared about. His guitar intro here is the template for every rock and roll song that followed. Keith Richards said the whole of rock and roll is in that opening riff.",
+    significance: "<strong>Why it matters:</strong> Berry invented the syntax of rock guitar and wrote the first genuinely teenage music. Without him there's no Rolling Stones, no Beatles, and no rock and roll as we know it. John Lennon: 'If you tried to give rock and roll another name, you might call it Chuck Berry.'"
+  },
+  {
+    era: "1950s",
+    year: 1956,
+    type: "album",
+    title: "Ellington at Newport",
+    artist: "Duke Ellington",
+    genre: ["Jazz / Big Band"],
+    spotify: "https://open.spotify.com/album/3mLSU4HiAPV0CGBLN2Iqla",
+    context: "Ellington's career was widely considered finished by 1956. Then Paul Gonsalves improvised 27 consecutive choruses on 'Diminuendo and Crescendo in Blue' at the Newport Jazz Festival and the audience went into a frenzy the organisers feared would become a riot. Ellington was back on the cover of Time magazine. The whole story of the comeback is in a single live performance.",
+    significance: "<strong>Why it matters:</strong> Proof that the most sophisticated compositional mind in jazz could still make people lose control. Ellington remained vital for another 18 years, composing sacred music, film scores, and suites until his death."
+  },
+  {
+    era: "1950s",
+    year: 1957,
+    type: "song",
+    title: "Whole Lotta Shakin' Goin' On",
+    artist: "Jerry Lee Lewis",
+    genre: ["Rock and Roll / Rockabilly"],
+    spotify: "https://open.spotify.com/track/2WyhlMuDcF8g3A0lgTOxE0",
+    context: "When Jerry Lee Lewis performed this on The Steve Allen Show in 1957, he stood up and kicked his stool away mid-song. The television audience had never seen anything like it. Lewis attacked the piano like it owed him money, and the combination of gospel technique, boogie-woogie rhythms, and barely contained mania was something new. He was 21.",
+    significance: "<strong>Why it matters:</strong> Lewis proved that rock and roll was physically dangerous — not just musically transgressive but bodily threatening. The performance is still electrifying. Every showman from James Brown to Elton John studied it."
+  },
+  {
+    era: "1950s",
+    year: 1959,
+    type: "album",
+    title: "Kind of Blue",
+    artist: "Miles Davis",
+    genre: ["Modal Jazz"],
+    spotify: "https://open.spotify.com/album/1weenld61qoidwYuZ1GESA",
+    context: "Davis gave his musicians almost no preparation. He handed them scales and told them to improvise. The result — recorded over two sessions in March and April 1959 — is the best-selling jazz album of all time and arguably the most influential recording of the 20th century. Bill Evans's liner notes describe the concept as 'Japanese visual art', where the painter accepts the brushstroke as it happens. The takes you hear are almost entirely first takes.",
+    significance: "<strong>Why it matters:</strong> Modal jazz freed improvisation from the obligation to follow chord changes every few beats. It created space. That space is in every ambient record, every minimalist composition, every slow-build rock song that dares to breathe."
+  },
+  {
+    era: "1950s",
+    year: 1959,
+    type: "album",
+    title: "Giant Steps",
+    artist: "John Coltrane",
+    genre: ["Jazz / Avant-garde"],
+    spotify: "https://open.spotify.com/album/3x4pHDq6jXBXwDsatWWkEF",
+    context: "Recorded in May 1959, the same year as Kind of Blue — but pointing in the exact opposite direction. While Davis was subtracting harmonic complexity, Coltrane was adding it. 'Coltrane changes' — rapid modulation through three tonal centres equally spaced around the octave — were so advanced that pianist Tommy Flanagan visibly struggled during the take. Coltrane had solved a harmonic problem that paralysed other musicians.",
+    significance: "<strong>Why it matters:</strong> Giant Steps is the terminus of bebop harmony. Everything that could be done with chord substitution, Coltrane did here. After this album, jazz had to go somewhere else — and it did, in multiple directions at once."
+  },
+
+  // ── 1960s ────────────────────────────────────────────────────────────────────
+  {
+    era: "1960s",
+    year: 1963,
+    type: "album",
+    title: "Please Please Me",
+    artist: "The Beatles",
+    genre: ["Rock / Pop"],
+    spotify: "https://open.spotify.com/album/3KzAvEXcqJKBF97HrXwlgf",
+    context: "Recorded in a single day — February 11, 1963 — between 10am and 10pm, because the label needed a cheap, fast record. The Beatles were already so rehearsed from years of Hamburg gigs that they barely needed more than one take per song. The last recording of the day, 'Twist and Shout', left Lennon hoarse; his voice cracking is audible on the record.",
+    significance: "<strong>Why it matters:</strong> The opening shot of the British Invasion. More than musicianship, the Beatles brought song-writing self-sufficiency — they wrote their own material at a time when that was rare. Every singer-songwriter who followed owes that precedent."
+  },
+  {
+    era: "1960s",
+    year: 1965,
+    type: "album",
+    title: "Highway 61 Revisited",
+    artist: "Bob Dylan",
+    genre: ["Folk Rock"],
+    spotify: "https://open.spotify.com/album/77iEiAqYGDrCGCMEMbOoHq",
+    context: "Dylan walked out on acoustic folk after the Newport Folk Festival and plugged in an electric guitar. Half the audience booed. He didn't care. 'Like a Rolling Stone' opens the album with six minutes of contemptuous, joyful narrative — longer than any single before it, a song that tells a story of ruin with barely concealed delight. Producer Tom Wilson later said it was the most important record he ever made.",
+    significance: "<strong>Why it matters:</strong> Dylan demonstrated that rock lyrics could carry the weight of poetry. He made it acceptable — necessary — for popular music to be about something. Every lyricist who came after had to answer the question he posed."
+  },
+  {
+    era: "1960s",
+    year: 1965,
+    type: "album",
+    title: "A Love Supreme",
+    artist: "John Coltrane",
+    genre: ["Jazz / Spiritual"],
+    spotify: "https://open.spotify.com/album/6QW36bZdFuOMl1XSmH13aE",
+    context: "Recorded in one session in December 1964 with Coltrane's classic quartet — McCoy Tyner, Jimmy Garrison, Elvin Jones. Coltrane was searching for God in music. The album is a four-part suite: Acknowledgement, Resolution, Pursuance, Psalm. In the final section, Coltrane plays his improvised saxophone solo in exactly the rhythm of a poem he wrote as a prayer. You can read the syllables while you listen to the notes.",
+    significance: "<strong>Why it matters:</strong> A Love Supreme is one of those recordings that people describe as a spiritual experience regardless of their beliefs. It's the most sustained expression of devotion in recorded music, and it established that jazz could be sacred art."
+  },
+  {
+    era: "1960s",
+    year: 1966,
+    type: "album",
+    title: "Pet Sounds",
+    artist: "The Beach Boys",
+    genre: ["Pop / Experimental"],
+    spotify: "https://open.spotify.com/album/6LPDSEbAMUaFvlaGvVE2Dj",
+    context: "Brian Wilson produced Pet Sounds while suffering severe anxiety and never touring. He spent weeks in the studio alone, building multi-layered orchestral arrangements from bicycle bells, dog whistles, Coca-Cola cans, and conventional instruments. He was responding to Rubber Soul. Paul McCartney heard the finished album and wept. He then made Revolver as his answer.",
+    significance: "<strong>Why it matters:</strong> The album that changed what the studio meant. Wilson proved the recording studio was a compositional instrument in itself — not just a room where you captured a live performance. The concept album was born here."
+  },
+  {
+    era: "1960s",
+    year: 1967,
+    type: "album",
+    title: "Sgt. Pepper's Lonely Hearts Club Band",
+    artist: "The Beatles",
+    genre: ["Psychedelic Rock / Art Pop"],
+    spotify: "https://open.spotify.com/album/6QaVfG1pHYl1z15ZxkvVDW",
+    context: "The Beatles had stopped touring in 1966. The studio was now the only place they existed as a band. Producer George Martin and engineer Geoff Emerick spent 700 hours building this album — an eternity by 1967 standards. They ran tape backwards, recorded orchestras in chaos, and invented techniques that still don't have names. 'A Day in the Life' ends with a 41-piece orchestra ascending from nothing to catastrophe on a single chord.",
+    significance: "<strong>Why it matters:</strong> The record that made the album the primary unit of artistic statement in rock. Not the single, the album. Every album-oriented band — Pink Floyd, Led Zeppelin, Radiohead — was making a case that Sgt. Pepper first proved."
+  },
+  {
+    era: "1960s",
+    year: 1967,
+    type: "album",
+    title: "Are You Experienced",
+    artist: "Jimi Hendrix Experience",
+    genre: ["Psychedelic Rock"],
+    spotify: "https://open.spotify.com/album/7oTGEbLTNQlfhQvGbLZlh8",
+    context: "Hendrix arrived in London in 1966 and within months was being described by Eric Clapton as the greatest guitarist alive. His debut album contains 'Purple Haze', 'Foxy Lady', and 'Manic Depression' — three entirely different approaches to the guitar. He used feedback not as noise but as melody, bent strings to pitches that hadn't been heard before, and played bass, rhythm, and lead simultaneously on a single guitar.",
+    significance: "<strong>Why it matters:</strong> Hendrix expanded the tonal vocabulary of the electric guitar beyond what anyone thought was possible. Guitar effects, studio manipulation of tone, the use of the guitar as an orchestra — it all traces back to 1967."
+  },
+  {
+    era: "1960s",
+    year: 1968,
+    type: "album",
+    title: "The White Album",
+    artist: "The Beatles",
+    genre: ["Rock / Experimental"],
+    spotify: "https://open.spotify.com/album/0ETFjACtuP2ADo6LFhL6HN",
+    context: "30 songs recorded by four people who had largely stopped speaking to each other. Lennon, McCartney, Harrison, and Starr often recorded separately or with only one or two other band members present. The incoherence became the point. 'Revolution 9' is an 8-minute noise collage. 'Blackbird' is a solo acoustic meditation. 'Back in the U.S.S.R.' is pure rock and roll. No album before it contained this range.",
+    significance: "<strong>Why it matters:</strong> Proof that constraint is not necessary for greatness. The White Album's chaos gave every subsequent artist permission to be contradictory — to include the experiment alongside the hit, the fragment alongside the finished piece."
+  },
+  {
+    era: "1960s",
+    year: 1969,
+    type: "album",
+    title: "Abbey Road",
+    artist: "The Beatles",
+    genre: ["Rock / Pop"],
+    spotify: "https://open.spotify.com/album/0ETFjACtuP2ADo6LFhL6HN",
+    context: "The last album the Beatles recorded together — though Let It Be was released later, Abbey Road was made last. Side B is a suite of 16 interconnected song fragments that flow without pause, something that had never been done in rock music at this scale. George Harrison's 'Something' and 'Here Comes the Sun' are the final flowers of his tenure in the band; 'Come Together' contains the most famous bass riff in rock history.",
+    significance: "<strong>Why it matters:</strong> The medley on side B invented the idea of a song cycle in rock. McCartney later used the technique in his classical compositions. The 'suite' concept is still the highest ambition in rock production."
+  },
+
+  // ── 1970s ────────────────────────────────────────────────────────────────────
+  {
+    era: "1970s",
+    year: 1970,
+    type: "album",
+    title: "Bitches Brew",
+    artist: "Miles Davis",
+    genre: ["Jazz Fusion"],
+    spotify: "https://open.spotify.com/album/2de3mEZfHJZnlBxIAo7AjB",
+    context: "Davis walked into the studio in August 1969 with an ensemble of up to twelve musicians and a very simple instruction: play. No charts, no written parts. The instruments included two or three electric keyboards, two bass guitars, drums, percussion, electric guitar — and Davis's muted trumpet threading through it all. Producer Teo Macero then edited the 90-minute sessions into the double album using studio tape as a compositional instrument.",
+    significance: "<strong>Why it matters:</strong> Bitches Brew invented jazz fusion, influenced electronic music, hip-hop, and ambient music. Every genre boundary it crossed — rock, jazz, electronic, African — was crossed first here. It is the most forward-looking record Davis ever made."
+  },
+  {
+    era: "1970s",
+    year: 1971,
+    type: "album",
+    title: "What's Going On",
+    artist: "Marvin Gaye",
+    genre: ["Soul / R&B"],
+    spotify: "https://open.spotify.com/album/2v6ANHzGEXl2jFDm8jXE6E",
+    context: "Motown boss Berry Gordy refused to release this album. He thought the social commentary — about the Vietnam War, urban poverty, environmental destruction — would alienate Gaye's pop audience. Gaye threatened to never record again. Gordy relented. The album sold 100,000 copies in its first week and changed what soul music was allowed to say. Gaye recorded his vocal parts in one continuous take across multiple songs, treating the album as a single musical conversation.",
+    significance: "<strong>Why it matters:</strong> The moment soul music became politically conscious in a sustained, coherent way. Gaye demonstrated that a funk groove and a political conscience weren't incompatible. The template for every protest album that followed."
+  },
+  {
+    era: "1970s",
+    year: 1971,
+    type: "album",
+    title: "Led Zeppelin IV",
+    artist: "Led Zeppelin",
+    genre: ["Hard Rock / Heavy Metal"],
+    spotify: "https://open.spotify.com/album/1J8QW9qsMLx3staWaHpQmU",
+    context: "This album has no name — just four symbols chosen by each band member. 'Stairway to Heaven' is not necessarily their best song, but it is the single most-played song in the history of American FM radio. Page's acoustic guitar introduction builds across eight minutes to one of rock's defining electric climaxes. Bonham's drumming on 'When the Levee Breaks' was recorded with the microphones at the bottom of a stairwell to get the sound of thunder in a room.",
+    significance: "<strong>Why it matters:</strong> Zeppelin demonstrated that rock could be both physically overwhelming and musically intricate. The dynamic range — from whisper to roar — was unprecedented. Heavy metal, grunge, and hard rock all trace their arc back to this record."
+  },
+  {
+    era: "1970s",
+    year: 1972,
+    type: "album",
+    title: "Innervisions",
+    artist: "Stevie Wonder",
+    genre: ["Soul / Funk / Pop"],
+    spotify: "https://open.spotify.com/album/0aRCEsTSFXcPoBJsXU73GI",
+    context: "Between 1972 and 1976, Stevie Wonder released five consecutive masterpieces: Music of My Mind, Talking Book, Innervisions, Fulfillingness' First Finale, and Songs in the Key of Life. This run has no parallel in pop music. Innervisions was recorded with Wonder playing almost every instrument himself, using synthesisers in ways that hadn't been heard before. He was 22 years old.",
+    significance: "<strong>Why it matters:</strong> Wonder's 70s run established the concept of the multi-instrumentalist auteur in pop music — one person controlling every sonic element. Prince cited this period directly when describing his approach to Purple Rain."
+  },
+  {
+    era: "1970s",
+    year: 1973,
+    type: "album",
+    title: "Dark Side of the Moon",
+    artist: "Pink Floyd",
+    genre: ["Progressive Rock"],
+    spotify: "https://open.spotify.com/album/4LH4d3cOWNNsVw41Gqt2kv",
+    context: "Spent 741 weeks — over 14 years — on the Billboard 200. Still sells 8,000 physical copies a week. The album is about the pressures of modern life: time, money, mental illness, death. Roger Waters wrote it while suffering a breakdown. The heartbeat that opens 'Speak to Me' and the cash register sounds of 'Money' are as identifiable as any riff in rock. The quadrophonic mixing sessions at Abbey Road were the most sophisticated in studio history.",
+    significance: "<strong>Why it matters:</strong> The greatest argument that a rock album could be a complete, unified artistic statement about the human condition. It is simultaneously accessible and profound — a combination almost impossible to achieve."
+  },
+  {
+    era: "1970s",
+    year: 1975,
+    type: "album",
+    title: "Blood on the Tracks",
+    artist: "Bob Dylan",
+    genre: ["Folk Rock"],
+    spotify: "https://open.spotify.com/album/4WD4pslu83FF6oMnMNZChq",
+    context: "Dylan wrote most of this album in the summer of 1974 in upstate New York while his marriage to Sara Dylan was ending. He later denied it was autobiographical, but the devastation is audible in every note. 'Idiot Wind' contains the most vicious lyric he ever wrote, sung to the woman he loved. He re-recorded half the album after playing it to his brother in Minnesota, who said it needed more energy.",
+    significance: "<strong>Why it matters:</strong> The definitive break-up album, and the one that proved Dylan's 60s genius wasn't a young man's flash. He was 33, and the writing is more focused and painful than anything he'd done before."
+  },
+  {
+    era: "1970s",
+    year: 1976,
+    type: "album",
+    title: "Songs in the Key of Life",
+    artist: "Stevie Wonder",
+    genre: ["Soul / Funk / Pop"],
+    spotify: "https://open.spotify.com/album/6pwuKxMUkNg673KETsXPUV",
+    context: "A double album plus a bonus four-song EP. Stevie Wonder was so late delivering it that Motown put an ad in the trades apologising to fans and promising it was coming. It contains 'Sir Duke', 'I Wish', 'Isn't She Lovely', 'As', and 'Another Star' — five songs that would each have been the highlight of most artists' careers. All on one record.",
+    significance: "<strong>Why it matters:</strong> The high-water mark of 70s soul. When it was released, Paul McCartney, John Lennon, and Elton John all said it was the best album ever made. It probably is."
+  },
+  {
+    era: "1970s",
+    year: 1977,
+    type: "album",
+    title: "Never Mind the Bollocks",
+    artist: "Sex Pistols",
+    genre: ["Punk Rock"],
+    spotify: "https://open.spotify.com/album/6HADPMavqOmTpHtdKKNcWe",
+    context: "The most controversial album in British music history. Several record shops were prosecuted for displaying it in their windows. John Lydon could barely sing, the production was deliberately ugly, and the songs finished when they ran out of contempt. The whole enterprise took less time to complete than a single Yes album. It lasted twelve months before the band disintegrated, but the damage was permanent.",
+    significance: "<strong>Why it matters:</strong> Punk declared that technique was optional, that music could be a weapon, and that the record industry was the enemy. It reset expectations for an entire generation and directly created post-punk, new wave, and indie rock."
+  },
+  {
+    era: "1970s",
+    year: 1979,
+    type: "album",
+    title: "The Wall",
+    artist: "Pink Floyd",
+    genre: ["Progressive Rock / Art Rock"],
+    spotify: "https://open.spotify.com/album/5J4EJPJL3l1MUPwKLkIJYV",
+    context: "Roger Waters wrote The Wall after spitting on a fan during a concert. The fan hadn't done anything wrong — Waters was just that alienated from the audience. The album is the story of a rock star named Pink who constructs a psychological wall around himself until he is completely isolated. 'Comfortably Numb' was the last song Waters and Gilmour wrote together, both at the keyboard from opposite ends of the room without speaking.",
+    significance: "<strong>Why it matters:</strong> The concept album taken to its logical extreme. An 81-minute, single-author, psychodrama that was simultaneously a commercial phenomenon — 'Another Brick in the Wall (Part II)' reached number one — and a piece of art only its creator fully understood."
+  },
+
+  // ── 1980s ────────────────────────────────────────────────────────────────────
+  {
+    era: "1980s",
+    year: 1982,
+    type: "album",
+    title: "Thriller",
+    artist: "Michael Jackson",
+    genre: ["Pop / R&B / Funk"],
+    spotify: "https://open.spotify.com/album/2ANVost0y2y52ema1E9xAZ",
+    context: "The best-selling album of all time, with 66–70 million copies sold. Quincy Jones produced it; Rod Temperton wrote 'Thriller'. Jackson had already made Off the Wall — which should have made any artist's career — and then used every lesson from that record to go further. The title track was written by a white British songwriter, arranged by a Black American producer, and performed by a Black American artist in a way that shattered every commercial barrier between genres.",
+    significance: "<strong>Why it matters:</strong> The moment MTV had to integrate its playlist. Before Thriller, the channel rarely aired Black artists. Jackson's videos were so expensive and so compelling they changed what music television was. Every subsequent pop spectacle traces the precedent."
+  },
+  {
+    era: "1980s",
+    year: 1984,
+    type: "album",
+    title: "Purple Rain",
+    artist: "Prince and the Revolution",
+    genre: ["Funk / Rock / Soul"],
+    spotify: "https://open.spotify.com/album/3Md7x3UyFRnfCKblzFbVTm",
+    context: "Prince wrote, produced, directed, and starred in a film and its soundtrack simultaneously. 'When Doves Cry' has no bass line — Prince removed it because the bass line he'd written was too conventional. He replaced it with nothing, and the song reached number one. The title track is seven minutes of controlled ascent culminating in a guitar solo that was played live in a single take on stage in Minneapolis.",
+    significance: "<strong>Why it matters:</strong> Prince collapsed every genre boundary that existed in 1984 — rock, funk, gospel, new wave — into a single consistent voice. He also proved that creative control and commercial success were not opposites."
+  },
+  {
+    era: "1980s",
+    year: 1986,
+    type: "album",
+    title: "Graceland",
+    artist: "Paul Simon",
+    genre: ["World Music / Pop"],
+    spotify: "https://open.spotify.com/album/3tNfKuFOwgCCo7PKpFNYCO",
+    context: "Simon travelled to South Africa in 1985, when such travel was widely considered a cultural boycott violation, to record with township musicians. He returned with recordings of mbaqanga — South African township pop — and built the album around those rhythms and vocal styles. 'Diamonds on the Soles of Her Shoes' and 'You Can Call Me Al' introduced Ladysmith Black Mambazo to a global audience.",
+    significance: "<strong>Why it matters:</strong> The most successful fusion of African popular music with Western rock pop, and still the model for how such collaborations should work — with the African musicians credited, compensated, and featured rather than sampled and hidden."
+  },
+  {
+    era: "1980s",
+    year: 1988,
+    type: "album",
+    title: "It Takes a Nation of Millions to Hold Us Back",
+    artist: "Public Enemy",
+    genre: ["Hip-Hop"],
+    spotify: "https://open.spotify.com/album/6By9I4bKwBt2JLmXPNZCFO",
+    context: "The Bomb Squad — PE's production team — layered hundreds of samples at once: James Brown, sirens, speeches, jazz fragments. The density was deliberate assault. Chuck D rapped in compound sentences with multiple sub-clauses about Black political power, media manipulation, and the criminal justice system. There was no precedent for music this confrontational that was also this technically sophisticated.",
+    significance: "<strong>Why it matters:</strong> Public Enemy proved hip-hop could carry the full weight of political and cultural analysis. It also proved that sample-based production could be as rich and complex as any conventional instrumentation. Everything in the hip-hop canon that takes itself seriously traces back here."
+  },
+  {
+    era: "1980s",
+    year: 1989,
+    type: "album",
+    title: "3 Feet High and Rising",
+    artist: "De La Soul",
+    genre: ["Hip-Hop / Neo-Soul"],
+    spotify: "https://open.spotify.com/album/0M6atMDaMBGTElMDTMcNFS",
+    context: "De La Soul sampled Steely Dan, Johnny Cash, Otis Redding, and dozens more — creating something entirely new from the fragments of everything that came before. Producer Prince Paul turned the album into a game show, complete with quiz segments between songs. The 'daisy age' aesthetic — colourful, playful, deliberately un-threatening — was a direct rebuttal of the hyper-masculinity that was coming to dominate hip-hop.",
+    significance: "<strong>Why it matters:</strong> The template for alternative hip-hop. Without 3 Feet High and Rising there is no Tribe Called Quest, no Mos Def, no Kanye West's early work."
+  },
+
+  // ── 1990s ────────────────────────────────────────────────────────────────────
+  {
+    era: "1990s",
+    year: 1991,
+    type: "album",
+    title: "Nevermind",
+    artist: "Nirvana",
+    genre: ["Grunge / Alternative Rock"],
+    spotify: "https://open.spotify.com/album/2UJcKiJxNryhL050F5Z1Fk",
+    context: "In October 1991, Nevermind outsold Michael Jackson to reach number one. Nobody — including the band — saw it coming. Cobain structured his songs like a game theory problem: quiet verse, loud chorus. He had learned it from the Pixies but deployed it in a context so raw and emotionally direct that the technique became the vocabulary of an entire generation.",
+    significance: "<strong>Why it matters:</strong> Nevermind ended the 1980s. Literally: hair metal disappeared from charts within months. It proved that a guitar, bass, and drums recorded cheaply in Seattle could be more powerful than any amount of production budget."
+  },
+  {
+    era: "1990s",
+    year: 1991,
+    type: "album",
+    title: "Achtung Baby",
+    artist: "U2",
+    genre: ["Alternative Rock / Electronic"],
+    spotify: "https://open.spotify.com/album/41XCGpXuFobfFkJAuZIBxU",
+    context: "U2 nearly broke up making this album in Berlin's Hansa Studios in 1990. The band was in crisis: they had to reinvent themselves or die. They were listening to My Bloody Valentine, industrial music, and Berlin-era Bowie. 'One' — arguably the greatest song they ever wrote — came from a chord progression Bono played in the moment the band realised they'd found something. It was almost an accident.",
+    significance: "<strong>Why it matters:</strong> The most successful reinvention in rock history. The band absorbed irony and electronics without losing their capacity for emotional directness. The ZooTV tour that followed changed what a rock concert could be."
+  },
+  {
+    era: "1990s",
+    year: 1994,
+    type: "album",
+    title: "Ready to Die",
+    artist: "The Notorious B.I.G.",
+    genre: ["Hip-Hop / East Coast Rap"],
+    spotify: "https://open.spotify.com/album/5rJVTTK0ucAxQhkUc0nXbH",
+    context: "Biggie's debut is a complete self-portrait: Christopher Wallace as drug dealer, as family failure, as someone who expects to die young. The flow is conversational — he sounds like he's telling you a story, and the stories are so vivid and specific that they feel lived rather than written. Puffy's production sits the most melodic possible beats under the most brutally honest possible lyrics.",
+    significance: "<strong>Why it matters:</strong> Set the standard for East Coast narrative rap that no one has exceeded. The combination of wit, melody, and genuine menace is Biggie's specific genius, and it's impossible to separate any one element from the others."
+  },
+  {
+    era: "1990s",
+    year: 1994,
+    type: "album",
+    title: "Illmatic",
+    artist: "Nas",
+    genre: ["Hip-Hop / East Coast Rap"],
+    spotify: "https://open.spotify.com/album/3kEtdS2pH5dfjHJMnCEr0l",
+    context: "Recorded when Nas was 19, mostly in his childhood apartment in the Queensbridge projects. Nine tracks, 40 minutes, zero filler. The production came from DJ Premier, Pete Rock, Q-Tip, and Large Professor — basically every important East Coast producer of the era, all working at their peak simultaneously. Nas delivered the most complete portrait of street life ever set to music, while being too young to have actually lived much of what he described.",
+    significance: "<strong>Why it matters:</strong> The short, perfect hip-hop album. No hip-hop record has a better batting average — every track is essential. Illmatic set the template for what a classic hip-hop album should feel like: dense, purposeful, short enough to listen to twice in a row."
+  },
+  {
+    era: "1990s",
+    year: 1995,
+    type: "album",
+    title: "Definitely Maybe",
+    artist: "Oasis",
+    genre: ["Britpop / Alternative Rock"],
+    spotify: "https://open.spotify.com/album/0mEB3H5TDGM6EHcS7KnGbY",
+    context: "The fastest-selling debut album in British history on release. Oasis made no apology for stealing from the Beatles, the Stones, and T. Rex — Noel Gallagher wore his influences as a badge of honour. 'Supersonic' and 'Live Forever' were recorded for almost nothing; 'Rock 'n' Roll Star' opens the album with what sounds like the entire history of British rock compressed into a guitar chord.",
+    significance: "<strong>Why it matters:</strong> Britpop's opening declaration. Oasis took the guitar band and made it feel urgent again after grunge. For three years in the mid-90s, British guitar music was the most commercially dominant genre on earth."
+  },
+  {
+    era: "1990s",
+    year: 1996,
+    type: "album",
+    title: "The Score",
+    artist: "Fugees",
+    genre: ["Hip-Hop / R&B"],
+    spotify: "https://open.spotify.com/album/0SZQzOBMrZSqKrT0RHaOgk",
+    context: "Lauryn Hill, Wyclef Jean, and Pras combined hip-hop, reggae, and soul in a way that reached a global audience without sacrificing depth. Their cover of 'Killing Me Softly' should have been a disaster — it's a very 70s song — but Hill's vocal turned it into something new. The production blends drum machines, live musicians, and samples so seamlessly you can't tell which is which.",
+    significance: "<strong>Why it matters:</strong> The album that proved hip-hop had genuinely global reach. It also launched Lauryn Hill, whose solo album The Miseducation two years later is one of the greatest records ever made."
+  },
+  {
+    era: "1990s",
+    year: 1997,
+    type: "album",
+    title: "OK Computer",
+    artist: "Radiohead",
+    genre: ["Alternative Rock / Art Rock"],
+    spotify: "https://open.spotify.com/album/6dVIqQ8qmQ5GBnJ9shOYGE",
+    context: "Recorded in a mansion in Bath while on tour with Alanis Morissette. Thom Yorke was suffering from writer's block that lifted in the weeks of isolation. The album is about alienation, technological anxiety, and systems that dehumanise — which, in 1997, felt prophetic. Jonny Greenwood's arrangements treat the guitar orchestra as one instrument among many rather than the centre of the music.",
+    significance: "<strong>Why it matters:</strong> OK Computer moved alternative rock into intellectual territory while remaining emotionally direct. It anticipated the anxiety of the internet age and is the reason a generation of musicians still cites Radiohead as the band that gave them permission to be strange."
+  },
+  {
+    era: "1990s",
+    year: 1998,
+    type: "album",
+    title: "The Miseducation of Lauryn Hill",
+    artist: "Lauryn Hill",
+    genre: ["Neo-Soul / Hip-Hop / R&B"],
+    spotify: "https://open.spotify.com/album/1BZoqL0vmBWMFJW9DnEHMi",
+    context: "Recorded after Hill left the Fugees and before she left music almost entirely. She played most of the instruments herself and produced the majority of the album alone. The classroom conceit — students answering questions about love — frames what is essentially a masterclass in contemporary soul. 'Ex-Factor' is a melody that rivals anything Marvin Gaye wrote. 'Doo Wop (That Thing)' debuted at number one.",
+    significance: "<strong>Why it matters:</strong> The album that founded neo-soul as a conscious genre. Amy Winehouse, Adele, Erykah Badu — the entire strand of emotionally direct, instrumentally sophisticated Black vocal music traces through this record."
+  },
+  {
+    era: "1990s",
+    year: 1999,
+    type: "album",
+    title: "The Slim Shady LP",
+    artist: "Eminem",
+    genre: ["Hip-Hop"],
+    spotify: "https://open.spotify.com/album/4Pi9M5VPOsJJFHnQYnHoGD",
+    context: "Dr. Dre found Eminem through a mixtape and signed him in 1998. The Slim Shady LP is technically the most dexterous rapping on any major-label debut to that point — the internal rhyme schemes, the multi-syllabic patterns, the deliberate dissonance between the lyrical content and the cheerful delivery. Marshall Mathers put his entire life — his absent father, his mother, his daughter — into the album under a persona he could both inhabit and deny.",
+    significance: "<strong>Why it matters:</strong> Eminem's technical command raised the bar for what hip-hop rhyming required. Every rapper who came after had to reckon with his technique even if they rejected his content."
+  },
+
+  // ── 2000s+ ────────────────────────────────────────────────────────────────────
+  {
+    era: "2000s+",
+    year: 2001,
+    type: "album",
+    title: "The Blueprint",
+    artist: "Jay-Z",
+    genre: ["Hip-Hop"],
+    spotify: "https://open.spotify.com/album/3s3TmhzYnkmcaaYLj0qNv4",
+    context: "Released on September 11, 2001. Kanye West and Just Blaze produced most of it by flipping classic soul samples — a technique that had been used before but never with this level of sophistication. Jay-Z rapped over Nas and Eminem on 'Takeover', settling the most important rap beef of the era in a single verse. His delivery was so relaxed it sounded effortless, which required an almost impossible command of timing.",
+    significance: "<strong>Why it matters:</strong> The moment Kanye West announced himself to the world as a producer. It also crystallised what a 'classic rap album' meant — polished, personal, lyrically ambitious, production-forward."
+  },
+  {
+    era: "2000s+",
+    year: 2001,
+    type: "album",
+    title: "Is This It",
+    artist: "The Strokes",
+    genre: ["Indie Rock / Garage Rock Revival"],
+    spotify: "https://open.spotify.com/album/2yNaksHgeMQs0WS4bBRpeh",
+    context: "Five private-school kids from New York who loved Television and the Velvet Underground made a guitar record at a time when guitar records seemed finished. The album was recorded in mono in a rehearsal room, intentionally lo-fi in a way that felt radical after the ProTools perfection of the 1990s. NME gave it 10 out of 10 before it was even released; British music critics had been waiting for this for a decade.",
+    significance: "<strong>Why it matters:</strong> The Strokes gave indie rock its template for the 2000s and pointed directly toward the Arctic Monkeys, Franz Ferdinand, and the entire guitar-revival of the mid-decade."
+  },
+  {
+    era: "2000s+",
+    year: 2003,
+    type: "album",
+    title: "Speakerboxxx / The Love Below",
+    artist: "OutKast",
+    genre: ["Hip-Hop / Funk / Experimental"],
+    spotify: "https://open.spotify.com/album/1UhCLmuMnHaEcNwfiFOUF0",
+    context: "A double album where André 3000 and Big Boi made completely separate records and released them together. André's side is a genre-collapsing experiment in funk, jazz, and something he described as 'anti-pop' — culminating in 'Hey Ya!', which reached number one while sounding like nothing else on the radio. Big Boi's side is the most underrated hip-hop record of the decade.",
+    significance: "<strong>Why it matters:</strong> The moment 'Hey Ya!' hit, people realised hip-hop could do anything. The song is built on a time-signature change that most listeners never notice. It's one of the most joyful records ever made."
+  },
+  {
+    era: "2000s+",
+    year: 2004,
+    type: "album",
+    title: "College Dropout",
+    artist: "Kanye West",
+    genre: ["Hip-Hop / Soul Rap"],
+    spotify: "https://open.spotify.com/album/4lTBEoV11HJpm5OBs8bBFl",
+    context: "Kanye West was almost exclusively known as a producer when he made this. He had a jaw wired shut from a car accident and recorded 'Through the Wire' with his mouth wired closed. The album is about being an outsider — in hip-hop, in education, in the class system. Its warmth and vulnerability were unlike anything in mainstream rap. 'Jesus Walks' nearly wasn't released because every radio station refused it.",
+    significance: "<strong>Why it matters:</strong> College Dropout introduced the idea that hip-hop could be emotionally vulnerable without being weak. Every confessional rapper of the following decade — Drake above all — built their career on the space Kanye opened."
+  },
+  {
+    era: "2000s+",
+    year: 2006,
+    type: "album",
+    title: "Whatever People Say I Am, That's What I'm Not",
+    artist: "Arctic Monkeys",
+    genre: ["Indie Rock"],
+    spotify: "https://open.spotify.com/album/3PQLM1R4tOJb8jxFDXYN0p",
+    context: "The fastest-selling debut album in British history, overtaking Oasis. The Arctic Monkeys had distributed their music for free on CDs at gigs before they signed to a label — an early model of what the internet would make normal. Alex Turner wrote about Sheffield nightlife with the precision of a short-story writer: specific places, specific drinks, specific people who feel like they could be identified.",
+    significance: "<strong>Why it matters:</strong> The last great British guitar album made by someone who didn't know yet that guitar albums were supposed to be dying. Turner's lyrical specificity influenced a generation of British songwriters who had been writing generic anthems."
+  },
+  {
+    era: "2000s+",
+    year: 2010,
+    type: "album",
+    title: "My Beautiful Dark Twisted Fantasy",
+    artist: "Kanye West",
+    genre: ["Hip-Hop / Art Pop"],
+    spotify: "https://open.spotify.com/album/20r762YmB5HeofjMCiPMLv",
+    context: "Kanye spent a year in Hawaii with a rotating cast of collaborators making this album as penance after the Taylor Swift incident had made him the most hated man in pop music. The maximalism is deliberately operatic: orchestras, choirs, sample loops, 9-minute centrepiece tracks. 'Runaway' is a toast to douchebags and assholes — including himself — set to a piano figure he played with one finger.",
+    significance: "<strong>Why it matters:</strong> The album that permanently secured Kanye's place as a generational artist regardless of everything that came after. Metacritic's highest-rated rap album ever. The proof that grand ambition and genuine self-awareness can coexist."
+  },
+  {
+    era: "2000s+",
+    year: 2012,
+    type: "album",
+    title: "good kid, m.A.A.d city",
+    artist: "Kendrick Lamar",
+    genre: ["Hip-Hop / West Coast Rap"],
+    spotify: "https://open.spotify.com/album/41MnTivkwTO3UUJ8DrqEJJ",
+    context: "A concept album that tells the story of a single day in Compton: Kendrick trying to get home while his friends are getting arrested, getting high, and getting shot. Dr. Dre executive-produced it, which gave Kendrick commercial legitimacy without commercial compromise. The album is so detailed and so specific about place that it could only have been written by someone who grew up there.",
+    significance: "<strong>Why it matters:</strong> The most artistically complete hip-hop album since Illmatic. Kendrick demonstrated that storytelling, technical virtuosity, and social conscience could all operate at maximum level simultaneously."
+  },
+  {
+    era: "2000s+",
+    year: 2013,
+    type: "album",
+    title: "Random Access Memories",
+    artist: "Daft Punk",
+    genre: ["Electronic / Disco / Pop"],
+    spotify: "https://open.spotify.com/album/4m2880jivSbbyEGAKfITCa",
+    context: "Recorded with live musicians — including Nile Rodgers, Giorgio Moroder, and Pharrell Williams — at a time when digital production had made live instruments feel optional. Daft Punk made an album about the music they loved as children and the people who made it: disco, film scores, funk. 'Get Lucky' has over 2 billion streams. 'Giorgio by Moroder' is a 9-minute documentary set to music.",
+    significance: "<strong>Why it matters:</strong> Reminded an entire generation that groove cannot be quantised into existence. The care and craftsmanship of the album were a deliberate argument against disposability in pop music."
+  },
+  {
+    era: "2000s+",
+    year: 2015,
+    type: "album",
+    title: "To Pimp a Butterfly",
+    artist: "Kendrick Lamar",
+    genre: ["Hip-Hop / Jazz / Funk"],
+    spotify: "https://open.spotify.com/album/7ycBtnsMtyVbbwTfJwRjSP",
+    context: "Kendrick recorded this while touring the world in support of good kid and suffering what he later described as survivor's guilt. The album incorporates jazz, funk, spoken word, and a conversation with Tupac assembled from archive recordings. 'Alright' became a protest anthem before the album was released. The closing poem/rap 'Mortal Man' is a 12-minute meditation on what artists owe their communities.",
+    significance: "<strong>Why it matters:</strong> The most ambitious work of hip-hop's critical consensus favourite, and the album that definitively answered the question of whether rap could sustain an extended artistic argument at the same level as the best jazz or soul records."
+  }
+];
+
+// ── State ──────────────────────────────────────────────────────────────────────
+
+let listened = new Set(JSON.parse(localStorage.getItem('musicedu-listened') || '[]'));
+let currentEra = 'all';
+let currentSearch = '';
+
+function saveListened() {
+  localStorage.setItem('musicedu-listened', JSON.stringify([...listened]));
+}
+
+function entryKey(e) {
+  return `${e.year}-${e.title}-${e.artist}`.replace(/\s+/g, '-').toLowerCase();
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────────
+
+function renderTimeline() {
+  const root = document.getElementById('timeline-root');
+  root.innerHTML = '';
+
+  const grouped = {};
+  for (const e of ENTRIES) {
+    if (!grouped[e.era]) grouped[e.era] = [];
+    grouped[e.era].push(e);
+  }
+
+  const eraOrder = ['1920s-40s','1950s','1960s','1970s','1980s','1990s','2000s+'];
+  const eraLabels = {
+    '1920s-40s': '1920s – 1940s · Jazz, Blues & Swing',
+    '1950s': '1950s · Birth of Rock and Roll',
+    '1960s': '1960s · The Revolution',
+    '1970s': '1970s · Consolidation & Reinvention',
+    '1980s': '1980s · Pop, Punk & Hip-Hop',
+    '1990s': '1990s · Alternative, Grunge & Golden Age Rap',
+    '2000s+': '2000s & Beyond · Digital Era Classics'
+  };
+
+  let anyVisible = false;
+
+  for (const era of eraOrder) {
+    const entries = grouped[era] || [];
+    let eraHasVisible = false;
+
+    const eraFrag = document.createDocumentFragment();
+    const heading = document.createElement('div');
+    heading.className = 'era-heading';
+    heading.textContent = eraLabels[era];
+
+    for (const e of entries) {
+      const key = entryKey(e);
+      const isListened = listened.has(key);
+      const matchesEra = currentEra === 'all' || currentEra === era;
+      const q = currentSearch.toLowerCase();
+      const matchesSearch = !q
+        || e.title.toLowerCase().includes(q)
+        || e.artist.toLowerCase().includes(q)
+        || e.genre.some(g => g.toLowerCase().includes(q));
+
+      const div = document.createElement('div');
+      div.className = 'entry' + (isListened ? ' listened' : '') + (!matchesEra || !matchesSearch ? ' is-hidden' : '');
+      div.dataset.key = key;
+
+      if (matchesEra && matchesSearch) {
+        eraHasVisible = true;
+        anyVisible = true;
+      }
+
+      div.innerHTML = `
+        <div class="entry-card ${e.type === 'album' ? 'is-album' : 'is-song'}">
+          <div class="entry-header">
+            <div class="entry-meta">
+              <div class="entry-year">${e.year}</div>
+              <div class="entry-title">${escHtml(e.title)}</div>
+              <div class="entry-artist">${escHtml(e.artist)}</div>
+            </div>
+            <div class="entry-actions">
+              <a class="spotify-btn" href="${e.spotify}" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+                Listen
+              </a>
+              <button class="listened-btn ${isListened ? 'active' : ''}" data-key="${key}">
+                ${isListened ? '✓ Listened' : 'Mark listened'}
+              </button>
+            </div>
+          </div>
+          <div class="entry-tags">
+            <span class="tag ${e.type === 'album' ? 'type-album' : 'type-song'}">${e.type === 'album' ? 'Album' : 'Song'}</span>
+            ${e.genre.map(g => `<span class="tag genre">${escHtml(g)}</span>`).join('')}
+            <span class="tag era">${e.era}</span>
+          </div>
+          <p class="entry-context">${e.context}</p>
+          <div class="entry-significance">${e.significance}</div>
+        </div>`;
+
+      eraFrag.appendChild(div);
+    }
+
+    if (eraHasVisible) {
+      root.appendChild(heading);
+    }
+    root.appendChild(eraFrag);
+  }
+
+  document.getElementById('no-results').style.display = anyVisible ? 'none' : 'block';
+}
+
+function updateStats() {
+  const total = ENTRIES.length;
+  const listenedCount = ENTRIES.filter(e => listened.has(entryKey(e))).length;
+  const pct = total > 0 ? Math.round(listenedCount / total * 100) : 0;
+
+  document.getElementById('total-count').textContent = total;
+  document.getElementById('listened-count').textContent = listenedCount;
+  document.getElementById('coverage-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${listenedCount} of ${total} listened`;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Events ─────────────────────────────────────────────────────────────────────
+
+document.getElementById('timeline-root').addEventListener('click', e => {
+  const btn = e.target.closest('.listened-btn');
+  if (!btn) return;
+  const key = btn.dataset.key;
+  if (listened.has(key)) {
+    listened.delete(key);
+  } else {
+    listened.add(key);
+  }
+  saveListened();
+  renderTimeline();
+  updateStats();
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentEra = btn.dataset.era;
+    renderTimeline();
+  });
+});
+
+let searchTimer;
+document.getElementById('search-input').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    currentSearch = e.target.value;
+    renderTimeline();
+  }, 120);
+});
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+
+renderTimeline();
+updateStats();
+</script>
+</body>
+</html>
