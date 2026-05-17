@@ -144,6 +144,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .dv01-explain-text{font-size:13px;color:var(--muted);line-height:1.55}
 .bump-check{font-size:12px;color:var(--muted);margin-top:6px}
 .bump-check span{font-family:monospace;color:var(--accent2)}
+.worked-panel{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;margin-bottom:24px;font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:13px;line-height:1.9;overflow-x:auto}
+.wc-header{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.wc-given{color:var(--text);border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:16px}
+.wc-step-label{color:var(--accent2);font-weight:700;margin-bottom:4px;font-size:13px}
+.wc-block{margin-bottom:16px}
+.wc-dim{color:var(--muted)}
+.wc-val{color:var(--text)}
+.wc-pvt-val{color:var(--green)}
+.wc-divider{border-top:1px dashed var(--border);margin:6px 0}
+.wc-answer{color:var(--green);font-weight:800;font-size:20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;border-top:2px solid rgba(34,211,160,.3);padding-top:12px;margin-top:8px}
 </style>
 </head>
 <body>
@@ -252,36 +262,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     </div>
   </div>
 
-  <h3 style="margin-bottom:16px">Step-by-Step Calculation</h3>
-  <div class="steps-grid">
-    <div class="step-card">
-      <div class="step-num">Step 1</div>
-      <div class="step-title">Cash Flows</div>
-      <div class="step-formula" id="s1-formula">—</div>
-      <div class="step-note" id="s1-note">—</div>
-    </div>
-    <div class="step-card">
-      <div class="step-num">Step 2</div>
-      <div class="step-title">Present Value Each Cash Flow</div>
-      <div class="step-formula">PV(t) = CF<sub>t</sub> / (1 + y/2)<sup>2t</sup></div>
-      <div class="step-result" id="s2-result">—</div>
-      <div class="step-note" id="s2-note">—</div>
-    </div>
-    <div class="step-card">
-      <div class="step-num">Step 3</div>
-      <div class="step-title">Macaulay Duration</div>
-      <div class="step-formula">MacD = Σ(t × PV<sub>t</sub>) / Price</div>
-      <div class="step-result" id="s3-result">—</div>
-      <div class="step-note" id="s3-note">—</div>
-    </div>
-    <div class="step-card">
-      <div class="step-num">Step 4 → DV01</div>
-      <div class="step-title">Modified Duration → DV01</div>
-      <div class="step-formula" id="s4-formula">ModD = MacD / (1 + y/2)<br>DV01 = Price × ModD × 0.0001</div>
-      <div class="step-result" id="s4-result">—</div>
-      <div class="step-note" id="s4-note">—</div>
-    </div>
-  </div>
+  <h3 style="margin-bottom:16px">Full Worked Calculation</h3>
+  <div id="worked-panel"></div>
 
   <h3>Cash Flow Table <span style="font-size:12px;font-weight:400;color:var(--muted)" id="cf-showing"></span></h3>
   <div style="overflow-x:auto">
@@ -757,45 +739,78 @@ function onCalcChange() {
   document.getElementById('c-dv01-big').textContent = dv01Disp;
 
   const instName = isSwap ? 'receive-fixed swap' : 'bond';
-  const dirNote  = isSwap
-    ? 'A 1bp rise in rates means you lose this amount (you receive fixed, which is now worth less). A 1bp fall earns you this.'
-    : 'A 1bp rise in yield means the bond loses this value. A 1bp fall gains this amount.';
   document.getElementById('c-dv01-sentence').textContent =
-    `On a $${(notional / 1e6).toFixed(0)}M notional ${years}Y ${instName} at ${yieldPct.toFixed(2)}%, every 1bp move in rates changes the value by ${dv01Disp}. A 10bp move = ${fmtDol(dv01 * 10)}. A 100bp move = ${fmtDol(dv01 * 100)}.`;
-
+    `On a $${(notional/1e6).toFixed(0)}M notional ${years}Y ${instName} at ${yieldPct.toFixed(2)}%, every 1bp move changes the value by ${dv01Disp}. 10bp = ${fmtDol(dv01*10)}. 100bp = ${fmtDol(dv01*100)}.`;
   document.getElementById('c-bump-check').innerHTML =
     `Verified via bump-and-reprice: <span>P(y−0.5bp) − P(y+0.5bp) = ${fmtDol(dv01Bump)}</span> ✓`;
 
-  // Step 1
-  const couponAnn = yieldPct / 100 * notional;
-  document.getElementById('s1-formula').innerHTML =
-    isSwap
-      ? `Fixed leg coupon = $${(notional/1e6).toFixed(0)}M × ${yieldPct.toFixed(2)}% = ${fmtDol(couponAnn)}/yr\n(semiannual = ${fmtDol(coupon)} per period)\nFloating leg ≈ par at each reset → duration ≈ 0`
-      : `Semiannual coupon = $${(notional/1e6).toFixed(0)}M × ${yieldPct.toFixed(2)}% / 2 = ${fmtDol(coupon)}\nFinal period: coupon + principal = ${fmtDol(coupon + notional)}\nTotal periods: ${n}`;
-  document.getElementById('s1-note').textContent =
-    isSwap
-      ? 'A receive-fixed swap is economically a long fixed bond + short floating bond. Since the floating bond resets to par, its DV01 ≈ 0, so the swap DV01 = fixed-leg DV01.'
-      : `Par bond: price = notional because coupon rate = yield. All ${n} semiannual periods shown in the table below.`;
+  // ── Worked panel ──────────────────────────────────────────────────────────
+  const factor      = 1 + yieldPct / 100 / 2;
+  const pvtTotal    = cfs.reduce((a, r) => a + r.pvt, 0);
+  const SHOW_N      = 3;
+  const showCFs     = n <= SHOW_N + 1 ? cfs : [...cfs.slice(0, SHOW_N), null, cfs[cfs.length - 1]];
 
-  // Step 2
-  document.getElementById('s2-result').textContent = fmtDol(totalPV);
-  document.getElementById('s2-note').textContent =
-    `Sum of all ${n} discounted cash flows. ` +
-    (Math.abs(totalPV - notional) < 1
-      ? 'Equals notional exactly — confirming this is a par instrument.'
-      : `Differs from notional because yield ≠ coupon rate.`);
+  const pvRows = showCFs.map(r => {
+    if (!r) return `<div class="wc-dim">&nbsp;&nbsp;&nbsp;&nbsp;⋮ &nbsp;(periods ${SHOW_N + 1}–${n - 1} same pattern)</div>`;
+    return `<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">t=${r.t.toFixed(1)}yr &nbsp;(period&nbsp;${r.period}): &nbsp;</span>`
+      + `<span class="wc-val">${fmtDol(r.cf)} &nbsp;÷ &nbsp;${factor.toFixed(5)}<sup>${r.period}</sup></span>`
+      + `<span class="wc-dim"> = </span><strong class="wc-val">${fmtDol(r.pv)}</strong>`
+      + `&nbsp;&nbsp;<span class="wc-dim">|&nbsp;t×PV = </span><strong class="wc-pvt-val">${fmtDol(r.pvt)}</strong></div>`;
+  }).join('');
 
-  // Step 3
-  document.getElementById('s3-result').textContent = macaulay.toFixed(4) + ' years';
-  document.getElementById('s3-note').textContent =
-    `The weighted-average time to receive cash flows. Shorter than ${years}Y because coupons arrive before maturity. A zero-coupon bond would have Macaulay Duration = ${years}Y exactly.`;
+  const pvtRows = showCFs.map(r => {
+    if (!r) return `<div class="wc-dim">&nbsp;&nbsp;&nbsp;&nbsp;⋮</div>`;
+    return `<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">${r.t.toFixed(1)} &nbsp;× &nbsp;${fmtDol(r.pv)}</span>`
+      + `<span class="wc-dim"> = </span><strong class="wc-pvt-val">${fmtDol(r.pvt)}</strong></div>`;
+  }).join('');
 
-  // Step 4
-  document.getElementById('s4-result').textContent =
-    `ModDur = ${modified.toFixed(4)} yrs → DV01 = ${fmtDol(dv01)}`;
-  document.getElementById('s4-note').innerHTML =
-    `ModDur = ${macaulay.toFixed(4)} / (1 + ${(yieldPct/2).toFixed(2)}%) = <strong style="color:var(--text)">${modified.toFixed(4)}</strong>. ` +
-    `DV01 = ${fmtDol(Math.round(totalPV))} × ${modified.toFixed(4)} × 0.0001 = <strong style="color:var(--green)">${fmtDol(dv01)}</strong>.`;
+  const swapFootnote = isSwap
+    ? `<div class="wc-dim" style="margin-top:8px;font-size:12px">(Floating leg always resets to par → its duration ≈ 0. Swap DV01 = fixed-leg DV01 above.)</div>`
+    : '';
+
+  document.getElementById('worked-panel').innerHTML = `
+    <div class="worked-panel">
+      <div class="wc-header">Full Worked Calculation — every number shown</div>
+
+      <div class="wc-given"><strong>Given:</strong> &nbsp;Notional = ${fmtDol(notional)} &nbsp;|&nbsp; Maturity = ${years} years &nbsp;|&nbsp; Yield = ${yieldPct.toFixed(2)}% &nbsp;(semiannual compounding, ${isSwap ? 'receive-fixed IRS' : 'par fixed-rate bond'})</div>
+
+      <div class="wc-block">
+        <div class="wc-step-label">[1] Cash Flows</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;Semiannual coupon = ${fmtDol(notional)} × ${yieldPct.toFixed(2)}% ÷ 2 = <strong class="wc-val">${fmtDol(coupon)}</strong> per period</div>
+        <div class="wc-dim">&nbsp;&nbsp;&nbsp;&nbsp;Periods 1 to ${n - 1}: &nbsp;CF = ${fmtDol(coupon)}</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">Period ${n} (final): CF = ${fmtDol(coupon)} + ${fmtDol(notional)} = </span><strong class="wc-val">${fmtDol(coupon + notional)}</strong></div>
+      </div>
+
+      <div class="wc-block">
+        <div class="wc-step-label">[2] Discount Each Cash Flow &nbsp;<span class="wc-dim" style="font-weight:400">PV = CF ÷ (1 + ${yieldPct.toFixed(2)}%/2)<sup>period</sup> = CF ÷ ${factor.toFixed(5)}<sup>period</sup></span></div>
+        ${pvRows}
+        <div class="wc-divider"></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">Price (Σ all PVs) = </span><strong class="wc-val">${fmtDol(totalPV)}</strong>${Math.abs(totalPV - notional) < 2 ? ' &nbsp;<span class="wc-dim">✓ equals notional (par bond)</span>' : ''}</div>
+      </div>
+
+      <div class="wc-block">
+        <div class="wc-step-label">[3] Macaulay Duration = Σ(t × PV) ÷ Price</div>
+        <div class="wc-dim">&nbsp;&nbsp;&nbsp;&nbsp;Numerator = Σ(t × PV):</div>
+        ${pvtRows}
+        <div class="wc-divider"></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">Σ(t × PV) = </span><strong class="wc-pvt-val">${fmtDol(pvtTotal)}</strong></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">Macaulay Duration = ${fmtDol(pvtTotal)} ÷ ${fmtDol(totalPV)} = </span><strong class="wc-val">${macaulay.toFixed(4)} years</strong></div>
+        <div class="wc-dim" style="font-size:12px">&nbsp;&nbsp;&nbsp;&nbsp;(Shorter than ${years}Y maturity because coupons arrive before the final date)</div>
+      </div>
+
+      <div class="wc-block">
+        <div class="wc-step-label">[4] Modified Duration = Macaulay ÷ (1 + yield/2)</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">ModDur = ${macaulay.toFixed(4)} ÷ (1 + ${yieldPct.toFixed(2)}%/2) = ${macaulay.toFixed(4)} ÷ ${factor.toFixed(5)} = </span><strong class="wc-val">${modified.toFixed(4)} years</strong></div>
+        <div class="wc-dim" style="font-size:12px">&nbsp;&nbsp;&nbsp;&nbsp;(This tells you: a 1% rise in yield → ~${modified.toFixed(2)}% fall in price, i.e. ${fmtDol(totalPV * modified / 100)} on this position)</div>
+      </div>
+
+      <div class="wc-block">
+        <div class="wc-step-label">[5] DV01 = Price × Modified Duration × 0.0001</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">DV01 = ${fmtDol(totalPV)} × ${modified.toFixed(4)} × 0.0001</span></div>
+        <div class="wc-answer">&nbsp;&nbsp;&nbsp;&nbsp;DV01 = ${fmtDol(dv01)}</div>
+        ${swapFootnote}
+      </div>
+    </div>`;
 
   // Cash flow table (show first 12 + last 1 if long)
   const SHOW = 12;
