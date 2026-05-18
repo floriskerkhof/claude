@@ -463,39 +463,53 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </ul>
 
   <details open>
-    <summary>How Gamma Actually Makes (or Costs) Money in Practice</summary>
+    <summary>How Gamma Actually Makes (or Costs) Money — Without Re-Hedging</summary>
     <div class="details-body">
-      <p><strong style="color:var(--text)">The key insight: gamma keeps your delta leaning into whichever way the market moves</strong></p>
-      <p>Start delta-neutral — DV01 = 0 — with positive gamma of +$2,000/bp² at the 5Y tenor. Rates fall 10bp. Your delta automatically drifts to +$20,000 (positive — you got <em>longer</em> as rates fell). You were increasingly long throughout the fall, so you profited from it as it happened. Once rates stop, you re-hedge by selling $20,000 DV01. Back to flat.</p>
-      <p>Now rates reverse and rise 10bp back to where they started. Your re-hedge position — short $20,000 — now profits from the rise. And gamma makes you shorter during the rise, so again your delta leans into the move. You profit from the reversal too.</p>
-      <p>Net result: rates went down 10bp and came back up. You made money in both directions, ending where you started. This is not a trick — it is the mathematical consequence of owning convexity.</p>
+      <p><strong style="color:var(--text)">The part that trips everyone up: re-hedging is not required for gamma to change your P&L</strong></p>
+      <p>You already understand that a rate move earns or costs you Delta × ΔR. The question is: what does gamma add on top? The answer is that your delta is not constant during the move. Gamma means your delta is changing <em>throughout</em> the rate move — so the amount you earn or lose from the move is different from what a fixed-delta position would give.</p>
 
-      <p><strong style="color:var(--text)">The round-trip worked out with numbers</strong></p>
-      <p>Gamma = +$2,000/bp². Start: delta = 0.</p>
-      <div class="code-block">Move 1 — rates fall 10bp
-  Delta drifts: 0 → +$20,000 (gamma × move = $2,000 × 10)
-  P&L from drift: ½ × $2,000 × 10² = +$100,000
-  Re-hedge: sell $20,000 DV01 at the new level → back to flat
+      <p><strong style="color:var(--text)">Side-by-side: same starting delta, different gamma</strong></p>
+      <p>Starting position: $44k DV01 at the 5Y bucket. Rates fall 10bp.</p>
 
-Move 2 — rates rise 10bp (back to start)
-  Delta drifts: 0 → −$20,000
-  P&L from drift: ½ × $2,000 × 10² = +$100,000
-  Re-hedge: buy $20,000 DV01 → back to flat
+      <div class="code-block">Without gamma (Γ = 0):
+  Delta stays $44k throughout the entire 10bp move
+  P&L = $44,000 × 10bp = $440,000
 
-Total P&L: +$200,000 — from zero net rate move</div>
-      <p>Rates are back where they started. You made $200,000 purely from the round-trip volatility. This is gamma P&L.</p>
+With positive gamma (Γ = +$2,000/bp²):
+  At 0bp fallen:  delta = $44,000
+  At 3bp fallen:  delta = $44,000 + ($2,000 × 3) = $50,000
+  At 6bp fallen:  delta = $44,000 + ($2,000 × 6) = $56,000
+  At 10bp fallen: delta = $44,000 + ($2,000 × 10) = $64,000
+  Average delta during the move ≈ ($44k + $64k) / 2 = $54,000
+  P&L ≈ $54,000 × 10bp = $540,000
 
-      <p><strong style="color:var(--text)">Why direction doesn't matter — ΔR is squared</strong></p>
-      <p>The gamma P&L formula is ½ × Γ × (ΔR)². The ΔR term is squared, so it is always positive — a 10bp fall and a 10bp rise each produce the same positive gamma P&L for a long-gamma position. Gamma is a bet on <em>volatility</em>, not on direction.</p>
+Gamma added: $540k − $440k = +$100,000 = ½ × $2,000 × 10²</div>
+
+      <p>Nothing was re-hedged. The extra $100k came purely from having a higher delta for the second half of the move than the first half — because gamma was growing it as rates fell.</p>
+
+      <p><strong style="color:var(--text)">With negative gamma, the opposite happens</strong></p>
+      <div class="code-block">With negative gamma (Γ = −$2,000/bp²):
+  At 0bp fallen:  delta = $44,000
+  At 3bp fallen:  delta = $44,000 − ($2,000 × 3) = $38,000
+  At 6bp fallen:  delta = $44,000 − ($2,000 × 6) = $32,000
+  At 10bp fallen: delta = $44,000 − ($2,000 × 10) = $24,000
+  Average delta during the move ≈ ($44k + $24k) / 2 = $34,000
+  P&L ≈ $34,000 × 10bp = $340,000
+
+Gamma cost: $440k − $340k = −$100,000</div>
+      <p>You were right about the direction (rates fell, you were long). But negative gamma eroded your delta as the move played out — so you captured less of it than your starting position suggested you would.</p>
 
       <p><strong style="color:var(--text)">The one-sentence version</strong></p>
-      <p>Long gamma = you are always selling at the high price and buying at the low price to re-hedge your delta. Short gamma = the opposite: you are forced to buy after prices rise and sell after they fall — a systematic cost every time the market moves.</p>
+      <p>Positive gamma means your position gets <em>bigger</em> as it moves in your favour and <em>smaller</em> as it moves against you — you always have more exposure when you're winning. Negative gamma is the opposite: more exposure when you're losing, less when you're winning.</p>
+
+      <p><strong style="color:var(--text)">The acceleration analogy</strong></p>
+      <p>Delta is your speed. Gamma is acceleration. If you're driving at 60mph and you accelerate while heading in the right direction, you cover more ground than if you stayed at 60mph. Even without changing lanes. The extra distance is the gamma P&L.</p>
+
+      <p><strong style="color:var(--text)">Why direction doesn't matter — ΔR is squared</strong></p>
+      <p>The formula ½ × Γ × (ΔR)² squares the rate move, so it is always positive for long gamma regardless of direction. Whether rates fall 10bp or rise 10bp, positive gamma adds $100k to P&L (relative to a fixed-delta baseline), because in both cases your delta was growing in the profitable direction.</p>
 
       <p><strong style="color:var(--text)">Why long gamma still costs money (theta)</strong></p>
-      <p>If long gamma is always profitable, why doesn't everyone own it? Because you pay for it every day through <em>theta</em> — the time decay of the option. The straddle that gives you +$2,000/bp² of gamma might cost $30,000/day in theta. If the market moves less than the break-even amount (√(2 × $30,000 / $2,000) ≈ 5.5bp/day), the gamma P&L doesn't cover the theta cost and the position loses money. Long gamma only wins if the market is volatile enough.</p>
-
-      <p><strong style="color:var(--text)">Short gamma: the reverse mechanics</strong></p>
-      <p>Every scenario above runs backwards. When rates fall, your short-gamma position automatically becomes short (negative DV01) — you were getting shorter during a fall, which costs money. To re-flatten you must buy DV01 at the new lower price. When rates then rise, you must sell DV01 at the new higher price. You are systematically buying high and selling low — every round trip costs you. The only compensation is the option premium you collected when you sold the option that created the short gamma.</p>
+      <p>If long gamma always adds P&L, why doesn't everyone own it? Because you pay for it every day through <em>theta</em> — the time decay of the option. The position that gives you +$2,000/bp² of gamma might cost $30,000/day just to hold. If rates barely move, the gamma P&L is tiny and the theta destroys you. Long gamma only wins when the market is volatile enough: specifically when daily moves exceed √(2 × theta / gamma) — the break-even volatility.</p>
     </div>
   </details>
 
