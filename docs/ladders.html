@@ -277,7 +277,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   <div class="dv01-hero">
     <div class="dv01-num" id="c-dv01-big">—</div>
     <div class="dv01-explain">
-      <div class="dv01-explain-title">DV01 — dollar value of 1 basis point</div>
+      <div class="dv01-explain-title">DV01 — dollar value of 1 basis point &nbsp;<span style="font-size:12px;font-weight:400;color:var(--muted)">(positive = profit when rates fall; negative = profit when rates rise)</span></div>
       <div class="dv01-explain-text" id="c-dv01-sentence">—</div>
       <div class="bump-check" id="c-bump-check"></div>
     </div>
@@ -344,10 +344,40 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   <h3>What Goes Into the Delta Ladder</h3>
   <ul class="body-list">
     <li><strong>Notional × Modified Duration × 0.0001</strong> — the DV01 formula for bonds and swaps</li>
-    <li><strong>Sign:</strong> receive-fixed swap or long bond = positive DV01 (you profit when rates fall). Pay-fixed or short bond = negative.</li>
+    <li><strong>Sign:</strong> receive-fixed swap or long bond = positive DV01 (you profit when rates fall, because the fixed coupon you locked in is now above the new lower market rate — making your instrument more valuable). Pay-fixed or short bond = negative DV01.</li>
     <li><strong>Tenor bucket assignment:</strong> a 5Y swap distributes ~90% of its DV01 to the 5Y bucket; small residuals sit in shorter buckets at each coupon date</li>
     <li><strong>Net vs Gross:</strong> net = long minus short per bucket. Gross shows total long and total short separately — a gross/net ratio above 5x is a warning sign</li>
   </ul>
+
+  <details open>
+    <summary>Why Does Long Delta Profit When Rates Fall?</summary>
+    <div class="details-body">
+      <p><strong style="color:var(--text)">The inverse relationship — the single most important concept in rates</strong></p>
+      <p>Bond prices and yields always move in <em>opposite directions</em>. When yields fall, bond prices rise. When yields rise, bond prices fall. This is not a convention — it is mathematical. Here is why.</p>
+
+      <p><strong style="color:var(--text)">Step 1: Your coupon is fixed at the point of issue</strong></p>
+      <p>When you buy a bond or enter a receive-fixed swap, the rate you receive is locked in immediately. A 5Y bond at 4% will pay 4% for its entire life, no matter what happens to market rates afterwards.</p>
+
+      <p><strong style="color:var(--text)">Step 2: Market rates fall — now your fixed coupon is above market</strong></p>
+      <p>Suppose market rates drop from 4% to 3%. New bonds issued today only pay 3%. But your bond still pays 4%. Any buyer in the market would prefer your bond — it earns them 1% per year more than a new bond. So they are willing to pay a premium above face value to own it. That premium is the P&L gain on your position.</p>
+
+      <p><strong style="color:var(--text)">Step 3: The maths — present value and discounting</strong></p>
+      <p>The price of a bond is the <em>present value</em> of all its future cash flows. Present value means discounting — a cash flow received in 5 years is worth less today because you could have invested money in the meantime. The discount rate used is the current market yield. When that yield falls, you are discounting at a lower rate, so every future cash flow has a higher present value today. Summing them up gives a higher bond price.</p>
+      <div class="code-block">Price = Σ CF<sub>t</sub> / (1 + yield/2)<sup>2t</sup> &nbsp;→ &nbsp;yield ↓ means denominator ↓ means price ↑</div>
+
+      <p><strong style="color:var(--text)">Concrete example: $44,000 from one basis point</strong></p>
+      <p>You hold a $100M 5Y bond paying 4%. Market rates fall 1bp to 3.99%. Your bond now pays 1bp per year more than the market. Over 5 years that is 5bp of extra annual income, discounted back to today. On $100M notional that works out to approximately <strong style="color:var(--green)">$44,000</strong> — exactly the DV01. Rates fall 10bp → you earn $440,000. Rates fall 100bp (a full 1% move) → you earn $4.4M.</p>
+
+      <p><strong style="color:var(--text)">Why the equity analogy misleads people</strong></p>
+      <p>In equities, "long delta" means you profit when the stock price goes up — and you track the price directly. In rates, "long delta" also means you profit when the instrument price goes up — but rates markets quote the <em>yield</em>, not the price. Since price moves opposite to yield, a long delta position in rates profits when the quoted number (the yield) goes <em>down</em>. This feels backwards at first, but it is the same logic: you are long the price of the instrument, which just happens to be quoted inversely.</p>
+
+      <p><strong style="color:var(--text)">Receive-fixed swaps: identical logic</strong></p>
+      <p>A receive-fixed swap has no upfront bond price to track, but the same mechanics apply. You agreed to receive a fixed rate (say 4%) and pay floating (whatever the market rate is each period). When market rates fall, the floating rate you pay falls — but the fixed rate you receive stays at 4%. The net present value of your future net receipts increases. That increase is your positive DV01 P&L.</p>
+
+      <p><strong style="color:var(--text)">The sign convention summarised</strong></p>
+      <p>Positive DV01 = you profit when rates fall 1bp. Negative DV01 = you profit when rates rise 1bp. The size of the DV01 tells you by how many dollars. A $50k DV01 at the 5Y tenor means every 1bp move in the 5Y rate changes your P&L by $50,000.</p>
+    </div>
+  </details>
 
   <div class="sc-btns" id="delta-btns">
     <button class="sc-btn active" onclick="setDeltaScenario(0)">2s10s Steepener</button>
@@ -508,7 +538,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   <div class="four-grid">
     <div class="q-card">
       <div class="q-card-name" style="color:var(--green)">Long Delta + Long Gamma</div>
-      <div class="q-card-desc">Positioned for a rally. The bigger the move down in rates, the more profitable you become — gamma accelerates gains. Even if wrong (rates rise), gamma cushions the loss.</div>
+      <div class="q-card-desc">You hold fixed-rate instruments — when rates fall, your locked-in coupon is above market so bond prices rise and you profit (see explainer in the Delta Ladder section). Positive gamma makes it better: the bigger the rate fall, the more your delta grows, accelerating gains. Even if wrong (rates rise), gamma cushions the loss.</div>
       <div class="q-example">
         Rates fall 20bp:<br>
         &nbsp;&nbsp;Delta P&L: +$44k × 20 = <strong class="pos">+$880k</strong><br>
@@ -522,7 +552,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     </div>
     <div class="q-card">
       <div class="q-card-name" style="color:var(--yellow)">Long Delta + Short Gamma</div>
-      <div class="q-card-desc">Positioned for a rally but sold options to earn premium. A moderate rally is great. A large move in either direction hurts — gamma bleeds away your delta or accelerates losses.</div>
+      <div class="q-card-desc">You hold fixed-rate instruments (profit when rates fall) but sold options to earn premium. A moderate rally is great. A large move in either direction hurts — gamma bleeds away your delta on a rally or accelerates losses on a sell-off.</div>
       <div class="q-example">
         Rates fall 20bp:<br>
         &nbsp;&nbsp;Delta P&L: <strong class="pos">+$880k</strong><br>
