@@ -178,6 +178,40 @@ details .details-body{padding:0 16px 16px;color:var(--muted);font-size:13px;line
 .chip-green{background:rgba(34,211,160,.12);color:var(--green)}
 .chip-purple{background:rgba(167,139,250,.12);color:var(--purple)}
 
+/* OPERATIONS */
+.ops-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.op-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;cursor:pointer;transition:all .2s}
+.op-card:hover{border-color:var(--red);background:var(--surface2)}
+.op-card.hidden{display:none}
+.op-date{font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600}
+.op-name{font-size:16px;font-weight:700;margin-bottom:4px}
+.op-theater{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+.op-theater.china{color:var(--orange)}
+.op-theater.pacific{color:var(--accent)}
+.op-theater.mainland{color:var(--yellow)}
+.op-theater.homeland{color:var(--red)}
+.op-summary{color:var(--muted);font-size:13px;line-height:1.6}
+
+/* SOURCES */
+.source-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:32px}
+.source-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px}
+.source-type{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.source-type.primary{color:var(--green)}
+.source-type.secondary{color:var(--accent)}
+.source-type.reading{color:var(--purple)}
+.source-name{font-size:15px;font-weight:700;margin-bottom:4px}
+.source-author{color:var(--muted);font-size:13px;margin-bottom:10px}
+.source-body{color:var(--muted);font-size:13px;line-height:1.65}
+
+/* QUOTE WALL */
+.quote-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin:24px 0}
+.quote-card{background:var(--surface);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:16px 20px}
+.quote-card.yellow{border-left-color:var(--yellow)}
+.quote-card.red{border-left-color:var(--red)}
+.quote-card.purple{border-left-color:var(--purple)}
+.quote-text{color:var(--text);font-size:14px;font-style:italic;line-height:1.75;margin-bottom:8px}
+.quote-attr{color:var(--muted);font-size:12px}
+
 /* RESPONSIVE */
 @media(max-width:640px){
   .timeline::before{left:90px}
@@ -198,7 +232,9 @@ details .details-body{padding:0 16px 16px;color:var(--muted);font-size:13px;line
     <a href="#" onclick="showSection('people',this)">Key People</a>
     <a href="#" onclick="showSection('concepts',this)">Concepts</a>
     <a href="#" onclick="showSection('shinto',this)">Shinto Pantheon</a>
+    <a href="#" onclick="showSection('military',this)">Military Operations</a>
     <a href="#" onclick="showSection('context',this)">Historical Context</a>
+    <a href="#" onclick="showSection('sources',this)">Sources &amp; Legacy</a>
   </nav>
 </div>
 
@@ -447,6 +483,84 @@ details .details-body{padding:0 16px 16px;color:var(--muted);font-size:13px;line
   </details>
 </div>
 
+<!-- ═══════════════════════════════════ MILITARY OPS ═══════════════════════════════════ -->
+<div id="section-military" class="section">
+  <h2>Military Operations</h2>
+  <p class="lead">The fourteen critical military actions — from Manchuria to the atomic bombs — that define the arc of Japan's wars. Each entry examines Hirohito's documented role, the strategic logic, and the human cost Bix foregrounds.</p>
+  <div class="callout red">
+    <div class="callout-title">Bix's Core Claim on the Military</div>
+    <p>Hirohito was not merely informed of these operations — he actively reviewed plans, questioned commanders, approved final orders, and in several cases initiated operational changes. The Imperial Conference system gave him both real authority and institutional deniability. Bix draws on the Sugiyama Memorandum, the Kido Diary, and post-war testimony to reconstruct his participation in each.</p>
+  </div>
+  <div class="filter-row">
+    <button class="ftab active" onclick="filterOps('all',this)">All</button>
+    <button class="ftab" style="color:var(--yellow);border-color:rgba(251,191,36,.3)" onclick="filterOps('mainland',this)">Mainland Asia</button>
+    <button class="ftab" style="color:var(--orange);border-color:rgba(251,146,60,.3)" onclick="filterOps('china',this)">China War</button>
+    <button class="ftab" style="color:var(--accent);border-color:rgba(74,158,255,.3)" onclick="filterOps('pacific',this)">Pacific War</button>
+    <button class="ftab red" onclick="filterOps('homeland',this)">Home Islands</button>
+  </div>
+  <div class="ops-grid" id="opsGrid"></div>
+</div>
+
+<!-- ═══════════════════════════════════ SOURCES & LEGACY ═══════════════════════════════════ -->
+<div id="section-sources" class="section">
+  <h2>Sources, Methodology &amp; Legacy</h2>
+  <p class="lead">Bix spent fifteen years in Japanese archives. Understanding his sources — and their limits — is essential to evaluating his argument. This section also covers the post-war memory politics that made writing this book necessary and controversial.</p>
+
+  <div class="callout">
+    <div class="callout-title">How Bix Did It</div>
+    <p>The book's power comes from triangulating multiple diaries, memoranda, and imperial conference records against each other. No single source proves Hirohito's agency — but the convergence of the Kido Diary, Sugiyama Memo, Harada Diary, and Hirohito's own post-war monologue creates a picture none of them could create alone. Bix also draws on declassified SCAP records showing the occupation's deliberate suppression of evidence.</p>
+  </div>
+
+  <h2 style="margin-top:32px">Primary Sources</h2>
+  <p class="lead">The documents that made this book possible — and the political battles over their release.</p>
+  <div class="source-grid" id="primaryGrid"></div>
+
+  <h2 style="margin-top:32px">Key Passages — Hirohito in His Own Words</h2>
+  <p class="lead">Direct quotations from imperial conferences, rescripts, and Hirohito's post-war monologue. These are the texts Bix's argument depends on.</p>
+  <div class="quote-grid" id="quotesGrid"></div>
+
+  <h2 style="margin-top:32px">Further Reading</h2>
+  <p class="lead">Works that complement, challenge, or contextualise Bix — organised by how they relate to his central argument.</p>
+  <div class="source-grid" id="readingGrid"></div>
+
+  <div style="margin-top:32px">
+    <h2>Post-War Memory Politics</h2>
+    <p class="lead">Why Japan's war memory remained contested for six decades after surrender — and why Bix wrote this book when he did.</p>
+    <div class="callout red">
+      <div class="callout-title">The Impunity Structure</div>
+      <p>The Tokyo Trials (1946–48) convicted 28 defendants and executed 7, but deliberately excluded the emperor, Unit 731 personnel (in exchange for biological warfare research data), and any witness whose testimony might have implicated Hirohito. SCAP destroyed key documents, coached witnesses, and classified findings for decades. The result was a legal record that made Japan's wars look like the work of a small militarist clique rather than a system the emperor commanded.</p>
+    </div>
+    <details>
+      <summary>The Yasukuni Shrine Controversy</summary>
+      <div class="details-body">
+        <p>Yasukuni Shrine enshrines the spirits of Japan's war dead — including, since 1978, fourteen Class A war criminals. Every prime ministerial visit triggers diplomatic crises with China and South Korea. For Bix, Yasukuni is the monument to unprocessed guilt: Japan honours its war dead without asking why they died or who sent them.</p>
+        <p style="margin-top:10px">Hirohito himself stopped visiting Yasukuni after the 1978 enshrinement of the Class A criminals — a fact revealed only after his death from his diaries. He apparently found the inclusion of Tōjō and others morally problematic even while refusing to address his own responsibility.</p>
+      </div>
+    </details>
+    <details>
+      <summary>The Textbook Controversies (1982, 2001, 2015)</summary>
+      <div class="details-body">
+        <p>Japan's Ministry of Education reviews school textbooks for historical content. In 1982, international outrage erupted over proposed changes softening language about the invasion of China ("advance" instead of "aggression"). In 2001 and 2015, nationalist-authored textbooks minimising the Nanjing Massacre and comfort women system were approved over protests from China, South Korea, and Japanese historians.</p>
+        <p style="margin-top:10px">Bix's book entered this political landscape directly — its Japanese translation was controversial precisely because it documented what mainstream Japanese textbooks still omit: the emperor's central role in the decisions that produced those events.</p>
+      </div>
+    </details>
+    <details>
+      <summary>The "Comfort Women" Denial</summary>
+      <div class="details-body">
+        <p>The Japanese military's system of sexual slavery (ianfu, "comfort women") forced an estimated 50,000–200,000 women — primarily Korean and Chinese — into sexual servitude for military personnel. In 1993, Chief Cabinet Secretary Kono Yohei issued an apology acknowledging military coercion. Since then, successive conservative governments have attempted to retract or minimise the apology.</p>
+        <p style="margin-top:10px">The comfort women system operated under the same imperial command structure Bix documents throughout the book. Its denial is part of the same impunity architecture that protected Hirohito himself.</p>
+      </div>
+    </details>
+    <details>
+      <summary>Hirohito's Death and the Shōwa Retrospective (1989)</summary>
+      <div class="details-body">
+        <p>When Hirohito died on January 7, 1989, Japan entered a period of intense public soul-searching. Retrospective assessments varied wildly: official ceremonies treated him as a beloved monarch who steered Japan to peace and prosperity; critics — particularly in South Korea and China — saw a war criminal who died without accountability.</p>
+        <p style="margin-top:10px">The mayor of Nagasaki, Motoshima Hitoshi, stated publicly that Hirohito bore responsibility for the war — and was shot by a right-wing gunman for saying so. He survived. The episode illustrated why Bix's subsequent book, published eleven years later, was so politically charged.</p>
+      </div>
+    </details>
+  </div>
+</div>
+
 <!-- ═══════════════════════════════════ GLOSSARY ═══════════════════════════════════ -->
 <div class="glossary">
   <div class="glossary-inner">
@@ -516,17 +630,34 @@ const tlData=[
   {y:'1936',cat:'military',title:'February 26 Incident',text:'1,400 soldiers under ultra-nationalist officers seize central Tokyo, assassinate senior officials. Hirohito is furious and personally demands suppression — one of the clearest demonstrations of his real authority. Leaders are executed.'},
   {y:'1937',cat:'military',title:'Second Sino-Japanese War Begins; Nanjing Massacre',text:'The Marco Polo Bridge Incident triggers full-scale invasion of China. December: Japanese forces capture Nanjing and kill 100,000–300,000 civilians. Hirohito approved the operations and received regular reports.'},
   {y:'1938',cat:'political',title:'National Mobilization Law',text:'Gives the government sweeping emergency powers over the economy and labour — effectively ending parliamentary governance in any meaningful sense.'},
-  {y:'1940',cat:'political',title:'Tripartite Pact Signed; Konoe\'s New Order',text:'Japan allies formally with Nazi Germany and Fascist Italy. Konoe Fumimaro announces the "Greater East Asia Co-Prosperity Sphere" ideology. Hirohito approves both moves.'},
-  {y:'1941',cat:'military',title:'Pearl Harbor Attack (December 7)',text:'Japan attacks the US Pacific Fleet simultaneously with invasions of Malaya, the Philippines, Hong Kong, and Wake Island. The Imperial Conference that approved war was chaired by Hirohito. Bix documents his active role in planning.'},
-  {y:'1942',cat:'military',title:'Battle of Midway — The Turn',text:'Japan loses four fleet carriers in June 1942. Hirohito is told the truth, unlike the Japanese public. From this point, Japan is strategically on the defensive — but Hirohito pursues the war for three more years.'},
-  {y:'1944',cat:'military',title:'Saipan Falls; Tōjō Resigns',text:'Loss of Saipan puts the home islands within B-29 range. Tōjō Hideki resigns as PM. Hirohito privately admits the war situation is "truly grave" but refuses surrender negotiations.'},
-  {y:'1945',cat:'military',title:'Firebombing; Okinawa; Atomic Bombs; Surrender',text:'March: Tokyo firebombing kills 80,000+ in one night. June: Okinawa falls after 12,000 US and 100,000+ Japanese deaths. August 6 & 9: Atomic bombs on Hiroshima and Nagasaki. August 15: Hirohito\'s recorded surrender broadcast.'},
-  {y:'1945',cat:'political',title:'Hirohito Meets MacArthur (September 27)',text:'The famous photograph. Hirohito offers to take personal responsibility for the war. MacArthur declines — he needs the emperor to govern Japan peacefully. The cover-up begins.'},
-  {y:'1946',cat:'political',title:'"Humanity Declaration" &amp; New Constitution',text:'January 1: Hirohito\'s rescript renouncing divinity (ambiguously in Japanese). November: New constitution drafted by SCAP makes Japan a constitutional monarchy with a pacifist Article 9 clause.'},
-  {y:'1948',cat:'international',title:'Tokyo Trials End — Tōjō Executed',text:'Seven war criminals hanged, including Tōjō. Hirohito is not prosecuted. SCAP has destroyed or suppressed key evidence. The impunity that Bix\'s entire book documents is now institutionalised.'},
-  {y:'1952',cat:'international',title:'Occupation Ends — San Francisco Treaty',text:'Japan regains sovereignty. The US-Japan Security Treaty is signed simultaneously. Hirohito continues to reign under the new constitutional framework.'},
-  {y:'1971',cat:'personal',title:'Hirohito\'s First Post-War European Tour',text:'His reception in Europe is cold — protesters in the Netherlands and UK remind him that for them, the war\'s memory is not abstract. He is visibly shaken.'},
-  {y:'1989',cat:'personal',title:'Emperor Hirohito Dies',text:'Hirohito dies January 7 after a long illness. His posthumous name becomes Emperor Shōwa — "Enlightened Peace." He reigned 62 years, the longest of any Japanese emperor. The cover-up of his wartime role remained largely intact.'},
+  {y:'1940',cat:'political',title:'Tripartite Pact Signed; Konoe\'s New Order',text:'Japan allies formally with Nazi Germany and Fascist Italy. Konoe Fumimaro announces the "Greater East Asia Co-Prosperity Sphere" ideology. Foreign Minister Matsuoka Yosuke signs the pact in Berlin. Hirohito approves despite private doubts about Germany\'s reliability as an ally.'},
+  {y:'1940',cat:'political',title:'Saionji Kinmochi Dies',text:'The last genrō dies at 91 in November 1940, removing the final informal institutional check on military escalation. After Saionji, no single figure commanded the moral authority to restrain either the emperor or the Army. Bix marks this as a turning point toward irreversible war.'},
+  {y:'1935',cat:'political',title:'Minobe Incident — "Emperor Organ Theory" Banned',text:'Constitutional scholar Minobe Tatsukichi\'s theory that the emperor is an organ of the state (not an absolute sovereign above it) is declared seditious. His books are burned, he is nearly assassinated, and forced to resign from the House of Peers. The intellectual space for liberal constitutional interpretation closes permanently.'},
+  {y:'1930',cat:'political',title:'London Naval Treaty Controversy',text:'PM Hamaguchi Osachi signs the London Naval Treaty limiting Japan\'s warship tonnage over military objections. The Army and Navy use the concept of "supreme command independence" to argue civilian interference in military matters. Hamaguchi is shot by a nationalist; he dies of his wounds. The episode teaches the military that killing works.'},
+  {y:'1932',cat:'political',title:'Assassination of PM Inukai Tsuyoshi',text:'Prime Minister Inukai, who had tried to negotiate an end to the Manchurian Incident, is assassinated by naval officers in the "May 15 Incident." The killing ends party government in Japan. No government dares restrain the military again. The failed assassins receive remarkably light sentences.'},
+  {y:'1919',cat:'international',title:'Paris Peace Conference — Racial Equality Clause Rejected',text:'Japan submits a racial equality clause to the League of Nations Covenant at Versailles — and sees it rejected by the United States and Britain. The humiliation deepens nationalist grievance and the perception of Western hypocrisy. Wilson opposes the clause despite his own self-determination rhetoric.'},
+  {y:'1910',cat:'international',title:'Annexation of Korea',text:'Japan formally annexes Korea, ending the Korean Empire. The 35-year colonial occupation (1910–1945) produces the comfort women system, forced labour, cultural suppression, and the Japanese-Korean tensions that still define Northeast Asian geopolitics. Hirohito grew up in a Japan that treated Korea as naturally subordinate.'},
+  {y:'1939',cat:'military',title:'Nomonhan / Khalkhin Gol — Catastrophic Defeat',text:'The Kwantung Army clashes with Soviet forces on the Mongolian border in the summer of 1939. Japan is routed — Soviet armoured tactics under Zhukov devastate Japanese infantry. The defeat convinces Japan\'s military to strike south (toward the Pacific) rather than north (toward Siberia). Hirohito is briefed on the losses, which are hidden from the public.'},
+  {y:'1927',cat:'political',title:'Shōwa Financial Crisis',text:'A banking crisis exposes the fragility of Japan\'s post-WWI economy. 37 banks collapse. The crisis discredits civilian economic management and strengthens the military\'s argument that only a state-directed war economy can secure Japan\'s resources. Hirohito is newly enthroned and navigating his first major domestic crisis.'},
+  {y:'1941',cat:'military',title:'Southern Advance Decision (July–September)',text:'Imperial Conference decides to advance into Southeast Asia regardless of US reaction, accepting the risk of war with America and Britain. Hirohito chairs the conference and explicitly approves the southern advance. Bix documents his direct questions to military commanders about the plan\'s feasibility — he was not a passive observer.'},
+  {y:'1941',cat:'military',title:'Pearl Harbor Attack (December 7)',text:'Japan attacks the US Pacific Fleet simultaneously with invasions of Malaya, the Philippines, Hong Kong, and Wake Island. The Imperial Conference that approved war was chaired by Hirohito. Bix documents that Hirohito reviewed the Pearl Harbor plan in detail, requested modifications, and approved the final version. His famous poem composed on the eve of the attack — about the world\'s four seas as brothers — became evidence of his ambivalence.'},
+  {y:'1942',cat:'military',title:'Fall of Singapore (February 15)',text:'The British "impregnable fortress" surrenders to a Japanese force half its size in what Churchill calls "the worst disaster...in British history." 80,000 Allied prisoners are taken. Hirohito marks the victory with a triumphal imperial rescript. The speed of Japan\'s expansion masks the strategic overextension that will doom it.'},
+  {y:'1942',cat:'military',title:'Battle of Midway — The Turn (June)',text:'Japan loses four fleet carriers — Akagi, Kaga, Sōryū, Hiryū — in four days. Hirohito is told the truth, unlike the Japanese public, who are told of a great victory. The code-breaking that enabled the ambush is unknown to Japan. From this point Japan is strategically on the defensive — but Hirohito pursues the war for three more years, costing millions of lives.'},
+  {y:'1943',cat:'military',title:'Yamamoto Killed; Guadalcanal Abandoned',text:'Admiral Yamamoto\'s inspection tour is ambushed after US intelligence decodes his itinerary — he is shot down and killed (April 18). His death shocks Japan. Simultaneously, after six months of brutal fighting, Japan abandons Guadalcanal — its first territorial retreat. The strategic initiative in the Pacific has permanently shifted.'},
+  {y:'1944',cat:'military',title:'Saipan Falls; Tōjō Resigns (July)',text:'Loss of Saipan puts the Japanese home islands within B-29 range. Tōjō Hideki is forced to resign by Hirohito, who has lost confidence in him. Hirohito privately tells advisors the situation is "truly grave" but refuses meaningful surrender negotiations, insisting on fighting for better terms. This delay costs hundreds of thousands of lives in the following twelve months.'},
+  {y:'1944',cat:'military',title:'Kamikaze Attacks Begin; Leyte Gulf',text:'Facing overwhelming US naval power, Japan deploys Special Attack Units (kamikaze) — pilots who fly aircraft loaded with explosives into US ships. The Battle of Leyte Gulf (October) is the largest naval battle in history; Japan loses its remaining fleet. The decision to launch kamikaze operations involved Hirohito\'s approval of the "body-crashing" strategy.'},
+  {y:'1945',cat:'military',title:'Tokyo Firebombing (March 9–10)',text:'Operation Meetinghouse sends 279 B-29s over Tokyo in a low-altitude incendiary attack. In under three hours, 16 square miles of the city are destroyed. Estimates of the dead range from 80,000 to 100,000+ — more than either atomic bomb in a single night. Hirohito tours the ruins and is reportedly shocked into silence.'},
+  {y:'1945',cat:'military',title:'Okinawa (April–June)',text:'The bloodiest battle of the Pacific War. 12,281 American deaths, over 110,000 Japanese military deaths, and an estimated 100,000+ Okinawan civilian deaths — one quarter of the island\'s entire population. The battle convinces US planners that an invasion of the home islands (Operation Downfall) would cost millions of casualties, informing the decision to use atomic bombs.'},
+  {y:'1945',cat:'military',title:'Atomic Bombs — Hiroshima & Nagasaki (August 6, 9)',text:'A uranium bomb destroys Hiroshima on August 6 (70,000–80,000 immediate deaths). A plutonium bomb destroys Nagasaki on August 9 (40,000+ immediate deaths). On the same day as Nagasaki, the Soviet Union declares war on Japan and invades Manchuria. For Bix, it remains debated whether the bombs or the Soviet entry was the greater shock to Japanese decision-makers — and whether either was truly necessary.'},
+  {y:'1945',cat:'political',title:'Hirohito\'s "Sacred Decision" (August 9–14)',text:'With the cabinet deadlocked between peace and war factions, PM Suzuki asks Hirohito to break the tie. Hirohito announces his personal decision: accept the Potsdam Declaration with the condition that the imperial system be preserved. This "sacred decision" (seidan) is Bix\'s key exhibit: Hirohito can act decisively — he chose not to end the war earlier.'},
+  {y:'1945',cat:'political',title:'Hirohito Meets MacArthur (September 27)',text:'The famous photograph — Hirohito in morning coat beside a casual, open-shirted MacArthur — signals the power inversion of the occupation. Hirohito reportedly offers to take personal responsibility for the war. MacArthur declines — he needs the emperor as a governance tool. The cover-up begins in earnest: Hirohito is repackaged as a peaceful figure who was manipulated by militarists.'},
+  {y:'1946',cat:'political',title:'"Humanity Declaration" &amp; New Constitution',text:'January 1: Hirohito\'s rescript renouncing divinity — deliberately ambiguous in Japanese, the denial of godhood appears only in the SCAP-authored English translation. November: MacArthur\'s staff drafts a new constitution in nine days, including the famous Article 9 (renouncing war). Japanese government and emperor accept it. The constitutional framework that defines Japan today was written by American lawyers in a week.'},
+  {y:'1946–48',cat:'international',title:'Tokyo War Crimes Tribunal',text:'The International Military Tribunal for the Far East convicts 28 defendants. Key exclusions: the emperor; Unit 731 personnel (traded immunity for biological warfare data); defendants whose testimony might have implicated Hirohito. SCAP staff coached witnesses, confiscated documents, and shaped the evidentiary record. Bix sees the trial as justice selectively applied — and a political act as much as a legal one.'},
+  {y:'1951',cat:'international',title:'San Francisco Peace Treaty',text:'Japan regains sovereignty. The USSR refuses to sign; the US-Japan Security Treaty is signed the same day, basing American forces in Japan permanently. Cold War logic has fully absorbed Japanese policy — making Hirohito an even more valuable symbol of the new alliance. War reparations to Asian victims are largely waived under US pressure.'},
+  {y:'1960',cat:'political',title:'ANPO Crisis — Security Treaty Protests',text:'Massive protests against renewal of the US-Japan Security Treaty (ANPO in Japanese). Millions demonstrate; President Eisenhower\'s press secretary is physically attacked at the airport. PM Kishi Nobusuke (a former Class A war crimes suspect, never tried) rams ratification through the Diet. The crisis shows how much post-war politics remained bound up in the unresolved war legacy.'},
+  {y:'1971',cat:'personal',title:'Hirohito\'s Post-War European Tour',text:'Hirohito\'s first visit to Europe since 1921. The reception is cold — protesters in the Netherlands (where his portrait was burned) and pointed silences in Britain remind him that for victims of Japanese occupation, the war\'s memory is not abstract. He is reportedly shaken. His own refusal to offer explicit apology throughout his reign contributed to this legacy.'},
+  {y:'1975',cat:'personal',title:'Hirohito Visits the United States',text:'The first Japanese emperor to visit the US. He visits Disneyland. The contrast between the man who commanded Japan\'s wars and the gentle tourist photographed with Mickey Mouse captures the magnitude of the post-war reinvention Bix documents throughout the book.'},
+  {y:'1989',cat:'personal',title:'Emperor Hirohito Dies',text:'Hirohito dies January 7 after months of illness, his body declining through 1988 in public. He is 87 years old and has reigned for 62 years — the longest reign of any Japanese emperor. His posthumous name becomes Emperor Shōwa — "Enlightened Peace." The Nagasaki mayor who said Hirohito bore war responsibility is shot by a right-wing gunman days after the death, illustrating the political charge that still surrounded the question of accountability.'},
 ];
 
 function renderTimeline(){
@@ -641,6 +772,60 @@ const people=[
    bio:'Born December 23, 1933, Akihito was the first post-war crown prince, educated by an American tutor (Elizabeth Gray Vining) as part of the occupation\'s democratisation programme. He became emperor upon Hirohito\'s death in 1989, reigning until his abdication in 2019.',
    bookRole:'Appears at the book\'s margins as the symbol of Japan\'s post-war reinvention. His American education and marriage to a commoner (Michiko Shōda) embodied the new democratic imperial image MacArthur\'s occupation helped create.',
    keyFacts:['Tutored by American Elizabeth Gray Vining','First emperor to marry a commoner (1959)','Reigned as Emperor Heisei 1989–2019','Abdicated in favour of Emperor Naruhito'],
+   quote:''},
+
+  {id:'yamagata',name:'Yamagata Aritomo',jp:'山縣有朋',dates:'1838–1922',role:'Meiji Oligarch; Father of the Japanese Army',group:'ancestor',icon:'🏛️',
+   bio:'The most powerful figure in Meiji Japan after the emperor himself, Yamagata built Japan\'s modern military from the remnants of the Chōshū domain\'s forces. He established the principle that war ministers must be active-duty generals or admirals — meaning the military could collapse any civilian cabinet it disliked by withdrawing its minister. This single institutional rule gave the military structural dominance over civilian government for forty years.',
+   bookRole:'Bix uses Yamagata as the architect of the structural flaw that made Japan\'s wars almost inevitable. The military independence doctrine (tōsuiken) was Yamagata\'s creation. Hirohito inherited a system Yamagata designed to concentrate power in the imperial-military nexus and remove it from parliament.',
+   keyFacts:['Created the Imperial Rescript to Soldiers and Sailors (1882) — the ethical code of the Japanese military','Established that only active-duty officers could serve as war/navy ministers','Built the Privy Council as a conservative check on parliamentary power','Died 1922, before Hirohito\'s reign — but his institutional legacy defined it'],
+   quote:'"The political arrangements [Yamagata] constructed ensured that, regardless of who held nominal power, the emperor and the military would always prevail." — Bix'},
+
+  {id:'nogi',name:'General Nogi Maresuke',jp:'乃木希典',dates:'1849–1912',role:'Meiji War Hero; Symbol of Imperial Loyalty',group:'ancestor',icon:'⚔️',
+   bio:'Celebrated general of the Russo-Japanese War, famous for the brutal siege of Port Arthur (1904–05) that cost 60,000 Japanese casualties. When Emperor Meiji died in September 1912, Nogi and his wife committed ritual suicide (junshi) to follow their lord in death — an act that shocked modern Japan and became a defining moment of imperial ideology.',
+   bookRole:'Hirohito was 11 years old when Nogi died. Bix argues the event was formative — the child emperor witnessed the ultimate expression of loyalty ideology and grew up in its shadow. The question of whether Hirohito internalised this ethic or cynically deployed it runs through the entire book.',
+   keyFacts:['Commanded the siege of Port Arthur in the Russo-Japanese War','Lost two sons in the war; reportedly told the Meiji Emperor personally','Committed junshi with his wife on the day of Meiji\'s state funeral','His house in Tokyo is preserved as a museum; his death is still commemorated annually'],
+   quote:''},
+
+  {id:'ishiwara',name:'Ishiwara Kanji',jp:'石原莞爾',dates:'1889–1949',role:'Lt. Colonel; Architect of the Manchurian Incident',group:'military',icon:'🗺️',
+   bio:'The brilliant, insubordinate officer who planned and executed the Manchurian Incident of 1931 without authorisation from Tokyo. Ishiwara believed in an inevitable "final world war" between East and West — Japan needed Manchuria\'s resources to win it. A follower of the Buddhist prophet Nichiren, he saw himself as fulfilling a cosmic destiny. Ironically, he later opposed the China War as strategically premature, was marginalised by Tōjō, and was never prosecuted at Tokyo.',
+   bookRole:'Ishiwara illustrates a paradox Bix highlights: the men who started Japan\'s wars were often its most brilliant strategic thinkers, who knew the risks better than anyone and did it anyway. He also shows how the Kwantung Army\'s insubordination was tolerated — and eventually rewarded — by Tokyo, including by Hirohito.',
+   keyFacts:['Co-planned the Manchurian Incident with Itagaki Seishirō','Studied Clausewitz and world military history extensively at German Staff College','Later became a critic of the China War and was removed from command','Not prosecuted at Tokyo — his testimony would have been too damaging to too many'],
+   quote:''},
+
+  {id:'kitaikki',name:'Kita Ikki',jp:'北一輝',dates:'1883–1937',role:'Ultranationalist Theorist',group:'government',icon:'📖',
+   bio:'Japan\'s most influential radical nationalist theorist, whose 1919 "Outline Plan for the Reorganization of Japan" (Nihon Kaizō Hōan Taikō) became the intellectual blueprint for the February 26, 1936 coup plotters. Kita advocated a military coup, suspension of the constitution, imperial restoration, and Japanese leadership of all Asia. Executed after the coup despite not directly participating in it.',
+   bookRole:'Kita\'s execution, ordered by Hirohito, is one of the emperor\'s most decisive documented acts. Bix uses it to show that Hirohito was not a passive recipient of ultranationalist pressure but its disciplinarian — he suppressed the movement when it threatened his own authority, while sharing many of its geopolitical goals.',
+   keyFacts:['His "Outline Plan" was banned on publication but circulated widely among young officers','Influenced by a mix of socialism, nationalism, and pan-Asianism','Was in contact with February 26 plotters but did not plan the coup','Executed August 19, 1937 — his books had inspired men who tried to restore the very emperor who ordered him killed'],
+   quote:''},
+
+  {id:'matsuoka',name:'Matsuoka Yōsuke',jp:'松岡洋右',dates:'1880–1946',role:'Foreign Minister (1940–41)',group:'government',icon:'🌐',
+   bio:'Foreign Minister who signed the Tripartite Pact with Germany and Italy (September 1940) and the Soviet-Japan Neutrality Pact (April 1941). Educated at the University of Oregon, he was a dramatic figure who dramatically walked Japan\'s delegation out of the League of Nations in 1933. His two treaties were intended to give Japan diplomatic freedom to advance south — but the Tripartite Pact made war with America almost automatic once the Pacific War began.',
+   bookRole:'Matsuoka\'s diplomacy locked Japan into its fatal alliances. Bix documents that Hirohito had reservations about the Tripartite Pact but approved it — illustrating his pattern of accepting military-diplomatic faits accomplis rather than blocking them.',
+   keyFacts:['Walked out of the League of Nations Assembly in 1933 after Manchurian condemnation','Signed Tripartite Pact in Berlin, September 27, 1940','Signed Soviet-Japan Neutrality Pact in Moscow, April 13, 1941','Died of tuberculosis awaiting his Tokyo war crimes trial verdict — 1946'],
+   quote:''},
+
+  {id:'hirota',name:'Hirota Kōki',jp:'広田弘毅',dates:'1878–1948',role:'Prime Minister (1936–37); Foreign Minister',group:'government',icon:'⚖️',
+   bio:'Career diplomat who served as Prime Minister after the February 26 Incident and Foreign Minister at multiple points. His cabinet codified the rule that only active-duty officers could serve as war ministers — institutionalising military control of government. He was the only civilian among the seven executed at the Tokyo Trials, a fact that remains deeply controversial among historians.',
+   bookRole:'Hirota\'s execution illustrates the arbitrariness of Tokyo justice. Bix notes that if Hirota was guilty enough to hang, then many who were not prosecuted — including the emperor — bore greater responsibility. His conviction for "failing to prevent" war crimes set an uncomfortable precedent.',
+   keyFacts:['As PM, his cabinet formalised the active-duty rule for war ministers','Negotiated with China before full-scale war — those negotiations failed','Convicted at Tokyo for war crimes by omission','Executed December 23, 1948 — only civilian among those hanged'],
+   quote:''},
+
+  {id:'chichibu',name:'Prince Chichibu',jp:'秩父宮雍仁親王',dates:'1902–1953',role:'Hirohito\'s Younger Brother',group:'family',icon:'🎖️',
+   bio:'Hirohito\'s second-born brother (Yasuhito), career army officer and more temperamentally suited to military life than his elder brother. Had connections to radical nationalist officers and was reportedly sympathetic to the February 26, 1936 coup plotters. Some historians suggest he was considered as an alternative emperor if Hirohito had abdicated. Died of tuberculosis in 1953.',
+   bookRole:'Bix uses Chichibu to show the spectrum of political opinion within the imperial family itself. The contrast between the brothers — Hirohito cautious and calculating, Chichibu more openly enthusiastic about military expansion — illustrates that the emperor\'s political character was not simply a product of his position.',
+   keyFacts:['Attended Harrow School in England briefly as a child','Career army officer; reached the rank of general','Had contact with February 26 coup plotters','His early death prevented him from ever becoming emperor'],
+   quote:''},
+
+  {id:'grew',name:'Joseph C. Grew',jp:'ジョセフ・グルー',dates:'1880–1965',role:'US Ambassador to Japan (1932–41)',group:'foreign',icon:'🇺🇸',
+   bio:'American diplomat who served as US Ambassador to Japan for nine years, longer than any predecessor. His detailed diary (published as Ten Years in Japan) is one of the essential Western primary sources on pre-war Japan. He warned Washington repeatedly that Japan was serious about war and that the US was being complacent. After Pearl Harbor he was interned and later exchanged; he became Undersecretary of State and advocated preserving the imperial institution in the post-war settlement.',
+   bookRole:'Grew\'s advocacy for preserving the emperor after the war was deeply influential on US policy — and on MacArthur\'s eventual decision to shield Hirohito. Bix draws on Grew\'s diary for the American perspective on Japanese political culture and uses his post-war role to trace how the "good emperor" narrative was constructed.',
+   keyFacts:['Longest-serving US Ambassador to Japan','His diary is a key primary source on pre-war Japanese politics','Warned Washington about Japanese war intentions — largely ignored','Post-war, argued successfully that the emperor must be preserved for occupation to succeed'],
+   quote:''},
+
+  {id:'minobe',name:'Minobe Tatsukichi',jp:'美濃部達吉',dates:'1873–1948',role:'Constitutional Scholar; "Emperor Organ" Theorist',group:'government',icon:'📚',
+   bio:'Professor of constitutional law at Tokyo Imperial University whose "emperor as organ of state" theory (tennō kikansetsu) offered a liberal interpretation of the Meiji Constitution — the emperor governed through constitutional organs of state, not as an absolute sovereign above them. His books were standard university texts for decades. In 1935, military and nationalist pressure forced his books to be banned, he was nearly assassinated, and he resigned from the House of Peers.',
+   bookRole:'Minobe\'s persecution is Bix\'s marker for the moment Japan\'s political space definitively closed. The destruction of the only serious liberal constitutional theory left no intellectual framework for restraining the emperor-military nexus. After Minobe, imperial sovereignty was absolute — legally and practically.',
+   keyFacts:['His theory was mainstream constitutional scholarship from 1912–1935','Attacked in the Diet as "lèse-majesté" by nationalist politicians in 1935','Books banned; shot by a nationalist; resigned from House of Peers','Survived the war; his theory was rehabilitated in the 1946 constitution'],
    quote:''},
 ];
 
@@ -762,6 +947,21 @@ const concepts=[
   {term:'Jinmu',jp:'神武',cat:'cultural',def:'The legendary first emperor of Japan (ca. 660 BCE), said to be a great-great-grandson of Ninigi-no-Mikoto and thus a direct descendant of Amaterasu. His mythological founding of Japan was taught as historical fact in pre-war schools.'},
   {term:'Potsdam Declaration',jp:'ポツダム宣言',cat:'international',def:'The July 26, 1945 ultimatum from the Allied powers demanding Japan\'s unconditional surrender or face "prompt and utter destruction." Japan\'s initial rejection triggered the atomic bombs. Japan ultimately surrendered on the condition that the imperial system be preserved.'},
   {term:'Genbaku',jp:'原爆',cat:'military',def:'"Atomic bomb" — Hiroshima (August 6) and Nagasaki (August 9), 1945. In the post-war Japanese narrative, these became the central symbols of Japanese victimhood — a framing Bix argues was deliberately cultivated to deflect attention from Japan\'s aggressor role.'},
+  {term:'Tennō Kikansetsu',jp:'天皇機関説',cat:'political',def:'"Emperor organ theory" — Minobe Tatsukichi\'s liberal constitutional interpretation that the emperor was an organ of the state rather than an absolute sovereign above it. Dominant constitutional theory 1912–1935, then banned under military pressure. Its destruction removed the only intellectual framework for restraining imperial power.'},
+  {term:'Kōdō',jp:'皇道',cat:'military',def:'"Imperial Way" — the ideology of the Kōdōha Army faction that called for a spiritual totalitarian state centred on direct imperial rule, expansion into Asia, and overthrow of the existing political establishment. The February 26, 1936 coup plotters were adherents. Suppressed by Hirohito himself.'},
+  {term:'Tōsei',jp:'統制',cat:'military',def:'"Control" — the rival Army faction to Kōdōha. The Tōseiha preferred a systematic, bureaucratic approach to military control of the state rather than romantic coup-making. After the February 26 Incident destroyed the Kōdōha, the Tōseiha (and Tōjō) dominated. They achieved military dominance through institutional means rather than assassination.'},
+  {term:'Bushidō',jp:'武士道',cat:'cultural',def:'"Way of the warrior" — the ethical code of the samurai, systematised in Nitobe Inazō\'s 1900 book of the same name for Western audiences. Emphasises loyalty, honour, and death before surrender. The military used bushidō ideology to justify the "no surrender" culture that produced mass suicides on Saipan, Iwo Jima, and Okinawa.'},
+  {term:'Gyokusai',jp:'玉砕',cat:'military',def:'"Shattering like a jewel" — the Japanese military doctrine and practice of fighting to the last man rather than surrendering. First used at the Battle of Attu (1943), gyokusai became standard: entire garrisons killed themselves rather than be captured. The ideology made fighting more costly for everyone while prolonging the war.'},
+  {term:'Tokkō',jp:'特高',cat:'military',def:'"Special Higher Police" (Tokubetsu Kōtō Keisatsu) — the thought police who monitored and suppressed political dissent, labour activism, and any expression critical of the emperor or the war. Operated under the Home Ministry, not the military. Arrested over 70,000 people for "dangerous thoughts" between 1928–1945.'},
+  {term:'Ianfu',jp:'慰安婦',cat:'military',def:'"Comfort women" — the euphemism for the women (estimated 50,000–200,000, primarily Korean and Chinese) enslaved in the military\'s sexual slavery system. The system operated under military command authority — the same command structure Bix documents throughout the book. Japan\'s refusal to fully acknowledge and compensate survivors remains a major diplomatic sore point.'},
+  {term:'Butai 731',jp:'第731部隊',cat:'military',def:'Unit 731 — the covert biological and chemical warfare research unit of the Kwantung Army headquartered near Harbin, Manchuria. Conducted lethal human experimentation on Chinese, Korean, and Allied prisoners. Its personnel were granted immunity from prosecution by SCAP in exchange for research data — one of the occupation\'s most morally compromised acts.'},
+  {term:'Gōzen Kaigi',jp:'御前会議',cat:'political',def:'"Imperial Conference in the Imperial Presence" — the highest-level policy meeting, chaired by Hirohito, at which war and peace decisions were formally ratified. Bix\'s core argument depends on reconstructing what happened in these conferences: Hirohito was not merely ceremonially present but actively questioned commanders and shaped outcomes.'},
+  {term:'Rescript',jp:'詔勅 (Shōchoku)',cat:'political',def:'An imperial edict carrying the force of divine command. The Rescript on Education (1890), the Rescript to Soldiers (1882), and the surrender rescript (1945) were the three most politically significant. Rescripts were written by officials but issued in the emperor\'s name — their authorship is itself a source of historical debate.'},
+  {term:'Kenpō',jp:'憲法',cat:'political',def:'"Constitution" — the Meiji Constitution (1889) was an instrument of oligarchic control dressed in constitutional language. The 1946 constitution (written by SCAP in nine days) genuinely limited imperial power. Article 9 renounced war. The contrast between the two documents measures the revolution the occupation attempted.'},
+  {term:'Zaibatsu Kaisan',jp:'財閥解散',cat:'economic',def:'Zaibatsu dissolution — SCAP\'s programme to break up Japan\'s industrial conglomerates, seen as pillars of the militarist state. Partially successful: the largest conglomerates were dissolved, but their personnel and capital soon reconstituted as keiretsu (looser corporate networks) that dominate Japanese business today.'},
+  {term:'Repatriation',jp:'引揚げ (Hikiage)',cat:'political',def:'The repatriation of approximately 6.5 million Japanese nationals — soldiers and civilians — from the former empire after 1945. Millions from Manchuria, Korea, Taiwan, and the Pacific islands returned to a devastated home country. Their experiences shaped post-war Japanese identity in ways still visible in literature and memory.'},
+  {term:'Kyoto School',jp:'京都学派',cat:'cultural',def:'The philosophical movement centred at Kyoto Imperial University (Nishida Kitarō, Tanabe Hajime, Nishitani Keiji) that attempted to synthesise Western philosophy with Japanese/Asian thought. During the war, several members produced philosophical justifications for Japan\'s "world-historical mission" — making abstract philosophy complicit in imperial violence.'},
+  {term:'Fifteen-Year War',jp:'十五年戦争',cat:'military',def:'The Japanese left-wing historiographical framework that treats 1931 (Manchurian Incident) through 1945 as a single continuous conflict rather than discrete wars. Adopted by Bix and other critical historians to emphasise continuity of Japanese aggression and accountability — in contrast to the conservative view that treats events as separate crises.'},
 ];
 
 function renderConcepts(){
@@ -869,6 +1069,36 @@ const deities=[
    myths:['Performed the ecstatic dance that ended the world\'s darkness when Amaterasu hid','Later guided Ninigi safely to earth through her negotiations with the kami Sarutahiko','Her dance is the mythological origin of kagura (sacred Shinto dance) and by extension all Japanese performing arts'],
    shintoFact:'Kagura (神楽), Shinto ritual dance, traces its origin directly to Ame-no-Uzume\'s dance — making her the patron goddess of all Japanese theatrical and musical traditions, including Noh, Kabuki, and Bunraku.'},
 
+  {id:'kagutsuchi',name:'Kagutsuchi',jp:'軻遇突智',domain:'Fire, Destruction, Birth',cat:'creation',icon:'🔥',
+   bio:'The fire deity whose birth killed his mother Izanami — the first death in Japanese mythology. So enraged was Izanagi that he cut Kagutsuchi into eight pieces with his sword, each piece becoming a different kami. His birth thus initiated the cycle of death and new creation that underlies Shinto cosmology.',
+   imperialLink:'Fire\'s dual nature — creative and destructive — parallels the imperial mythology Bix documents: the same ideology that built Japan\'s modernisation also burned it to the ground in 1945. The firebombing of Tokyo (March 1945) and atomic bombs were described by survivors using imagery of divine fire.',
+   myths:['His birth burned Izanami to death — the origin of mortality','His dismembered body parts became many of Japan\'s volcanoes and fire kami','The swords that cut him became the progenitors of Takemikazuchi and other thunder kami'],
+   shintoFact:'Kagutsuchi is enshrined at Atago Shrine in Kyoto, patron of fire prevention — a fire deity worshipped to prevent fires, reflecting Shinto\'s pattern of propitiating dangerous forces rather than rejecting them.'},
+
+  {id:'ryujin',name:'Ryūjin',jp:'龍神',domain:'Sea, Storms, Tide Jewels',cat:'nature',icon:'🐉',
+   bio:'The Dragon King of the sea, ruler of the undersea palace Ryūgū-jō. He possesses the tide jewels (kanju and manju) that control the ebb and flow of the ocean. His daughter Toyotama-hime married Hoori (Ninigi\'s son), making Ryūjin the great-great-grandfather of Emperor Jimmu and thus an ancestor of the imperial line.',
+   imperialLink:'The imperial family\'s descent from a sea dragon through the female line connects Shintoism to Japan\'s identity as an island maritime nation. Japan\'s navy historically invoked Ryūjin\'s protection — the divine winds (kamikaze) that scattered the Mongol fleets were understood as his intervention.',
+   myths:['Possesses the tide jewels that control ocean tides — a threat to any coastal power','His palace at the bottom of the sea is a land of eternal youth','His daughter Toyotama-hime gave birth to Ugayafukiaezu, grandfather of Emperor Jimmu, on the beach before transforming into a sea creature'],
+   shintoFact:'The undersea palace Ryūgū-jō inspired the Urashima Tarō folk tale — the fisherman who visits the sea palace and returns to find centuries have passed. The tale reflects Shinto beliefs about the different flow of time in the divine realm.'},
+
+  {id:'sarutahiko',name:'Sarutahiko Ōkami',jp:'猿田彦大神',domain:'Guidance, Earthly Kami, Crossroads',cat:'nature',icon:'👺',
+   bio:'The great earthly kami who stood at the crossroads of heaven and earth when Ninigi descended. Initially frightening in appearance (red face, long nose), he was persuaded by Ame-no-Uzume to guide Ninigi\'s party safely to earth. He became the patron deity of guidance, travel, and martial arts.',
+   imperialLink:'Sarutahiko represents the indigenous earthly powers that submitted to (rather than resisted) the heavenly imperial order — a mythological template for how the Meiji state imagined local elites absorbing into the national imperial structure.',
+   myths:['Stood at the junction of heaven and earth when Ninigi descended — the last barrier before imperial rule of earth','Was eventually convinced by Ame-no-Uzume, who became his wife','His face caught in a shellfish while fishing; the sea creatures who laughed were cursed, explaining why certain fish are not eaten'],
+   shintoFact:'Sarutahiko is the patron of the Tsubaki Grand Shrine in Mie Prefecture and gives his name to the Tengu figures of Japanese folklore — the long-nosed mountain goblins of legend who teach martial arts.'},
+
+  {id:'konohana',name:'Konohanasakuya-hime',jp:'木花之佐久夜毘売',domain:'Cherry Blossoms, Flowers, Mt. Fuji',cat:'nature',icon:'🌸',
+   bio:'Goddess of blossoming trees, especially the cherry blossom (sakura), and the enshrined deity of Mount Fuji. She married Ninigi (Amaterasu\'s grandson) despite her father Ōyamatsumi\'s preference that Ninigi also marry her plainer sister. When Ninigi doubted the paternity of her children, she proved herself by giving birth in a burning parturition hut — fire could not harm divine children.',
+   imperialLink:'As Ninigi\'s wife, Konohanasakuya-hime is the direct ancestress of the imperial family through the female line. The cherry blossom — her emblem — became the symbol of Japan\'s imperial family and of the Japanese aesthetic of beautiful transience (mono no aware). The samurai and kamikaze pilots used sakura imagery to express dying beautifully for the emperor.',
+   myths:['Her fire-birth proved her children\'s divine paternity — Hoderi, Hosuseri, and Hoori (ancestor of Jimmu)','The brevity of cherry blossoms reflects her mortal element — her longevity was traded for beauty','Her rejected sister Iwanagahime (goddess of rocks) cursed the imperial line with human mortality when refused marriage'],
+   shintoFact:'The Imperial Seal of Japan (菊の御紋) is the chrysanthemum, but the cherry blossom is equally identified with the imperial family. Japan\'s military used sakura imagery extensively — cherry blossoms fall at their peak, like young soldiers dying gloriously before old age could diminish them.'},
+
+  {id:'takeminakata',name:'Takeminakata-no-Kami',jp:'建御名方神',domain:'Wind, Water, Hunting, Sumo',cat:'war',icon:'💪',
+   bio:'Son of Ōkuninushi who refused to surrender the earthly realm to Amaterasu\'s emissary Takemikazuchi. He challenged Takemikazuchi to a wrestling/sumo contest and lost, fleeing to Lake Suwa in Nagano where he agreed to submit and never leave. The mythological origin of sumo as a divine contest between kami.',
+   imperialLink:'His defeat and submission to Amaterasu\'s representative is another mythological precedent for the subjugation of local earthly powers to imperial heavenly authority. His enshrinement at Suwa — where he agreed never to leave — represents the binding of conquered territories within the imperial order.',
+   myths:['Lost the wrestling contest with Takemikazuchi — the first recorded sumo match','Fled to Lake Suwa and pledged never to leave — still enshrined at Suwa Grand Shrine','Associated with the indigenous Suwa people who were absorbed into the Yamato state'],
+   shintoFact:'The Suwa Grand Shrine is one of Japan\'s oldest — predating Buddhism\'s arrival. The "Omiwatari" phenomenon (the booming sound of Lake Suwa\'s ice cracking in winter) is interpreted as the god crossing the lake to visit his wife at the opposite shrine.'},
+
   {id:'takemikazuchi',name:'Takemikazuchi-no-Kami',jp:'建御雷之男神',domain:'Lightning, Swords, Martial Arts',cat:'war',icon:'🗡️',
    bio:'God of thunder and swords, born from the blood of Kagutsuchi (fire god) when Izanagi killed him. Sent by Amaterasu to pacify the earthly realm before Ninigi\'s descent — he negotiated Ōkuninushi\'s surrender. The Kashima Shrine (Ibaraki Prefecture) is his primary enshrinement.',
    imperialLink:'The Kashima Shinto-ryū (one of Japan\'s oldest martial arts schools) and many sword-fighting traditions claim Takemikazuchi as their patron deity. The martial arts ideology that permeated Japan\'s officer corps had deep Shinto roots.',
@@ -912,9 +1142,197 @@ function openDeityModal(id){
   document.getElementById('modalOverlay').classList.add('open');
 }
 
+// ─── OPERATIONS DATA ───
+const operations=[
+  {id:'manchuria',name:'Manchurian Incident',date:'September 18, 1931',theater:'mainland',
+   summary:'Kwantung Army officers blow up a section of the South Manchuria Railway at Mukden and blame Chinese soldiers — the pretext for invading all of Manchuria within months.',
+   hirohitoRole:'Hirohito was initially agitated by the unauthorised action. Bix documents that he resisted pressure to formally approve it at first, then acquiesced as the military presented it as a fait accompli. His failure to actively suppress the operation — unlike his response to the February 26 coup — set the pattern for subsequent military adventurism.',
+   casualties:'Chinese civilian and military losses in the thousands. The occupation of Manchuria (population 30 million) began a process that would kill millions over the following fourteen years.',
+   significance:'The Manchurian Incident is the opening move of the Fifteen-Year War. It demonstrated that the military could conduct unauthorised operations and face no punishment — in fact, they were rewarded with the territory they seized.'},
+
+  {id:'shanghai32',name:'Shanghai Incident (First)',date:'January 28, 1932',theater:'china',
+   summary:'Japanese naval forces attack Shanghai after engineering a pretext involving anti-Japanese protests. After two months of fighting, a ceasefire is brokered. Japan withdraws troops but demonstrates willingness to extend the war beyond Manchuria.',
+   hirohitoRole:'Hirohito approved naval operations in Shanghai and received regular briefings. His approval of naval bombardment of Chinese civilians marked an early escalation of the conflict.',
+   casualties:'~14,000 Chinese military deaths; significant civilian casualties in Zhabei district, which was destroyed.',
+   significance:'Demonstrated Japan\'s willingness to use the military beyond Manchuria. The League of Nations\' weak response confirmed what the Manchurian Incident had suggested: Japan could act with impunity.'},
+
+  {id:'feb26',name:'February 26 Incident',date:'February 26, 1936',theater:'mainland',
+   summary:'1,483 soldiers led by Kōdōha officers seize central Tokyo, assassinate or attempt to kill senior officials (PM Okada escapes; Finance Minister Takahashi, Lord Keeper Saitō, and General Watanabe are killed), and occupy government buildings for four days.',
+   hirohitoRole:'This is Bix\'s clearest exhibit of Hirohito\'s real authority. He was outraged and personally ordered suppression. "Immediately subdue them by force" he reportedly said. The military was shocked — they expected sympathy. His decisive intervention ended the coup within days and destroyed the Kōdōha faction permanently.',
+   casualties:'Several senior officials killed; four days of tension that nearly became civil war.',
+   significance:'Paradoxically, the coup that most threatened imperial authority led to its greatest assertion. Hirohito\'s response proved he could act decisively — making his later passivity toward military aggression a political choice, not an institutional inability.'},
+
+  {id:'nanjing',name:'Nanjing Massacre',date:'December 1937 – January 1938',theater:'china',
+   summary:'Following the capture of China\'s capital, Japanese forces kill an estimated 100,000–300,000 civilians and POWs over six weeks. Mass rape, burning, and looting accompany the killings. The massacre becomes the defining atrocity of the Sino-Japanese War.',
+   hirohitoRole:'Hirohito received regular reports from the field throughout the campaign. He approved the operations that led to Nanjing\'s capture and issued a triumphal imperial rescript celebrating the fall of the city on December 17 — the massacre had already begun. No order was given to stop it; it ended when the troops moved on.',
+   casualties:'Estimates range from 100,000 to 300,000 dead; tens of thousands of women raped. The death toll remains politically contested in Japan.',
+   significance:'The Nanjing Massacre is Japan\'s Holocaust in Chinese memory — an atrocity whose denial became a defining feature of post-war Japanese nationalism. Bix\'s treatment of Hirohito\'s knowledge is central to the question of imperial responsibility.'},
+
+  {id:'nomonhan',name:'Nomonhan / Khalkhin Gol',date:'May – September 1939',theater:'mainland',
+   summary:'The Kwantung Army clashes with Soviet-Mongolian forces on the disputed Mongolian-Manchurian border. Japan is decisively defeated — Soviet armoured tactics under Georgy Zhukov destroy Japanese infantry. Over 8,000 Japanese killed, 9,000 wounded.',
+   hirohitoRole:'The defeat was kept from the Japanese public. Hirohito was briefed on the losses. The battle\'s lesson — the Soviet army was now invincible — convinced Japan\'s military to abandon the "Strike North" strategy and focus south toward the Pacific. This strategic reorientation would produce Pearl Harbor.',
+   casualties:'Japan: ~8,440 killed, ~9,000 wounded. Soviet/Mongolia: ~7,974 killed, ~15,952 wounded.',
+   significance:'Nomonhan is one of the war\'s decisive turning points, though it receives little attention in Western history. It redirected Japan\'s expansion southward — toward the resource-rich European colonies of Southeast Asia and, ultimately, toward war with the United States.'},
+
+  {id:'pearlharbor',name:'Attack on Pearl Harbor',date:'December 7–8, 1941',theater:'pacific',
+   summary:'Japan simultaneously attacks the US Pacific Fleet at Pearl Harbor, Hawaii; British forces in Malaya; the Philippines; Hong Kong; Wake Island; and Guam — opening the Pacific War across multiple theatres in a single day.',
+   hirohitoRole:'Bix documents that Hirohito reviewed the Pearl Harbor attack plan in detail, asked specific questions about its feasibility, and approved the final version. His eve-of-battle poem about "the world\'s four seas as brothers" — expressing apparent sadness at war — has been used to suggest ambivalence, but Bix argues it was composed with full knowledge of what was about to happen.',
+   casualties:'2,403 Americans killed; 1,178 wounded. 29 Japanese aircraft, 5 midget submarines lost. The "day of infamy" united American opinion and made Germany\'s subsequent declaration of war against the US inevitable.',
+   significance:'The decision Hirohito made here is the fulcrum of Bix\'s book. Japan knew it could not win a long war against America — Yamamoto said so explicitly. The bet was on a quick victory and negotiated peace. It was a catastrophically wrong bet that Hirohito and his advisors made with full awareness of the risk.'},
+
+  {id:'singapore',name:'Fall of Singapore',date:'February 15, 1942',theater:'pacific',
+   summary:'The British fortress — the anchor of British power in Asia — surrenders to Japanese forces under General Yamashita Tomoyuki after a week of fighting. 80,000 Allied troops become prisoners of war. Churchill calls it "the worst disaster and largest capitulation in British history."',
+   hirohitoRole:'Hirohito issued a triumphal imperial rescript marking the victory. The speed and completeness of Japan\'s conquests in the first months of the Pacific War masked the strategic overextension that would become apparent at Midway.',
+   casualties:'80,000 Allied prisoners. Many would die in captivity — the Burma-Thailand Railway (the "Death Railway") was built with Allied POW labour at the cost of ~12,000 POW deaths and 90,000+ Asian civilian deaths.',
+   significance:'Singapore\'s fall destroyed British prestige in Asia permanently. It also fed Japanese overconfidence — leading to the overextension that Yamamoto had warned about. The garrison\'s surrender was used for decades as evidence of Allied racial inferiority in Japanese propaganda.'},
+
+  {id:'midway',name:'Battle of Midway',date:'June 4–7, 1942',theater:'pacific',
+   summary:'A US Navy ambush — enabled by code-breaking — destroys four Japanese fleet carriers (Akagi, Kaga, Sōryū, Hiryū) in four days, along with 248 aircraft and 3,057 men. Japan loses its strategic offensive capability and never recovers it.',
+   hirohitoRole:'Hirohito was informed of the true scale of the defeat — unlike the Japanese public, who were told of a great victory. He reportedly wept. The decision to continue the war for three more years after Midway, when the strategic situation was already irretrievable, is one of the book\'s most damning indictments of the imperial command structure.',
+   casualties:'Japan: 4 carriers, 248 aircraft, 3,057 men. US: 1 carrier (Yorktown), 145 aircraft, 307 men.',
+   significance:'Midway is the Pacific War\'s decisive turning point. Japan could not replace its lost carriers and experienced pilots; the US industrial machine was just beginning to produce replacements at scale. The battle\'s outcome was irreversible — yet Japan fought for three more years.'},
+
+  {id:'guadalcanal',name:'Guadalcanal Campaign',date:'August 1942 – February 1943',theater:'pacific',
+   summary:'Six months of attritional fighting on and around Guadalcanal island for control of an airfield. Japan commits forces piecemeal in a series of failed counterattacks; the US holds the island. Japan evacuates its remaining forces in February 1943 — its first territorial retreat.',
+   hirohitoRole:'Hirohito was briefed on the deteriorating situation. His approval of continued reinforcement despite mounting losses reflects the "decisive battle" logic that governed Japanese strategic thought — always one more effort to reverse the situation.',
+   casualties:'Japan: ~25,000 dead (most from disease and starvation), 900 aircraft, 24 warships. US: 7,100 dead, 615 aircraft, 29 warships.',
+   significance:'Guadalcanal combined with Midway to confirm Japan\'s strategic defeat. The US had demonstrated it could project power across the Pacific and absorb attritional combat. The only remaining question was how long Japan would resist.'},
+
+  {id:'leytegulf',name:'Battle of Leyte Gulf',date:'October 23–26, 1944',theater:'pacific',
+   summary:'The largest naval battle in history, involving 367 ships. Japan deploys its remaining fleet in a last attempt to destroy the US invasion force at Leyte in the Philippines. The fleet is destroyed; the Philippines are lost. Kamikaze attacks sink 3 US escort carriers and damage many more.',
+   hirohitoRole:'The decision to commit the entire remaining fleet — including the super-battleship Yamato — was made at the highest levels with Hirohito\'s knowledge. The simultaneous approval of kamikaze (Special Attack) operations involved his direct sanctioning of the "body-crashing" strategy.',
+   casualties:'Japan: 26 ships sunk including 4 carriers, 3 battleships; ~10,000 killed. US: 6 ships sunk; ~3,000 killed.',
+   significance:'After Leyte Gulf, Japan had no surface fleet. The war would be decided by air power, island-by-island fighting, and eventually the strategic bombing of the home islands. Surrender was now the only rational option — but rationality was not what governed Japanese command decisions.'},
+
+  {id:'tokyofirebombing',name:'Firebombing of Tokyo',date:'March 9–10, 1945',theater:'homeland',
+   summary:'Operation Meetinghouse: 279 B-29s fly low over Tokyo at night dropping incendiary bombs. Sixteen square miles of the city burn in three hours; the death toll exceeds 80,000 (some estimates: 100,000+), surpassing either atomic bomb in a single night. One million people are left homeless.',
+   hirohitoRole:'Hirohito toured the ruins and was reportedly silenced by the destruction. Bix documents that despite touring the devastated city, the experience did not lead him to seek peace — he continued to hope for a negotiated settlement that preserved the imperial system, not unconditional surrender.',
+   casualties:'Estimates of 80,000–100,000 dead; 267,000 buildings destroyed; 1 million homeless. The most destructive conventional air raid in history.',
+   significance:'The Tokyo firebombing reframed the strategic bombing campaign. LeMay\'s low-altitude incendiary approach was far more deadly than high-altitude precision bombing. Sixty-seven Japanese cities were subsequently firebombed before the atomic bombs fell.'},
+
+  {id:'okinawa',name:'Battle of Okinawa',date:'April 1 – June 22, 1945',theater:'homeland',
+   summary:'The last major island battle before the planned invasion of the Japanese home islands. Japan deploys kamikaze attacks at scale, uses Okinawan civilians as human shields, and fights to the last. The battle\'s ferocity convinces US planners that an invasion of Kyushu (Operation Downfall) would cost millions of casualties.',
+   hirohitoRole:'Hirohito followed the battle closely. Its outcome was predictable — but the scale of resistance reinforced his belief that Japan could extract better surrender terms by inflicting maximum US casualties. Bix argues this calculation was politically rational but morally catastrophic — it killed 100,000 Okinawan civilians to delay a surrender that was already inevitable.',
+   casualties:'US: 12,281 killed; Japanese military: 110,000+ killed; Okinawan civilians: 94,000–150,000 killed — up to one-third of the entire civilian population.',
+   significance:'Okinawa\'s death toll directly influenced the atomic bomb decision. US planners projected 250,000–1,000,000 US casualties in an invasion of the home islands, extrapolating from Okinawa\'s resistance ratios.'},
+
+  {id:'atomicbombs',name:'Atomic Bombings — Hiroshima & Nagasaki',date:'August 6 & 9, 1945',theater:'homeland',
+   summary:'A uranium bomb (Little Boy) destroys Hiroshima on August 6; a plutonium bomb (Fat Man) destroys Nagasaki on August 9. On August 9, the Soviet Union also declares war on Japan and invades Manchuria — the "double shock" that finally broke the deadlock over surrender.',
+   hirohitoRole:'Hirohito used the atomic bombs and Soviet entry as political cover to break the deadlocked cabinet — his "sacred decision" of August 9 cited these events as making further resistance impossible. Bix asks pointedly: why did atomic bombs accomplish what six months of conventional firebombing did not? His answer involves kokutai preservation politics, not military calculation.',
+   casualties:'Hiroshima: 70,000–80,000 immediate deaths; total (including radiation sickness) ~140,000 by year-end. Nagasaki: 40,000+ immediate; ~70,000 by year-end. Combined long-term deaths: over 200,000.',
+   significance:'The atomic bombings remain the most contested military decisions of the 20th century. Bix\'s contribution is to shift the frame: rather than asking "were the bombs necessary?", he asks why Japan\'s leadership delayed surrender for so long — and implicates Hirohito directly in the deaths those weeks of delay produced.'},
+];
+
+function renderOps(){
+  const grid=document.getElementById('opsGrid');
+  if(!grid) return;
+  grid.innerHTML=operations.map(op=>`
+    <div class="op-card" data-theater="${op.theater}" onclick="openOpModal('${op.id}')">
+      <div class="op-date">${op.date}</div>
+      <div class="op-name">${op.name}</div>
+      <div class="op-theater ${op.theater}">${op.theater.replace('mainland','Mainland Asia').replace('pacific','Pacific').replace('china','China War').replace('homeland','Home Islands')}</div>
+      <div class="op-summary">${op.summary.substring(0,140)}…</div>
+    </div>`).join('');
+}
+
+function filterOps(cat,btn){
+  document.querySelectorAll('#section-military .filter-row .ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.op-card').forEach(el=>{
+    el.classList.toggle('hidden', cat!=='all' && el.dataset.theater!==cat);
+  });
+}
+
+function openOpModal(id){
+  const op=operations.find(x=>x.id===id);
+  if(!op) return;
+  document.getElementById('modalContent').innerHTML=`
+    <h2>${op.name}</h2>
+    <div class="modal-sub">${op.date}</div>
+    <div class="modal-dates">${op.theater.replace('mainland','Mainland Asia').replace('pacific','Pacific War').replace('china','China War').replace('homeland','Home Islands')}</div>
+    <div class="modal-divider"></div>
+    <div class="modal-body">
+      <p>${op.summary}</p>
+      <h4>Hirohito's Role</h4><p>${op.hirohitoRole}</p>
+      <h4>Casualties</h4><p>${op.casualties}</p>
+      <h4>Historical Significance</h4><p>${op.significance}</p>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ─── SOURCES DATA ───
+const primarySources=[
+  {type:'primary',name:'Shōwa Tennō Dokuhakuroku',author:'Emperor Hirohito (recorded 1946)',
+   body:'Hirohito\'s own post-war account of his reign, dictated to court officials in five sessions in 1946. Intended to shape his defence if prosecuted at Tokyo — it consistently portrays him as reluctantly approving military decisions while being misled by advisors. Bix cross-references it against the Kido Diary and finds numerous contradictions. Its very existence — and its strategic self-exculpation — is Bix\'s strongest evidence that Hirohito understood his own culpability.',
+   revelation:'The monologue describes Hirohito\'s anxiety about specific operations — including Nanjing — in ways that confirm he knew exactly what was happening. His framing of events as "regrettable" rather than "unknown" is itself an admission.'},
+  {type:'primary',name:'Kido Nikki (Kido Diary)',author:'Kido Kōichi, Lord Keeper of the Privy Seal',
+   body:'The diary Kido kept throughout his service as Lord Keeper (1940–45) is Bix\'s single most important source. It records who met with the emperor, what was discussed, and how Hirohito responded — in real time, not retrospect. SCAP initially classified and then selectively released it. The Tokyo prosecution used heavily redacted portions; Bix uses the fuller post-declassification version.',
+   revelation:'The diary records Hirohito asking detailed operational questions, expressing specific strategic preferences, and receiving reports that confirm his continuous involvement. Kido\'s post-war testimony minimised this involvement — the diary itself tells a different story.'},
+  {type:'primary',name:'Sugiyama Memo (Sugiyama Memorandum)',author:'General Sugiyama Hajime, Army Chief of Staff',
+   body:'Detailed notes of military-imperial conference proceedings kept by Army Chief of Staff Sugiyama, covering the critical 1940–45 period. The memo records the content of briefings given to Hirohito at imperial conferences — including his specific questions and responses. Sugiyama himself committed suicide on August 15, 1945; his wife died alongside him.',
+   revelation:'The memo shows Hirohito asking pointed questions about operational details — "how many days to reduce the Philippines?" — that contradict the passive emperor narrative. His engagement with military specifics was substantive, not ceremonial.'},
+  {type:'primary',name:'Harada Diary',author:'Harada Kumao, Secretary to Saionji',
+   body:'Harada served as the last genrō Saionji\'s private secretary and kept a meticulous diary of his conversations with political leaders, court officials, and Saionji himself. His record of political maneuvering in the 1930s complements and cross-checks the Kido Diary, providing a view from outside the imperial household.',
+   revelation:'Harada\'s diary documents the progressive narrowing of civilian political space through the 1930s — the closing of options that Bix sees as making war inevitable once Saionji died.'},
+  {type:'primary',name:'SCAP Records (Declassified)',author:'Supreme Commander Allied Powers, 1945–52',
+   body:'The occupation\'s administrative records, including evidence gathered for the Tokyo Trials, documents subsequently suppressed, and internal SCAP communications about Hirohito\'s legal exposure. Key documents were classified for decades. Bix draws on materials declassified in the 1970s–90s that reveal SCAP\'s deliberate shielding of the emperor from prosecution.',
+   revelation:'Internal SCAP communications show staff knew they were destroying or suppressing evidence. Hirohito\'s exposure was discussed explicitly; the decision to protect him was consciously political, not a finding of innocence.'},
+];
+
+const quotes=[
+  {text:'I was extremely reluctant [to go to war], but in view of the prevailing domestic and international circumstances, I had no choice but to give approval.',attr:'Emperor Hirohito, Dokuhakuroku (post-war monologue, 1946)',color:'yellow'},
+  {text:'The Emperor\'s posture of peaceful emperor has been a creation of the Occupation. No emperor has been as politically involved as Hirohito.',attr:'Herbert P. Bix, Hirohito and the Making of Modern Japan',color:''},
+  {text:'Immediately subdue [the rebels] — I will personally lead the Imperial Guard Division if necessary.',attr:'Hirohito to military commanders during the February 26, 1936 coup — demonstrating the decisive authority he rarely showed in restraining military aggression',color:'red'},
+  {text:'[The situation is] truly grave… I pray that the crisis will be managed without further sacrifice.',attr:'Hirohito to Kido Kōichi, after the fall of Saipan (July 1944) — noted in the Kido Diary',color:'purple'},
+  {text:'I cannot bear to see my innocent people suffer any longer. Ending the war is the only way to restore world peace and to relieve the nation from the terrible distress with which it is burdened.',attr:'Hirohito, in the surrender rescript recording (August 14, 1945) — a statement Bix notes made no mention of Asian suffering',color:''},
+];
+
+const furtherReading=[
+  {type:'secondary',name:'Embracing Defeat: Japan in the Wake of World War II',author:'John W. Dower (1999)',
+   body:'The essential complement to Bix — while Bix focuses on Hirohito\'s wartime role, Dower reconstructs the occupation from the Japanese perspective. Shows how ordinary Japanese people processed defeat, embraced the new constitution, and rebuilt their lives. Pulitzer Prize winner; indispensable for understanding the post-war chapters of Bix.'},
+  {type:'reading',name:'China\'s War with Japan, 1937–1945',author:'Rana Mitter (2013)',
+   body:'Corrects the Pacific War\'s marginalisation of China\'s central role. Mitter documents that China bore the brunt of Japanese aggression for eight years and mobilised millions in resistance. Essential for contextualising the Nanjing Massacre and understanding why China\'s historical memory of Japan remains so fraught.'},
+  {type:'reading',name:'Japan at War: An Oral History',author:'Haruko Taya Cook & Theodore F. Cook (1992)',
+   body:'Interviews with 200 Japanese who lived through the war — soldiers, civilians, comfort women, atomic bomb survivors. Puts human faces on the statistics Bix documents. Particularly valuable for understanding the experience of ordinary Japanese who believed imperial ideology without necessarily being responsible for it.'},
+  {type:'reading',name:'The Rape of Nanking',author:'Iris Chang (1997)',
+   body:'The book that brought the Nanjing Massacre to Western audiences. Though some of Chang\'s statistics are disputed, its essential documentation of the atrocity and its post-war denial is indispensable. Pairs directly with Bix\'s discussion of Hirohito\'s role in the China War.'},
+  {type:'reading',name:'Japan\'s Imperial Conspiracy',author:'David Bergamini (1971)',
+   body:'Bix\'s controversial precursor — Bergamini made similar arguments about Hirohito\'s active role thirty years earlier but was largely dismissed by the academic establishment. Reading Bergamini after Bix illustrates how the documentary record that was unavailable to Bergamini confirmed many of his intuitions.'},
+  {type:'reading',name:'Factories of Death: Japanese Biological Warfare 1932–1945',author:'Sheldon H. Harris (1994)',
+   body:'Documents Unit 731 and Japan\'s broader biological warfare programme. Essential for understanding SCAP\'s most morally compromised decision: granting immunity to Unit 731 personnel in exchange for their research data. Directly relevant to Bix\'s discussion of the Tokyo Trials\' selective justice.'},
+];
+
+function renderSources(){
+  const pg=document.getElementById('primaryGrid');
+  if(!pg) return;
+  pg.innerHTML=primarySources.map(s=>`
+    <div class="source-card">
+      <div class="source-type ${s.type}">${s.type==='primary'?'Primary Source':'Secondary'}</div>
+      <div class="source-name">${s.name}</div>
+      <div class="source-author">${s.author}</div>
+      <div class="source-body">${s.body}</div>
+      ${s.revelation?`<div class="modal-body"><div class="book-quote"><strong>Key Revelation:</strong> ${s.revelation}</div></div>`:''}
+    </div>`).join('');
+
+  const qg=document.getElementById('quotesGrid');
+  if(qg) qg.innerHTML=quotes.map(q=>`
+    <div class="quote-card ${q.color}">
+      <div class="quote-text">"${q.text}"</div>
+      <div class="quote-attr">— ${q.attr}</div>
+    </div>`).join('');
+
+  const rg=document.getElementById('readingGrid');
+  if(rg) rg.innerHTML=furtherReading.map(s=>`
+    <div class="source-card">
+      <div class="source-type reading">Further Reading</div>
+      <div class="source-name">${s.name}</div>
+      <div class="source-author">${s.author}</div>
+      <div class="source-body">${s.body}</div>
+    </div>`).join('');
+}
+
 // ─── GLOSSARY ───
 const glossTerms=[
-  {term:'DV01',tip:'Not relevant here — see Hirohito!'},
   {term:'Gyokuon',tip:'Literally "jewel voice" — the emperor\'s sacred voice, first broadcast publicly on August 15, 1945.'},
   {term:'Gozen Kaigi',tip:'Imperial Conference — the formal meeting chaired by Hirohito where major state decisions were ratified in his presence.'},
   {term:'Harakiri / Seppuku',tip:'Ritual self-disembowelment — a samurai and military officer practice Bix documents in multiple key figures including Anami Korechika.'},
@@ -930,6 +1348,14 @@ const glossTerms=[
   {term:'Tenno Heika',tip:'"His Imperial Majesty the Emperor" — the honorific formula used when addressing or referring to the emperor in formal contexts.'},
   {term:'Torii',tip:'The gate marking the entrance to a Shinto shrine — the threshold between the sacred and profane. Its vermilion colour symbolises protection against evil.'},
   {term:'Yomi-no-Kuni',tip:'"Land of the Dead" in Shinto cosmology — the shadowy underworld where Izanami became a death goddess after dying in childbirth.'},
+  {term:'Kamikaze',tip:'"Divine wind" — originally the typhoons that destroyed the Mongol fleets in 1274 and 1281; later the name for Japan\'s Special Attack suicide pilots of 1944–45.'},
+  {term:'Gyokusai',tip:'"Shattering like a jewel" — fighting to the last man rather than surrendering. Standard Japanese military doctrine from 1943 onward, producing mass suicides on Saipan, Iwo Jima, and Okinawa.'},
+  {term:'SCAP',tip:'Supreme Commander Allied Powers — MacArthur\'s designation as de facto ruler of occupied Japan, 1945–1951. His decisions about Hirohito shaped Japan\'s post-war identity.'},
+  {term:'Ianfu',tip:'"Comfort women" — the euphemism for women (primarily Korean and Chinese) enslaved in Japan\'s military sexual slavery system during the war. Estimates: 50,000–200,000.'},
+  {term:'Fifteen-Year War',tip:'Historiographical framework treating 1931–1945 as one continuous conflict. Adopted by Bix and left-wing Japanese historians; contrasts with conservative view of discrete separate crises.'},
+  {term:'Dokuhakuroku',tip:'Hirohito\'s post-war monologue (1946), dictating his account of events to court officials. Bix uses it as evidence of his awareness — its self-exculpation proves he knew what he was exculpating himself from.'},
+  {term:'Tōsuiken',tip:'"Supreme command right" — the constitutional provision making the military answerable to the emperor directly, bypassing civilian ministers. The structural flaw that gave the military independence from democratic oversight.'},
+  {term:'Kenpeitai',tip:'Military police — Japan\'s feared secret police with jurisdiction over civilians as well as soldiers. Equivalent in function to the Gestapo; answered to Army command.'},
 ];
 
 function renderGlossary(){
@@ -952,6 +1378,8 @@ renderConcepts();
 renderDeities();
 renderGlossary();
 renderPeople();
+renderOps();
+renderSources();
 
 window.addEventListener('resize',()=>{
   const wrap=document.getElementById('hierarchySvg');
