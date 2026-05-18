@@ -465,8 +465,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   <details open>
     <summary>How Gamma Actually Makes (or Costs) Money — Without Re-Hedging</summary>
     <div class="details-body">
-      <p><strong style="color:var(--text)">The part that trips everyone up: re-hedging is not required for gamma to change your P&L</strong></p>
-      <p>You already understand that a rate move earns or costs you Delta × ΔR. The question is: what does gamma add on top? The answer is that your delta is not constant during the move. Gamma means your delta is changing <em>throughout</em> the rate move — so the amount you earn or lose from the move is different from what a fixed-delta position would give.</p>
+      <p><strong style="color:var(--text)">First: how does a rate move make you money at all?</strong></p>
+      <p>It is mark-to-market. Your position is worth more on the books — no trade required. If you hold a $100M bond paying 4% and rates fall 10bp, that bond now pays 4% in a 3.9% world. Anyone buying a new bond today gets 3.9%. Yours pays more. It is more valuable. Your books show +$440k immediately. Nothing was sold. If you want to lock in the gain you sell; if you want to reduce your exposure you re-hedge — but neither is required for the P&L to exist.</p>
+      <p>For a swap it is the same: the net present value of your future net cash flows (fixed received minus floating paid) increases when floating rates fall. That NPV increase hits your P&L statement the moment rates move.</p>
+
+      <p><strong style="color:var(--text)">Where re-hedging fits in</strong></p>
+      <p>Re-hedging does not <em>create</em> the P&L — it <em>freezes</em> your exposure. After a 10bp fall your DV01 has grown (because of gamma) and you are now more exposed than you want to be. Selling some DV01 brings you back to target. That sale itself also earns or costs money, but the main gain already happened through mark-to-market as rates moved.</p>
+
+      <p><strong style="color:var(--text)">Now: what does gamma add on top?</strong></p>
+      <p>Without gamma your DV01 stays fixed throughout the move — every basis point earns the same $44k, and 10bp earns exactly $440k. With positive gamma your DV01 <em>grows</em> as rates fall, so each successive basis point earns slightly more than the last. The total P&L is the area under a rising line, not a flat one.</p>
 
       <p><strong style="color:var(--text)">Side-by-side: same starting delta, different gamma</strong></p>
       <p>Starting position: $44k DV01 at the 5Y bucket. Rates fall 10bp.</p>
@@ -476,40 +483,37 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   P&L = $44,000 × 10bp = $440,000
 
 With positive gamma (Γ = +$2,000/bp²):
-  At 0bp fallen:  delta = $44,000
-  At 3bp fallen:  delta = $44,000 + ($2,000 × 3) = $50,000
-  At 6bp fallen:  delta = $44,000 + ($2,000 × 6) = $56,000
-  At 10bp fallen: delta = $44,000 + ($2,000 × 10) = $64,000
+  At 0bp fallen:  delta = $44,000  →  earns $44k on the next bp
+  At 3bp fallen:  delta = $50,000  →  earns $50k on the next bp
+  At 6bp fallen:  delta = $56,000  →  earns $56k on the next bp
+  At 10bp fallen: delta = $64,000
   Average delta during the move ≈ ($44k + $64k) / 2 = $54,000
   P&L ≈ $54,000 × 10bp = $540,000
 
 Gamma added: $540k − $440k = +$100,000 = ½ × $2,000 × 10²</div>
 
-      <p>Nothing was re-hedged. The extra $100k came purely from having a higher delta for the second half of the move than the first half — because gamma was growing it as rates fell.</p>
+      <p>Nothing was re-hedged. The extra $100k came purely from owning a progressively larger position in an instrument that kept getting more valuable as rates fell.</p>
 
       <p><strong style="color:var(--text)">With negative gamma, the opposite happens</strong></p>
       <div class="code-block">With negative gamma (Γ = −$2,000/bp²):
   At 0bp fallen:  delta = $44,000
-  At 3bp fallen:  delta = $44,000 − ($2,000 × 3) = $38,000
-  At 6bp fallen:  delta = $44,000 − ($2,000 × 6) = $32,000
-  At 10bp fallen: delta = $44,000 − ($2,000 × 10) = $24,000
+  At 3bp fallen:  delta = $38,000
+  At 6bp fallen:  delta = $32,000
+  At 10bp fallen: delta = $24,000
   Average delta during the move ≈ ($44k + $24k) / 2 = $34,000
   P&L ≈ $34,000 × 10bp = $340,000
 
 Gamma cost: $440k − $340k = −$100,000</div>
-      <p>You were right about the direction (rates fell, you were long). But negative gamma eroded your delta as the move played out — so you captured less of it than your starting position suggested you would.</p>
+      <p>You were right about the direction. But negative gamma shrank your DV01 as the move played out — so you captured less of the mark-to-market gain than your starting position implied.</p>
 
       <p><strong style="color:var(--text)">The one-sentence version</strong></p>
-      <p>Positive gamma means your position gets <em>bigger</em> as it moves in your favour and <em>smaller</em> as it moves against you — you always have more exposure when you're winning. Negative gamma is the opposite: more exposure when you're losing, less when you're winning.</p>
-
-      <p><strong style="color:var(--text)">The acceleration analogy</strong></p>
-      <p>Delta is your speed. Gamma is acceleration. If you're driving at 60mph and you accelerate while heading in the right direction, you cover more ground than if you stayed at 60mph. Even without changing lanes. The extra distance is the gamma P&L.</p>
+      <p>Positive gamma means your position gets <em>bigger</em> as it moves in your favour and <em>smaller</em> as it moves against you — you always have more mark-to-market exposure when you're winning. Negative gamma is the opposite.</p>
 
       <p><strong style="color:var(--text)">Why direction doesn't matter — ΔR is squared</strong></p>
-      <p>The formula ½ × Γ × (ΔR)² squares the rate move, so it is always positive for long gamma regardless of direction. Whether rates fall 10bp or rise 10bp, positive gamma adds $100k to P&L (relative to a fixed-delta baseline), because in both cases your delta was growing in the profitable direction.</p>
+      <p>The formula ½ × Γ × (ΔR)² squares the rate move, so it is always positive for long gamma regardless of direction. Whether rates fall 10bp or rise 10bp, positive gamma adds $100k to mark-to-market P&L relative to a fixed-delta baseline.</p>
 
       <p><strong style="color:var(--text)">Why long gamma still costs money (theta)</strong></p>
-      <p>If long gamma always adds P&L, why doesn't everyone own it? Because you pay for it every day through <em>theta</em> — the time decay of the option. The position that gives you +$2,000/bp² of gamma might cost $30,000/day just to hold. If rates barely move, the gamma P&L is tiny and the theta destroys you. Long gamma only wins when the market is volatile enough: specifically when daily moves exceed √(2 × theta / gamma) — the break-even volatility.</p>
+      <p>If long gamma always adds mark-to-market P&L on any move, why doesn't everyone own it? Because you pay for it every day through <em>theta</em> — the time decay of the option. The position that gives you +$2,000/bp² of gamma might cost $30,000/day just to hold. If rates barely move, the gamma P&L is tiny and the theta destroys you. Long gamma only wins when the market is volatile enough: specifically when daily moves exceed √(2 × theta / gamma) — the break-even volatility.</p>
     </div>
   </details>
 
