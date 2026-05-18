@@ -20,6 +20,34 @@ nav{position:sticky;top:0;z-index:100;background:rgba(7,9,15,.92);backdrop-filte
 .nav-logo{font-weight:800;font-size:14px;color:var(--accent);text-decoration:none}
 .nav-back{font-size:12px;color:var(--muted);text-decoration:none;transition:color .15s}
 .nav-back:hover{color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:12px}
+
+/* Sync button */
+.sync-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s}
+.sync-btn:hover{border-color:var(--accent);color:var(--accent)}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
+.sync-dot.synced{background:var(--green)}
+.sync-dot.syncing{background:var(--yellow);animation:pulse-dot .8s ease-in-out infinite}
+.sync-dot.error{background:var(--red)}
+@keyframes pulse-dot{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* Sync panel */
+.sync-panel{display:none;position:fixed;top:58px;right:16px;z-index:200;width:300px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:0 12px 40px rgba(0,0,0,.6)}
+.sync-panel.open{display:block}
+.sync-panel h3{font-size:.9rem;font-weight:700;margin-bottom:6px}
+.sync-panel p{font-size:.8rem;color:var(--muted);line-height:1.55;margin-bottom:12px}
+.sync-panel a{color:var(--accent)}
+.sync-token-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--text);outline:none;font-family:monospace;margin-bottom:8px;transition:border-color .15s}
+.sync-token-input:focus{border-color:var(--accent)}
+.sync-connect-btn{width:100%;background:var(--accent);border:none;border-radius:6px;padding:8px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .15s}
+.sync-connect-btn:hover{opacity:.85}
+.sync-connect-btn:disabled{opacity:.5;cursor:default}
+.sync-status-text{font-size:.78rem;margin-top:8px;min-height:18px}
+.sync-status-text.synced{color:var(--green)}
+.sync-status-text.error{color:var(--red)}
+.sync-status-text.syncing{color:var(--yellow)}
+.sync-disconnect{background:none;border:none;font-size:.75rem;color:var(--muted);cursor:pointer;margin-top:8px;padding:0;text-decoration:underline;display:none}
+.sync-disconnect:hover{color:var(--red)}
 
 /* Hero */
 .hero{max-width:860px;margin:0 auto;padding:72px 24px 48px}
@@ -143,8 +171,21 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--muted);border-t
 
 <nav>
   <a href="/" class="nav-logo">FK</a>
-  <a href="/" class="nav-back">← All Tools</a>
+  <div class="nav-right">
+    <a href="/" class="nav-back">← All Tools</a>
+    <button class="sync-btn" id="sync-btn"><span class="sync-dot" id="sync-dot"></span>Sync</button>
+  </div>
 </nav>
+
+<div class="sync-panel" id="sync-panel">
+  <h3>GitHub Gist Sync</h3>
+  <p>Your progress is saved to a private GitHub Gist — accessible on any device.<br>
+  Create a token at <a href="https://github.com/settings/tokens/new?scopes=gist&description=Musical+Education+Sync" target="_blank" rel="noopener">github.com/settings/tokens</a> with the <strong>gist</strong> scope.</p>
+  <input type="password" class="sync-token-input" id="token-input" placeholder="ghp_…" autocomplete="off">
+  <button class="sync-connect-btn" id="connect-btn">Connect</button>
+  <div class="sync-status-text" id="sync-status-text"></div>
+  <button class="sync-disconnect" id="disconnect-btn">Disconnect</button>
+</div>
 
 <section class="hero">
   <h1>Musical Education</h1>
@@ -802,7 +843,142 @@ let currentSearch = '';
 
 function saveListened() {
   localStorage.setItem('musicedu-listened', JSON.stringify([...listened]));
+  scheduleGistSave();
 }
+
+// ── Gist Sync ──────────────────────────────────────────────────────────────────
+
+const GIST_FILE = 'musicedu-progress.json';
+
+const gist = {
+  token: localStorage.getItem('musicedu-token') || '',
+  id:    localStorage.getItem('musicedu-gist-id') || '',
+};
+
+function setSyncUI(status, msg) {
+  const dot  = document.getElementById('sync-dot');
+  const text = document.getElementById('sync-status-text');
+  const disc = document.getElementById('disconnect-btn');
+  const conn = document.getElementById('connect-btn');
+  const inp  = document.getElementById('token-input');
+
+  dot.className = 'sync-dot ' + status;
+  text.className = 'sync-status-text ' + status;
+
+  const labels = { synced:'✓ Synced', syncing:'Syncing…', error:'Error: ' + msg, idle:'' };
+  text.textContent = labels[status] ?? msg;
+
+  const connected = status === 'synced' || status === 'syncing';
+  disc.style.display = connected ? 'block' : 'none';
+  conn.style.display = connected ? 'none' : 'block';
+  inp.style.display  = connected ? 'none' : 'block';
+}
+
+async function gistRequest(method, path, body) {
+  const r = await fetch('https://api.github.com' + path, {
+    method,
+    headers: { Authorization: 'Bearer ' + gist.token, 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!r.ok) throw new Error('GitHub API ' + r.status);
+  return r.json();
+}
+
+async function findOrCreateGist() {
+  if (gist.id) {
+    try { await gistRequest('GET', '/gists/' + gist.id); return; } catch {}
+  }
+  let page = 1;
+  while (true) {
+    const list = await gistRequest('GET', `/gists?per_page=100&page=${page}`);
+    const match = list.find(g => g.files[GIST_FILE]);
+    if (match) { gist.id = match.id; break; }
+    if (list.length < 100) {
+      const created = await gistRequest('POST', '/gists', {
+        description: 'Musical Education — Progress Tracker',
+        public: false,
+        files: { [GIST_FILE]: { content: JSON.stringify({ listened: [] }) } },
+      });
+      gist.id = created.id;
+      break;
+    }
+    page++;
+  }
+  localStorage.setItem('musicedu-gist-id', gist.id);
+}
+
+async function loadFromGist() {
+  setSyncUI('syncing');
+  try {
+    await findOrCreateGist();
+    const data = await gistRequest('GET', '/gists/' + gist.id);
+    const content = data.files[GIST_FILE]?.content;
+    if (content) {
+      const remote = JSON.parse(content).listened || [];
+      remote.forEach(k => listened.add(k));
+      localStorage.setItem('musicedu-listened', JSON.stringify([...listened]));
+    }
+    setSyncUI('synced');
+    renderTimeline();
+    updateStats();
+  } catch (err) {
+    setSyncUI('error', err.message);
+  }
+}
+
+let gistSaveTimer;
+function scheduleGistSave() {
+  if (!gist.token) return;
+  clearTimeout(gistSaveTimer);
+  gistSaveTimer = setTimeout(async () => {
+    setSyncUI('syncing');
+    try {
+      await findOrCreateGist();
+      await gistRequest('PATCH', '/gists/' + gist.id, {
+        files: { [GIST_FILE]: { content: JSON.stringify({ listened: [...listened] }) } },
+      });
+      setSyncUI('synced');
+    } catch (err) {
+      setSyncUI('error', err.message);
+    }
+  }, 1000);
+}
+
+async function connectGist() {
+  const token = document.getElementById('token-input').value.trim();
+  if (!token) return;
+  gist.token = token;
+  gist.id = '';
+  localStorage.setItem('musicedu-token', token);
+  localStorage.removeItem('musicedu-gist-id');
+  await loadFromGist();
+}
+
+function disconnectGist() {
+  gist.token = '';
+  gist.id = '';
+  localStorage.removeItem('musicedu-token');
+  localStorage.removeItem('musicedu-gist-id');
+  setSyncUI('idle');
+  document.getElementById('token-input').value = '';
+  document.getElementById('sync-panel').classList.remove('open');
+}
+
+// Sync panel toggle
+document.getElementById('sync-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('sync-panel').classList.toggle('open');
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('#sync-panel') && !e.target.closest('#sync-btn')) {
+    document.getElementById('sync-panel').classList.remove('open');
+  }
+});
+document.getElementById('connect-btn').addEventListener('click', connectGist);
+document.getElementById('disconnect-btn').addEventListener('click', disconnectGist);
+document.getElementById('token-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') connectGist();
+});
 
 function entryKey(e) {
   return `${e.year}-${e.title}-${e.artist}`.replace(/\s+/g, '-').toLowerCase();
@@ -961,6 +1137,13 @@ document.getElementById('search-input').addEventListener('input', e => {
 
 renderTimeline();
 updateStats();
+
+if (gist.token) {
+  setSyncUI('syncing');
+  loadFromGist();
+} else {
+  setSyncUI('idle');
+}
 </script>
 </body>
 </html>
