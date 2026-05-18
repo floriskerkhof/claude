@@ -88,7 +88,28 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 @media(max-width:600px){.four-grid{grid-template-columns:1fr}}
 .q-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px}
 .q-card-name{font-size:15px;font-weight:700;margin-bottom:8px}
-.q-card-desc{font-size:13px;color:var(--muted);line-height:1.55}
+.q-card-desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:12px}
+.q-example{background:var(--surface3);border-radius:6px;padding:10px 12px;font-size:12px;font-family:'SF Mono',Menlo,monospace;line-height:1.8;color:var(--muted)}
+.q-example strong{color:var(--text)}
+.q-example .pos{color:var(--green)}
+.q-example .neg{color:var(--red)}
+.ratio-cards{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.ratio-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}
+.ratio-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:10px;flex-wrap:wrap}
+.ratio-name{font-size:14px;font-weight:700;color:var(--accent2)}
+.ratio-formula{font-family:monospace;font-size:12px;background:var(--surface3);border-radius:4px;padding:3px 9px;color:var(--accent2);white-space:nowrap}
+.ratio-reveal{font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.55}
+.ratio-worked{background:var(--surface3);border-radius:6px;padding:10px 14px;font-size:12px;font-family:'SF Mono',Menlo,monospace;line-height:1.9;color:var(--muted)}
+.ratio-worked strong{color:var(--green)}
+.ratio-worked .dim{color:var(--muted)}
+.ratio-trigger{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;color:var(--yellow);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);border-radius:4px;padding:2px 8px}
+.live-panel{background:var(--surface2);border:1px solid rgba(74,158,255,.3);border-radius:var(--r);padding:20px 24px;margin-bottom:24px}
+.live-panel-title{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--accent);text-transform:uppercase;margin-bottom:16px}
+.live-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.live-stat{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.live-stat-label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px}
+.live-stat-val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.live-stat-sub{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
 .sc-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:640px){.sc-cards{grid-template-columns:1fr}}
 .scenario-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px}
@@ -483,65 +504,171 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </div>
 
   <h3>The Four Quadrants of Risk</h3>
+  <p style="margin-bottom:16px">All examples below use a 5Y position with <strong style="color:var(--text)">DV01 = $44k/bp</strong> and <strong style="color:var(--text)">gamma = ±$2,000/bp²</strong>. These are realistic numbers for a $100M notional position.</p>
   <div class="four-grid">
     <div class="q-card">
       <div class="q-card-name" style="color:var(--green)">Long Delta + Long Gamma</div>
-      <div class="q-card-desc">Positioned for a rally and get more long if rates fall. The bigger the move down, the better. Classic risk-on with convexity: even if wrong on direction, gamma limits the loss.</div>
+      <div class="q-card-desc">Positioned for a rally. The bigger the move down in rates, the more profitable you become — gamma accelerates gains. Even if wrong (rates rise), gamma cushions the loss.</div>
+      <div class="q-example">
+        Rates fall 20bp:<br>
+        &nbsp;&nbsp;Delta P&L: +$44k × 20 = <strong class="pos">+$880k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: ½ × $2,000 × 20² = <strong class="pos">+$400k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="pos">+$1,280k</strong> · new DV01: +$84k<br><br>
+        Rates rise 20bp (wrong way):<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="neg">−$880k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: <strong class="pos">+$400k</strong> (always positive)<br>
+        &nbsp;&nbsp;Total: <strong class="neg">−$480k</strong> instead of −$880k ✓
+      </div>
     </div>
     <div class="q-card">
       <div class="q-card-name" style="color:var(--yellow)">Long Delta + Short Gamma</div>
-      <div class="q-card-desc">Positioned for a rally but sold options to monetise vol. A moderate rally is great. A violent rally less so — your delta shrinks as rates fall. If wrong, losses accelerate. Only works if vol is rich.</div>
+      <div class="q-card-desc">Positioned for a rally but sold options to earn premium. A moderate rally is great. A large move in either direction hurts — gamma bleeds away your delta or accelerates losses.</div>
+      <div class="q-example">
+        Rates fall 20bp:<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="pos">+$880k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: ½ × (−$2,000) × 20² = <strong class="neg">−$400k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="pos">+$480k</strong> · new DV01: +$4k only<br><br>
+        Rates rise 20bp (wrong way):<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="neg">−$880k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: <strong class="neg">−$400k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="neg">−$1,280k</strong> · losses accelerate ✗
+      </div>
     </div>
     <div class="q-card">
       <div class="q-card-name" style="color:var(--yellow)">Short Delta + Long Gamma</div>
-      <div class="q-card-desc">Positioned for a sell-off with convexity protection. A sharp sell-off is very profitable; so is a big rally (gamma compensates). The cost is theta every day while waiting for the move.</div>
+      <div class="q-card-desc">Positioned for a sell-off with convexity protection. A sharp sell-off is very profitable. Even a big rally pays off via gamma. The daily cost is theta — you pay to hold this profile.</div>
+      <div class="q-example">
+        Rates rise 30bp (right way):<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="pos">+$1,320k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: ½ × $2,000 × 30² = <strong class="pos">+$900k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="pos">+$2,220k</strong><br><br>
+        Rates fall 30bp (wrong way):<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="neg">−$1,320k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: <strong class="pos">+$900k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="neg">−$420k</strong> — gamma saved $900k ✓
+      </div>
     </div>
     <div class="q-card">
       <div class="q-card-name" style="color:var(--red)">Short Delta + Short Gamma</div>
-      <div class="q-card-desc">The most exposed quadrant. Positioned for a sell-off, but if wrong the losses accelerate as rates fall. Requires constant monitoring, tight stops, and is only used when vol is significantly overpriced.</div>
+      <div class="q-card-desc">The most dangerous quadrant. Right-way moves give muted gains. Wrong-way moves produce accelerating losses. Only viable when implied vol is very rich relative to realised vol.</div>
+      <div class="q-example">
+        Rates rise 30bp (right way):<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="pos">+$1,320k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: <strong class="neg">−$900k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="pos">+$420k</strong> — muted gain<br><br>
+        Rates fall 30bp (wrong way):<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="neg">−$1,320k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: <strong class="neg">−$900k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="neg">−$2,220k</strong> — accelerating ✗
+      </div>
     </div>
   </div>
 
-  <h3>Key Ratios Traders Monitor Daily</h3>
-  <div style="overflow-x:auto">
-    <table>
-      <thead>
-        <tr><th>Metric</th><th>Formula</th><th>What It Reveals</th><th>Common Trigger</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td style="font-weight:700;color:var(--text)">Net DV01 per bucket</td>
-          <td style="font-family:monospace;font-size:12px">Σ(Notional × Duration × 0.0001)</td>
-          <td>Current rate sensitivity at each tenor point</td>
-          <td>Breach of position limits</td>
-        </tr>
-        <tr>
-          <td style="font-weight:700;color:var(--text)">Gross/Net ratio</td>
-          <td style="font-family:monospace;font-size:12px">Σ|DV01| / |Σ(DV01)|</td>
-          <td>Hidden offsetting size — a "flat" book may have huge gross exposure</td>
-          <td>Ratio > 5× is a warning</td>
-        </tr>
-        <tr>
-          <td style="font-weight:700;color:var(--text)">Gamma/DV01</td>
-          <td style="font-family:monospace;font-size:12px">Γ / DV01 per bucket</td>
-          <td>How fast delta changes relative to current size — re-hedging frequency predictor</td>
-          <td>> 5%/bp signals active re-hedging</td>
-        </tr>
-        <tr>
-          <td style="font-weight:700;color:var(--text)">Break-even vol</td>
-          <td style="font-family:monospace;font-size:12px">√(2 × Theta / Gamma)</td>
-          <td>Daily move needed for long-gamma position to be profitable vs theta decay</td>
-          <td>Compare to recent realised vol</td>
-        </tr>
-        <tr>
-          <td style="font-weight:700;color:var(--text)">Gamma P&L at scenario</td>
-          <td style="font-family:monospace;font-size:12px">½ × Γ × (ΔR)²</td>
-          <td>Expected convexity P&L in a stress scenario — the "free money" for long gamma</td>
-          <td>Central bank meeting, CPI</td>
-        </tr>
-      </tbody>
-    </table>
+  <h3>Key Ratios — What They Mean With Real Numbers</h3>
+  <div class="ratio-cards">
+
+    <div class="ratio-card">
+      <div class="ratio-card-head">
+        <span class="ratio-name">Net DV01 per bucket</span>
+        <span class="ratio-formula">Σ(Notional × Duration × 0.0001)</span>
+      </div>
+      <div class="ratio-reveal">Your rate sensitivity at each tenor — how many dollars you make or lose for every 1bp move at that specific point on the curve. This is the primary number in the delta ladder.</div>
+      <div class="ratio-worked">
+        Example: $100M notional, 5Y bond, Modified Duration = 4.41 years<br>
+        DV01 = $100,000,000 × 4.41 × 0.0001 = <strong>$44,100 per bp</strong><br>
+        &nbsp;<br>
+        This $44,100 sits in the 5Y bucket.<br>
+        10bp sell-off in 5Y rates → you lose $44,100 × 10 = <strong>$441,000</strong><br>
+        100bp sell-off → you lose <strong>$4,410,000</strong>
+      </div>
+      <span class="ratio-trigger">⚠ Trigger: any bucket breaches risk limits</span>
+    </div>
+
+    <div class="ratio-card">
+      <div class="ratio-card-head">
+        <span class="ratio-name">Gross/Net DV01 ratio</span>
+        <span class="ratio-formula">Σ|DV01| / |Σ(DV01)|</span>
+      </div>
+      <div class="ratio-reveal">Detects hidden size in a "flat" book. A net-zero bucket can still hide enormous offsetting positions that move against you when the curve shifts non-uniformly.</div>
+      <div class="ratio-worked">
+        2Y bucket: +$200,000 DV01 (receive-fixed swaps)<br>
+        10Y bucket: −$195,000 DV01 (pay-fixed swaps)<br>
+        &nbsp;<br>
+        Net DV01 = $200k − $195k = <strong>$5,000</strong> — looks flat<br>
+        Gross DV01 = $200k + $195k = <strong>$395,000</strong><br>
+        Ratio = $395k / $5k = <strong>79× ← massive warning</strong><br>
+        &nbsp;<br>
+        A 15bp curve flattening (2Y up, 10Y flat):<br>
+        Loss = $200,000 × 15 = <strong>$3,000,000</strong> — the $5k net told you nothing
+      </div>
+      <span class="ratio-trigger">⚠ Trigger: ratio above 5× warrants investigation</span>
+    </div>
+
+    <div class="ratio-card">
+      <div class="ratio-card-head">
+        <span class="ratio-name">Gamma / DV01</span>
+        <span class="ratio-formula">Γ / DV01 per bucket</span>
+      </div>
+      <div class="ratio-reveal">How fast your delta changes relative to its current size. A high ratio means your hedge will be meaningfully wrong after even a small rate move — you'll need to re-hedge frequently.</div>
+      <div class="ratio-worked">
+        5Y DV01 = +$44,000 &nbsp;|&nbsp; 5Y gamma = −$2,000/bp²<br>
+        Ratio = $2,000 / $44,000 = <strong>4.5% per bp</strong><br>
+        &nbsp;<br>
+        Interpretation: for every 1bp move in 5Y rates,<br>
+        your 5Y delta changes by 4.5% of its current size.<br>
+        &nbsp;<br>
+        After a 10bp move: delta changes by 4.5% × 10 = 45% — you<br>
+        need to re-hedge nearly <strong>half your position</strong><br>
+        After a 22bp move: delta is fully gone (100% change)
+      </div>
+      <span class="ratio-trigger">⚠ Trigger: above 5%/bp means active re-hedging required</span>
+    </div>
+
+    <div class="ratio-card">
+      <div class="ratio-card-head">
+        <span class="ratio-name">Break-even volatility</span>
+        <span class="ratio-formula">√(2 × Theta / Gamma)</span>
+      </div>
+      <div class="ratio-reveal">For a long-gamma position: the average daily rate move you need to cover the theta you pay each day. If realised vol exceeds this, long gamma is profitable. Below it, you're paying more in theta than you earn from re-hedging.</div>
+      <div class="ratio-worked">
+        Long 5Y straddle: theta = $30,000/day &nbsp;|&nbsp; gamma = +$1,500/bp²<br>
+        Break-even = √(2 × $30,000 / $1,500) = √40 = <strong>6.3 bp/day</strong><br>
+        &nbsp;<br>
+        If 5Y rates move <strong>4 bp/day</strong> on average (below break-even):<br>
+        &nbsp;&nbsp;Gamma P&L/day: ½ × $1,500 × 4² = $12,000<br>
+        &nbsp;&nbsp;Theta cost/day: $30,000 → net <strong class="neg">−$18,000/day</strong> ✗<br>
+        &nbsp;<br>
+        If 5Y rates move <strong>9 bp/day</strong> (above break-even):<br>
+        &nbsp;&nbsp;Gamma P&L/day: ½ × $1,500 × 9² = $60,750<br>
+        &nbsp;&nbsp;Theta cost/day: $30,000 → net <strong class="pos">+$30,750/day</strong> ✓
+      </div>
+      <span class="ratio-trigger">⚠ Compare to trailing 20-day realised vol before buying options</span>
+    </div>
+
+    <div class="ratio-card">
+      <div class="ratio-card-head">
+        <span class="ratio-name">Gamma P&L at scenario</span>
+        <span class="ratio-formula">½ × Γ × (ΔR)²</span>
+      </div>
+      <div class="ratio-reveal">The convexity P&L from a specific rate shock — independent of delta. For long gamma this is the "free money" on a big move. For short gamma it's the hidden loss that compounds on top of any delta P&L.</div>
+      <div class="ratio-worked">
+        Short gamma −$2,000/bp² in 5Y bucket. ECB surprises +40bp.<br>
+        &nbsp;<br>
+        Gamma P&L = ½ × (−$2,000) × 40² = ½ × (−$2,000) × 1,600<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong class="neg">−$1,600,000</strong><br>
+        &nbsp;<br>
+        This loss is on top of any delta P&L and re-hedging costs.<br>
+        It compounds: a 40bp move costs 4× as much as a 20bp move<br>
+        (40² = 1,600 vs 20² = 400) — gamma risk is non-linear.
+      </div>
+      <span class="ratio-trigger">⚠ Run this before every central bank meeting and major data release</span>
+    </div>
+
   </div>
+
+  <h3>Live Ratio Check — Current Scenario</h3>
+  <p style="margin-bottom:16px">Computed from whichever delta and gamma scenarios you have selected on this page.</p>
+  <div id="live-ratios"></div>
 </section>
 
 <!-- ═══════════════════════════════ SCENARIOS ═══════════════════════════════ -->
@@ -1262,12 +1389,81 @@ function renderShock() {
   ind.innerHTML = `After a <strong style="color:var(--accent2)">${shock >= 0 ? '+' : ''}${shock}bp ${dir}</strong>: total DV01 shifts from <strong>$${(Math.abs(totOrig) * 1000).toLocaleString()}</strong> to <strong>$${(Math.abs(totShifted) * 1000).toLocaleString()}</strong>. Re-hedging required: ${driftDesc}.`;
 }
 
+function renderLiveRatios() {
+  const ds = DELTA_DATA[deltaScenario];
+  const gs = GAMMA_DATA[gammaScenario].gamma;
+  const net = netArr(ds);
+
+  const totalNet  = net.reduce((a, b) => a + b, 0);
+  const totalLong = ds.long.reduce((a, b) => a + b, 0);
+  const totalShort = Math.abs(ds.short.reduce((a, b) => a + b, 0));
+  const totalGross = totalLong + totalShort;
+  const grossNet  = totalNet !== 0 ? (totalGross / Math.abs(totalNet)).toFixed(1) + '×' : totalGross > 0 ? '∞ (net zero)' : '—';
+
+  const maxAbsIdx = net.map(Math.abs).indexOf(Math.max(...net.map(Math.abs)));
+  const bigDV01   = net[maxAbsIdx];
+  const bigGamma  = gs[maxAbsIdx];
+  const gammaDV01 = bigDV01 !== 0 ? ((Math.abs(bigGamma) / Math.abs(bigDV01)) * 100).toFixed(1) + '%/bp' : '—';
+
+  const totalGamma = gs.reduce((a, b) => a + b, 0);
+  const gammaSign  = totalGamma > 0 ? 'Long' : totalGamma < 0 ? 'Short' : 'None';
+  const gammaCol   = totalGamma > 0 ? 'var(--green)' : totalGamma < 0 ? 'var(--red)' : 'var(--muted)';
+
+  const move25 = gs.reduce((a, g) => a + 0.5 * g * 625, 0);
+  const move50 = gs.reduce((a, g) => a + 0.5 * g * 2500, 0);
+
+  const grossNetCol = totalGross / Math.abs(totalNet || 1) > 5 ? 'var(--red)' : 'var(--green)';
+
+  document.getElementById('live-ratios').innerHTML = `
+    <div class="live-panel">
+      <div class="live-panel-title">Live Ratios — ${ds.name} + ${GAMMA_DATA[gammaScenario].name}</div>
+      <div class="live-stats">
+        <div class="live-stat">
+          <div class="live-stat-label">Total Net DV01</div>
+          <div class="live-stat-val ${totalNet > 0 ? 'pos' : totalNet < 0 ? 'neg' : 'neu'}">${totalNet >= 0 ? '+' : ''}$${(Math.abs(totalNet)*1000).toLocaleString()}</div>
+          <div class="live-stat-sub">per 1bp parallel shift</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-label">Gross DV01</div>
+          <div class="live-stat-val" style="color:var(--text)">$${(totalGross*1000).toLocaleString()}</div>
+          <div class="live-stat-sub">total long + short exposure</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-label">Gross / Net Ratio</div>
+          <div class="live-stat-val" style="color:${grossNetCol}">${grossNet}</div>
+          <div class="live-stat-sub">${totalGross / Math.abs(totalNet || 1) > 5 ? '⚠ hidden offsetting size' : 'within normal range'}</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-label">Total Gamma</div>
+          <div class="live-stat-val" style="color:${gammaCol}">${gammaSign !== 'None' ? (totalGamma > 0 ? '+' : '') + '$' + Math.abs(totalGamma).toLocaleString() + '/bp²' : '—'}</div>
+          <div class="live-stat-sub">${gammaSign} gamma overall</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-label">Γ/DV01 (largest bucket)</div>
+          <div class="live-stat-val" style="color:${Math.abs(bigGamma)/Math.abs(bigDV01||1)*100 > 5 ? 'var(--yellow)' : 'var(--text)'}">${gammaDV01}</div>
+          <div class="live-stat-sub">${TENORS[maxAbsIdx]} tenor · ${Math.abs(bigGamma)/Math.abs(bigDV01||1)*100 > 5 ? '⚠ active re-hedging likely' : 'moderate'}</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-label">Gamma P&L at 25bp</div>
+          <div class="live-stat-val ${move25 > 0 ? 'pos' : move25 < 0 ? 'neg' : 'neu'}">${move25 !== 0 ? (move25 > 0 ? '+' : '−') + '$' + (Math.abs(move25)/1000).toFixed(0) + 'k' : '—'}</div>
+          <div class="live-stat-sub">½ × Σ(Γ) × 25²</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-label">Gamma P&L at 50bp</div>
+          <div class="live-stat-val ${move50 > 0 ? 'pos' : move50 < 0 ? 'neg' : 'neu'}">${move50 !== 0 ? (move50 > 0 ? '+' : '−') + '$' + (Math.abs(move50)/1000).toFixed(0) + 'k' : '—'}</div>
+          <div class="live-stat-sub">½ × Σ(Γ) × 50²</div>
+        </div>
+      </div>
+    </div>`;
+}
+
 function setDeltaScenario(i) {
   deltaScenario = i;
   document.querySelectorAll('#delta-btns .sc-btn').forEach((b, j) => b.classList.toggle('active', i === j));
   renderDelta();
   renderShock();
   renderHedge('delta-hedge-panel', DELTA_HEDGES[i]);
+  renderLiveRatios();
 }
 
 function setGammaScenario(i) {
@@ -1275,6 +1471,7 @@ function setGammaScenario(i) {
   document.querySelectorAll('#gamma-btns .sc-btn').forEach((b, j) => b.classList.toggle('active', i === j));
   renderGamma();
   renderHedge('gamma-hedge-panel', GAMMA_HEDGES[i]);
+  renderLiveRatios();
 }
 
 function setDeltaView(v) {
@@ -1300,6 +1497,7 @@ window.addEventListener('load', () => {
     renderGamma();
     renderHedge('delta-hedge-panel', DELTA_HEDGES[0]);
     renderHedge('gamma-hedge-panel', GAMMA_HEDGES[0]);
+    renderLiveRatios();
 
     window.addEventListener('resize', () => {
       deltaChart.resize();
