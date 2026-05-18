@@ -462,6 +462,43 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <li><strong>Long vs short:</strong> buying options = positive gamma (convexity benefit). Selling = negative gamma (re-hedging risk).</li>
   </ul>
 
+  <details open>
+    <summary>How Gamma Actually Makes (or Costs) Money in Practice</summary>
+    <div class="details-body">
+      <p><strong style="color:var(--text)">The key insight: gamma keeps your delta leaning into whichever way the market moves</strong></p>
+      <p>Start delta-neutral — DV01 = 0 — with positive gamma of +$2,000/bp² at the 5Y tenor. Rates fall 10bp. Your delta automatically drifts to +$20,000 (positive — you got <em>longer</em> as rates fell). You were increasingly long throughout the fall, so you profited from it as it happened. Once rates stop, you re-hedge by selling $20,000 DV01. Back to flat.</p>
+      <p>Now rates reverse and rise 10bp back to where they started. Your re-hedge position — short $20,000 — now profits from the rise. And gamma makes you shorter during the rise, so again your delta leans into the move. You profit from the reversal too.</p>
+      <p>Net result: rates went down 10bp and came back up. You made money in both directions, ending where you started. This is not a trick — it is the mathematical consequence of owning convexity.</p>
+
+      <p><strong style="color:var(--text)">The round-trip worked out with numbers</strong></p>
+      <p>Gamma = +$2,000/bp². Start: delta = 0.</p>
+      <div class="code-block">Move 1 — rates fall 10bp
+  Delta drifts: 0 → +$20,000 (gamma × move = $2,000 × 10)
+  P&L from drift: ½ × $2,000 × 10² = +$100,000
+  Re-hedge: sell $20,000 DV01 at the new level → back to flat
+
+Move 2 — rates rise 10bp (back to start)
+  Delta drifts: 0 → −$20,000
+  P&L from drift: ½ × $2,000 × 10² = +$100,000
+  Re-hedge: buy $20,000 DV01 → back to flat
+
+Total P&L: +$200,000 — from zero net rate move</div>
+      <p>Rates are back where they started. You made $200,000 purely from the round-trip volatility. This is gamma P&L.</p>
+
+      <p><strong style="color:var(--text)">Why direction doesn't matter — ΔR is squared</strong></p>
+      <p>The gamma P&L formula is ½ × Γ × (ΔR)². The ΔR term is squared, so it is always positive — a 10bp fall and a 10bp rise each produce the same positive gamma P&L for a long-gamma position. Gamma is a bet on <em>volatility</em>, not on direction.</p>
+
+      <p><strong style="color:var(--text)">The one-sentence version</strong></p>
+      <p>Long gamma = you are always selling at the high price and buying at the low price to re-hedge your delta. Short gamma = the opposite: you are forced to buy after prices rise and sell after they fall — a systematic cost every time the market moves.</p>
+
+      <p><strong style="color:var(--text)">Why long gamma still costs money (theta)</strong></p>
+      <p>If long gamma is always profitable, why doesn't everyone own it? Because you pay for it every day through <em>theta</em> — the time decay of the option. The straddle that gives you +$2,000/bp² of gamma might cost $30,000/day in theta. If the market moves less than the break-even amount (√(2 × $30,000 / $2,000) ≈ 5.5bp/day), the gamma P&L doesn't cover the theta cost and the position loses money. Long gamma only wins if the market is volatile enough.</p>
+
+      <p><strong style="color:var(--text)">Short gamma: the reverse mechanics</strong></p>
+      <p>Every scenario above runs backwards. When rates fall, your short-gamma position automatically becomes short (negative DV01) — you were getting shorter during a fall, which costs money. To re-flatten you must buy DV01 at the new lower price. When rates then rise, you must sell DV01 at the new higher price. You are systematically buying high and selling low — every round trip costs you. The only compensation is the option premium you collected when you sold the option that created the short gamma.</p>
+    </div>
+  </details>
+
   <div class="sc-btns" id="gamma-btns">
     <button class="sc-btn active" onclick="setGammaScenario(0)">No Options</button>
     <button class="sc-btn" onclick="setGammaScenario(1)">Long 5Y Straddle</button>
