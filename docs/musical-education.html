@@ -921,8 +921,8 @@ function escHtml(s) {
 document.getElementById('timeline-root').addEventListener('click', e => {
   const spotifyBtn = e.target.closest('.spotify-btn');
   if (spotifyBtn) {
-    const q = encodeURIComponent(spotifyBtn.dataset.artist + ' ' + spotifyBtn.dataset.title);
-    window.open('https://open.spotify.com/search/' + q, '_blank', 'noopener');
+    const q = spotifyBtn.dataset.artist + ' ' + spotifyBtn.dataset.title;
+    window.open('spotify:search:' + encodeURIComponent(q));
     return;
   }
 
