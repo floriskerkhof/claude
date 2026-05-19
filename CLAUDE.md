@@ -55,7 +55,19 @@ These rules exist because users consistently said they couldn't understand what 
 - Follow with a **blue callout box** (`background:rgba(74,158,255,.06); border:1px solid rgba(74,158,255,.18)`) that answers "why does a trader/risk manager care about this specifically?"
 - Then the interactive element.
 - Then a **live breakdown table** (never a tooltip) showing the term-by-term calculation at the current slider position.
+- Then a **yellow sanity-check box** (see rule below).
 - Then a collapsible "deep dive" with the LaTeX formula and derivation.
+
+### Sanity-check questions (every section)
+After the live breakdown table, add a **yellow callout box** (`background:rgba(251,191,36,.06); border:1px solid rgba(251,191,36,.25)`) with a bold header **"Questions to ask"**. These are 1–3 questions a non-technical manager uses to test whether the number on screen is plausible — without needing to understand the math.
+
+Rules for writing them:
+- Phrase in second person and tie directly to the **current slider value** (update dynamically via JS as sliders move): *"Your DV01 is $5,000. If rates moved 10bp today, your desk should show ±$50,000 in rate P&L. Does it?"*
+- Each question must be answerable from something **observable**: a P&L number, a Bloomberg reading, a vol surface, a trade blotter entry — not another abstract concept.
+- The goal is catching factor-of-10 errors and sign flips, not deep understanding.
+- Bad: *"Does this reflect the true sensitivity?"* — too vague, unanswerable.
+- Good: *"Alpha doubled. ATM implied vol should be roughly twice as high. Pull up the vol surface — does it match?"*
+- Good: *"Gamma is $200/bp². The market moved 20bp — you should have earned an extra ~$80,000 from delta rebalancing. Can you see that in the blotter?"*
 
 ### Glossary (every page)
 Always end with a glossary strip of hover-tooltip terms. Minimum 8–12 terms. Tooltip copy should be one sentence max and use concrete units (e.g. "$/bp", "$/bp²").
@@ -73,6 +85,12 @@ These are hard constraints. Violating them causes charts to collapse or animate 
 - Charts initialised inside a `display:none` container (e.g. inactive tabs) measure 0×0. Defer `init` to `requestAnimationFrame` and call `chart.resize()` inside `setTab()` also via `requestAnimationFrame`.
 - Set `animation:false` on all charts. Set `tooltip:{enabled:false}` wherever a live breakdown table replaces the tooltip.
 - Attach a `window.addEventListener('resize', ...)` that calls `.resize()` on every chart instance.
+
+---
+
+## Domain
+
+These pages teach quantitative finance concepts to rates traders and risk managers. Use desk-appropriate language (bp, DV01, notional, tenor) and always ground examples in realistic market moves and dollar amounts.
 
 ---
 
