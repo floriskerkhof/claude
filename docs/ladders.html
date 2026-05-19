@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delta & Gamma Ladders – Rates Risk Educator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--surface:#0d1117;--surface2:#161b27;--surface3:#1e2637;
+  --border:#2a3347;--text:#e2e8f0;--muted:#7a8faa;
+  --accent:#4a9eff;--accent2:#7bc4ff;--green:#22d3a0;--red:#f87171;
+  --yellow:#fbbf24;--purple:#a78bfa;--orange:#fb923c;--r:10px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;line-height:1.65;overflow-x:hidden}
+nav{position:sticky;top:0;z-index:100;background:rgba(7,9,15,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:20px;height:50px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+.nav-logo{font-weight:800;font-size:14px;color:var(--accent);white-space:nowrap;flex-shrink:0}
+nav a{color:var(--muted);font-size:13px;text-decoration:none;white-space:nowrap;flex-shrink:0;transition:color .15s}
+nav a:hover{color:var(--text)}
+section{padding:60px 20px;max-width:1080px;margin:0 auto}
+section+section{border-top:1px solid var(--border)}
+h1{font-size:clamp(28px,5vw,46px);font-weight:900;line-height:1.15;margin-bottom:14px;background:linear-gradient(135deg,#e2e8f0 30%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+h2{font-size:clamp(19px,3vw,26px);font-weight:700;color:var(--accent2);margin-bottom:18px}
+h3{font-size:16px;font-weight:600;color:var(--text);margin-bottom:10px}
+p{color:var(--muted);margin-bottom:10px}
+p.lead{color:var(--text);font-size:16px;margin-bottom:22px}
+ul.body-list{color:var(--muted);font-size:14px;line-height:2;padding-left:20px;margin-bottom:20px}
+ul.body-list strong{color:var(--text)}
+.badge{display:inline-block;background:rgba(74,158,255,.12);border:1px solid rgba(74,158,255,.28);color:var(--accent);font-size:11px;font-weight:700;letter-spacing:1.2px;padding:4px 14px;border-radius:20px;margin-bottom:22px;text-transform:uppercase}
+#hero{padding-top:72px;text-align:center}
+.hero-sub{color:var(--muted);font-size:clamp(14px,2vw,17px);max-width:640px;margin:0 auto 32px}
+.callout{background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.18);border-radius:var(--r);padding:20px 24px;margin-bottom:24px}
+.callout-label{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--accent);text-transform:uppercase;margin-bottom:8px}
+.callout p{color:var(--text);margin:0}
+.tri-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:780px;margin:0 auto 28px}
+@media(max-width:580px){.tri-grid{grid-template-columns:1fr}}
+.tri-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:18px;text-align:left}
+.tri-card.c1{border-color:rgba(74,158,255,.4)}
+.tri-card.c2{border-color:rgba(34,211,160,.4)}
+.tri-card.c3{border-color:rgba(167,139,250,.4)}
+.tri-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.c1 .tri-label{color:var(--accent)}
+.c2 .tri-label{color:var(--green)}
+.c3 .tri-label{color:var(--purple)}
+.tri-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:5px}
+.tri-desc{font-size:12px;color:var(--muted);line-height:1.5}
+details{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:16px}
+summary{padding:14px 18px;cursor:pointer;font-weight:600;font-size:14px;color:var(--accent2);list-style:none;display:flex;justify-content:space-between;align-items:center;user-select:none}
+summary::after{content:'▼';font-size:11px;color:var(--muted);transition:transform .2s}
+details[open] summary::after{transform:rotate(180deg)}
+.details-body{padding:4px 18px 18px;color:var(--muted);font-size:14px;line-height:1.7}
+.details-body p+p{margin-top:10px}
+.details-body ol,.details-body ul{padding-left:18px;margin-top:8px}
+.details-body li{margin-bottom:6px}
+.code-block{margin:12px 0;padding:12px;background:var(--surface3);border-radius:8px;font-family:monospace;font-size:13px;color:var(--accent2)}
+.sc-btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.sc-btn{padding:7px 16px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .18s}
+.sc-btn:hover{border-color:var(--accent);color:var(--text)}
+.sc-btn.active{background:rgba(74,158,255,.15);border-color:var(--accent);color:var(--accent2)}
+.chart-wrap{position:relative;height:300px;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px}
+th{text-align:left;padding:8px 12px;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:8px 12px;border-bottom:1px solid rgba(42,51,71,.5);font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:none}
+.pos{color:var(--green)}
+.neg{color:var(--red)}
+.neu{color:var(--muted)}
+.chip{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px}
+.chip-pos{background:rgba(34,211,160,.12);color:var(--green)}
+.chip-neg{background:rgba(248,113,113,.12);color:var(--red)}
+.chip-neu{background:rgba(122,143,170,.12);color:var(--muted)}
+.chip-acc{background:rgba(74,158,255,.12);color:var(--accent)}
+input[type=range]{width:100%;height:4px;-webkit-appearance:none;background:var(--border);border-radius:2px;cursor:pointer;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:0 0 6px rgba(74,158,255,.45)}
+.sl-row{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+.sl-label{font-size:13px;color:var(--muted);white-space:nowrap;width:100px;flex-shrink:0}
+.sl-val-box{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text);width:80px;text-align:right;flex-shrink:0}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+@media(max-width:520px){.stat-row{grid-template-columns:1fr 1fr}}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.stat-label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.four-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+@media(max-width:600px){.four-grid{grid-template-columns:1fr}}
+.q-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.q-card-name{font-size:15px;font-weight:700;margin-bottom:8px}
+.q-card-desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:12px}
+.q-example{background:var(--surface3);border-radius:6px;padding:10px 12px;font-size:12px;font-family:'SF Mono',Menlo,monospace;line-height:1.8;color:var(--muted)}
+.q-example strong{color:var(--text)}
+.q-example .pos{color:var(--green)}
+.q-example .neg{color:var(--red)}
+.ratio-cards{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.ratio-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}
+.ratio-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:10px;flex-wrap:wrap}
+.ratio-name{font-size:14px;font-weight:700;color:var(--accent2)}
+.ratio-formula{font-family:monospace;font-size:12px;background:var(--surface3);border-radius:4px;padding:3px 9px;color:var(--accent2);white-space:nowrap}
+.ratio-reveal{font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.55}
+.ratio-worked{background:var(--surface3);border-radius:6px;padding:10px 14px;font-size:12px;font-family:'SF Mono',Menlo,monospace;line-height:1.9;color:var(--muted)}
+.ratio-worked strong{color:var(--green)}
+.ratio-worked .dim{color:var(--muted)}
+.ratio-trigger{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;color:var(--yellow);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);border-radius:4px;padding:2px 8px}
+.live-panel{background:var(--surface2);border:1px solid rgba(74,158,255,.3);border-radius:var(--r);padding:20px 24px;margin-bottom:24px}
+.live-panel-title{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--accent);text-transform:uppercase;margin-bottom:16px}
+.live-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.live-stat{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.live-stat-label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px}
+.live-stat-val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.live-stat-sub{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+.sc-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.sc-cards{grid-template-columns:1fr}}
+.scenario-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.sc-icon{font-size:24px;margin-bottom:10px}
+.sc-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.sc-desc{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:12px}
+.sc-chips{display:flex;flex-wrap:wrap;gap:6px}
+.glos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:600px){.glos-grid{grid-template-columns:1fr 1fr}}
+.glos-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.glos-term{font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:4px}
+.glos-def{font-size:12px;color:var(--muted);line-height:1.5}
+.toggle-row{display:flex;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:3px;gap:3px;width:fit-content;margin-bottom:20px}
+.tog-btn{padding:6px 18px;border-radius:5px;border:none;background:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .18s}
+.tog-btn.active{background:var(--accent);color:#fff}
+.shock-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:20px}
+.shock-indicator{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-top:12px;font-size:13px;color:var(--text);min-height:42px;line-height:1.6}
+.hedge-panel{background:var(--surface2);border:1px solid rgba(74,158,255,.25);border-radius:var(--r);padding:20px 24px;margin-top:24px}
+.hedge-panel-title{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--accent);text-transform:uppercase;margin-bottom:6px}
+.hedge-summary{font-size:14px;color:var(--text);margin-bottom:18px;line-height:1.6}
+.hedge-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:16px}
+.hedge-card{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.hedge-card-name{font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:4px}
+.hedge-card-action{font-size:12px;color:var(--text);margin-bottom:8px;line-height:1.5}
+.hedge-card-meta{display:flex;flex-direction:column;gap:4px}
+.hedge-pro{font-size:11px;color:var(--green);line-height:1.4}
+.hedge-con{font-size:11px;color:var(--red);line-height:1.4}
+.hedge-cost{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:2px 7px;border-radius:3px;margin-top:6px}
+.cost-low{background:rgba(34,211,160,.12);color:var(--green)}
+.cost-med{background:rgba(251,191,36,.12);color:var(--yellow)}
+.cost-high{background:rgba(248,113,113,.12);color:var(--red)}
+.hedge-consideration{font-size:13px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;line-height:1.6}
+.hedge-consideration strong{color:var(--text)}
+.ctrl-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px}
+@media(max-width:640px){.ctrl-grid-3{grid-template-columns:1fr}}
+.sl-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.sl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.sl-name{font-size:13px;font-weight:700;color:var(--accent2)}
+.sl-num{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+.sl-tip{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.4}
+.steps-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;align-items:start}
+@media(max-width:660px){.steps-grid{grid-template-columns:1fr}}
+.step-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.step-num{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.step-title{font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:8px}
+.step-formula{font-family:monospace;font-size:12px;background:var(--surface3);border-radius:6px;padding:8px 10px;color:var(--accent2);margin-bottom:8px;line-height:1.6}
+.step-result{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text);margin-bottom:4px}
+.step-note{font-size:12px;color:var(--muted);line-height:1.45}
+.dv01-hero{background:var(--surface2);border:1px solid rgba(34,211,160,.35);border-radius:var(--r);padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.dv01-num{font-size:48px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--green);flex-shrink:0;line-height:1}
+.dv01-explain{flex:1;min-width:200px}
+.dv01-explain-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.dv01-explain-text{font-size:13px;color:var(--muted);line-height:1.55}
+.bump-check{font-size:12px;color:var(--muted);margin-top:6px}
+.bump-check span{font-family:monospace;color:var(--accent2)}
+.worked-panel{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;margin-bottom:24px;font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:13px;line-height:1.9;overflow-x:auto}
+.wc-header{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.wc-given{color:var(--text);border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:16px}
+.wc-step-label{color:var(--accent2);font-weight:700;margin-bottom:4px;font-size:13px}
+.wc-block{margin-bottom:16px}
+.wc-dim{color:var(--muted)}
+.wc-val{color:var(--text)}
+.wc-pvt-val{color:var(--green)}
+.wc-divider{border-top:1px dashed var(--border);margin:6px 0}
+.wc-answer{color:var(--green);font-weight:800;font-size:20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;border-top:2px solid rgba(34,211,160,.3);padding-top:12px;margin-top:8px}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">Rates Risk</span>
+  <a href="#dv01">DV01 Explained</a>
+  <a href="#delta">Delta Ladder</a>
+  <a href="#gamma">Gamma Ladder</a>
+  <a href="#together">Together</a>
+  <a href="#scenarios">Scenarios</a>
+  <a href="#glossary">Glossary</a>
+</nav>
+
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+<section id="hero">
+  <div class="badge">Rates Risk Toolkit</div>
+  <h1>Delta & Gamma Ladders</h1>
+  <p class="hero-sub">You delta-hedged your rates book this morning. Rates just moved 30bp. Your risk system says you're $800k short when you should be flat. The gamma ladder had the answer before the move happened.</p>
+
+  <div class="callout" style="max-width:680px;margin:0 auto 32px;text-align:left">
+    <div class="callout-label">Morning Risk Check — Euro Rates Desk</div>
+    <p>It's 8:15am. You run your delta ladder: you're net flat — just $2k of DV01 across all tenors. But your gamma ladder shows you're short $3,500/bp² in the 5Y bucket. ECB meeting is today. If rates move 30bp (very likely), your 5Y delta drifts to −$105k and you're forced to buy bonds into a sell-off. Without the gamma ladder, you'd walk into that meeting thinking you were hedged.</p>
+  </div>
+
+  <div class="tri-grid">
+    <div class="tri-card c1">
+      <div class="tri-label">Delta Ladder</div>
+      <div class="tri-title">Where is my rate risk right now?</div>
+      <div class="tri-desc">Your DV01 at each tenor — how much you make or lose for a 1bp move at 3M, 1Y, 5Y, 10Y, 30Y. The snapshot of your current exposure.</div>
+    </div>
+    <div class="tri-card c2">
+      <div class="tri-label">Gamma Ladder</div>
+      <div class="tri-title">How does my risk change when rates move?</div>
+      <div class="tri-desc">How your DV01 shifts after a rate move. Positive gamma = you get longer in rallies (free money). Negative gamma = you get shorter in sell-offs (forced re-hedging).</div>
+    </div>
+    <div class="tri-card c3">
+      <div class="tri-label">Together</div>
+      <div class="tri-title">Will I need to re-hedge, and at what cost?</div>
+      <div class="tri-desc">A flat delta + negative gamma = guaranteed re-hedging cost in volatility. This is the hidden risk that VaR misses entirely.</div>
+    </div>
+  </div>
+
+  <details open style="max-width:680px;margin:0 auto">
+    <summary>How to use this tool</summary>
+    <div class="details-body">
+      <ol>
+        <li><strong>Delta Ladder:</strong> Pick a portfolio scenario and see DV01 per tenor. Toggle Net vs Gross to reveal hidden offsetting positions.</li>
+        <li><strong>Gamma Ladder:</strong> Pick an options book and drag the rate shock slider — watch the delta ladder shift in real time.</li>
+        <li><strong>Together:</strong> Understand the four quadrants of combined delta/gamma risk and the key ratios traders monitor daily.</li>
+        <li><strong>Scenarios:</strong> Five real desk stories showing where the ladders catch risk that P&L attribution misses.</li>
+      </ol>
+    </div>
+  </details>
+</section>
+
+<!-- ═══════════════════════════════ DV01 ═══════════════════════════════ -->
+<section id="dv01">
+  <div class="badge">Foundation</div>
+  <h2>How DV01 is Calculated</h2>
+  <p class="lead">DV01 is the dollar change in a position's value when its yield moves by exactly 1 basis point (0.01%). Understanding where the number comes from makes every figure in the ladder concrete rather than abstract.</p>
+
+  <div class="callout">
+    <div class="callout-label">Start Here — The Intuition Before Any Formula</div>
+    <p>Imagine you own a bond that pays you $4M per year (4% on $100M face value) for 5 years, then returns your $100M. You paid $100M for it today because 4% is exactly the market rate — a fair deal.</p>
+    <p style="margin-top:10px">Now the market moves and new bonds yield 4.01% (one basis point more). Your bond is now slightly unattractive — it still pays 4%, but someone could get 4.01% elsewhere. To sell your bond, you'd need to drop the price slightly. That price drop is your DV01: roughly $43,000 on a $100M, 5Y bond.</p>
+    <p style="margin-top:10px">The key driver is <strong>time</strong>. A 1bp change in yield affects every future cash flow — but cash flows far in the future are affected much more than near-term ones, because the discount factor compounds over more periods. That's why a 30Y bond has a DV01 roughly 5× larger than a 5Y bond with the same notional: it has far more future cash flows sitting at the end of a long discount chain.</p>
+  </div>
+
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;margin-bottom:24px">
+    <h3 style="margin-bottom:12px">Why Bond Prices Fall When Yields Rise</h3>
+    <p style="color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:10px">This trips up almost everyone at first. Think of it this way: the bond's coupon is <em>fixed</em> at the time of issue. If market rates then rise, the bond's fixed coupon looks less attractive — it's paying below the new market rate. So buyers will only buy it at a discount. The higher the yield rise, the bigger the discount needed. That's the inverse relationship.</p>
+    <p style="color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:10px">Mathematically: the price of a bond is the <em>present value</em> of all its future cash flows. Present value means discounting: a cash flow of $1 received in 5 years is worth less than $1 today, because you could have invested $1 today and earned interest. The discount rate is the yield. A higher yield → heavier discounting → lower present values → lower price.</p>
+    <p style="color:var(--muted);font-size:14px;line-height:1.7">DV01 is simply how much the total present value changes when the yield moves 1bp. The calculator below shows this step by step.</p>
+  </div>
+
+  <div class="sc-btns" id="inst-btns">
+    <button class="sc-btn active" onclick="setInstrument('bond')">Fixed-Rate Bond (par)</button>
+    <button class="sc-btn" onclick="setInstrument('swap')">Receive-Fixed Swap</button>
+  </div>
+
+  <div class="ctrl-grid-3">
+    <div class="sl-card">
+      <div class="sl-head"><span class="sl-name">Notional</span><span class="sl-num" id="c-notional">$100M</span></div>
+      <div class="sl-tip">Face value of the bond or swap.</div>
+      <input type="range" id="sl-notional" min="10" max="500" step="10" value="100" oninput="onCalcChange()">
+    </div>
+    <div class="sl-card">
+      <div class="sl-head"><span class="sl-name">Maturity</span><span class="sl-num" id="c-maturity">5Y</span></div>
+      <div class="sl-tip">Years to final cash flow. Longer = higher DV01.</div>
+      <input type="range" id="sl-maturity" min="1" max="30" step="1" value="5" oninput="onCalcChange()">
+    </div>
+    <div class="sl-card">
+      <div class="sl-head"><span class="sl-name">Yield / Rate</span><span class="sl-num" id="c-yield">4.00%</span></div>
+      <div class="sl-tip">Current yield (= coupon for a par bond).</div>
+      <input type="range" id="sl-yield" min="0.5" max="10" step="0.25" value="4" oninput="onCalcChange()">
+    </div>
+  </div>
+
+  <div class="dv01-hero">
+    <div class="dv01-num" id="c-dv01-big">—</div>
+    <div class="dv01-explain">
+      <div class="dv01-explain-title">DV01 — dollar value of 1 basis point &nbsp;<span style="font-size:12px;font-weight:400;color:var(--muted)">(positive = profit when rates fall; negative = profit when rates rise)</span></div>
+      <div class="dv01-explain-text" id="c-dv01-sentence">—</div>
+      <div class="bump-check" id="c-bump-check"></div>
+    </div>
+  </div>
+
+  <h3 style="margin-bottom:16px">Full Worked Calculation</h3>
+  <div id="worked-panel"></div>
+
+  <h3>Cash Flow Table <span style="font-size:12px;font-weight:400;color:var(--muted)" id="cf-showing"></span></h3>
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>Period</th>
+          <th>Time (yrs)</th>
+          <th>Cash Flow</th>
+          <th>Present Value</th>
+          <th>t × PV</th>
+          <th>% of Price</th>
+        </tr>
+      </thead>
+      <tbody id="cf-tbody"></tbody>
+      <tfoot id="cf-tfoot"></tfoot>
+    </table>
+  </div>
+
+  <details>
+    <summary>Deep Dive: Macaulay Duration, Modified Duration, and Why They're Different</summary>
+    <div class="details-body">
+      <p><strong style="color:var(--text)">Macaulay Duration: the weighted average waiting time</strong></p>
+      <p>Imagine a 5Y bond pays you 10 semiannual coupons plus the principal at the end. Some of that money arrives in 6 months, some in 1 year, some in 5 years. Macaulay Duration asks: <em>on average, when do you get paid?</em> It weights each cash flow by its present value, then averages the timing. The result is always less than the bond's maturity — because coupons arrive before maturity and pull the average forward. A zero-coupon bond has Macaulay Duration = maturity exactly, because all cash flow arrives at the end.</p>
+      <p>Why does this matter? Bonds with longer Macaulay Duration are more sensitive to yield changes, because more of their value is sitting far out in the future where discount factors magnify the rate change.</p>
+      <p style="margin-top:4px"><strong style="color:var(--text)">Modified Duration: the direct price-sensitivity measure</strong></p>
+      <p>Macaulay Duration is elegant but you can't directly multiply it by a yield change to get a price change. You need a small adjustment:</p>
+      <div class="code-block">Modified Duration = Macaulay Duration / (1 + yield / m)</div>
+      <p>where m is the compounding frequency (2 for semiannual). For a 5Y bond at 4% yield: Modified Duration ≈ Macaulay / 1.02. The difference is small but matters for precision. Modified Duration tells you the <em>percentage</em> change in price for a 100bp (1%) change in yield. So if Modified Duration = 4.5 years and yields rise 1%, the bond loses approximately 4.5% of its value.</p>
+      <p style="margin-top:4px"><strong style="color:var(--text)">From Modified Duration to DV01</strong></p>
+      <p>DV01 is just Modified Duration scaled to a 1bp (0.01%) move instead of 100bp:</p>
+      <div class="code-block">DV01 = Price × Modified Duration × 0.0001</div>
+      <p>Example: $100M bond, Modified Duration = 4.5 years. DV01 = $100,000,000 × 4.5 × 0.0001 = $45,000. Every basis point move costs or earns $45,000.</p>
+      <p style="margin-top:4px"><strong style="color:var(--text)">Why DV01 is not constant: convexity</strong></p>
+      <p>DV01 assumes a linear relationship between yield and price. In reality, for large moves, the relationship curves — a 100bp fall in yields gains slightly more than a 100bp rise in yields loses. This curvature is called <em>convexity</em> and it's why the gamma ladder matters: gamma is the second-order correction to the DV01 approximation.</p>
+      <p style="margin-top:4px"><strong style="color:var(--text)">For a receive-fixed interest rate swap</strong></p>
+      <p>A swap has no upfront cash exchange — only a series of future net payments (fixed minus floating). The floating leg resets to market rates at each period start, which means it always reprices to par immediately after each reset. Its "duration" is approximately the time to the next reset — nearly zero for frequent resets. So the whole swap's rate sensitivity comes from the fixed leg, making receive-fixed swap DV01 ≈ equivalent fixed-rate bond DV01. This is why traders treat swaps and bonds interchangeably when building the delta ladder.</p>
+      <p style="margin-top:4px"><strong style="color:var(--text)">Bump-and-reprice: the universal check</strong></p>
+      <p>For any instrument, you can always verify DV01 numerically without the analytical formula:</p>
+      <div class="code-block">DV01 = [ Price(yield − 0.5bp) − Price(yield + 0.5bp) ] / 2</div>
+      <p>Shift the yield down 0.5bp, reprice. Shift it up 0.5bp, reprice. The average dollar difference is your DV01. Trading systems use this for complex derivatives where analytical formulas become intractable. The calculator above shows this verification for the current inputs.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ═══════════════════════════════ DELTA ═══════════════════════════════ -->
+<section id="delta">
+  <div class="badge">Delta Ladder</div>
+  <h2>The Delta Ladder</h2>
+  <p class="lead">A rates book has hundreds of instruments. Without bucketing sensitivity by tenor, you can't tell if your net $50k DV01 is one big 30Y bond risk or a dozen mismatches across the curve — and those are completely different problems.</p>
+
+  <div class="callout">
+    <div class="callout-label">Why Traders Need This — Not Just Net DV01</div>
+    <p>A single net DV01 number is nearly useless. It tells you what happens if rates move in parallel. They never do. The 2Y/10Y spread moves independently. The belly (5Y) has its own supply/demand dynamics. A "flat" book with $200k long at 2Y and $195k short at 10Y looks like $5k net — but a 15bp flattening wipes $3M. The delta ladder makes that visible. Net DV01 hides it.</p>
+  </div>
+
+  <h3>What Goes Into the Delta Ladder</h3>
+  <ul class="body-list">
+    <li><strong>Notional × Modified Duration × 0.0001</strong> — the DV01 formula for bonds and swaps</li>
+    <li><strong>Sign:</strong> receive-fixed swap or long bond = positive DV01 (you profit when rates fall, because the fixed coupon you locked in is now above the new lower market rate — making your instrument more valuable). Pay-fixed or short bond = negative DV01.</li>
+    <li><strong>Tenor bucket assignment:</strong> a 5Y swap distributes ~90% of its DV01 to the 5Y bucket; small residuals sit in shorter buckets at each coupon date</li>
+    <li><strong>Net vs Gross:</strong> net = long minus short per bucket. Gross shows total long and total short separately — a gross/net ratio above 5x is a warning sign</li>
+  </ul>
+
+  <details open>
+    <summary>Why Does Long Delta Profit When Rates Fall?</summary>
+    <div class="details-body">
+      <p><strong style="color:var(--text)">The inverse relationship — the single most important concept in rates</strong></p>
+      <p>Bond prices and yields always move in <em>opposite directions</em>. When yields fall, bond prices rise. When yields rise, bond prices fall. This is not a convention — it is mathematical. Here is why.</p>
+
+      <p><strong style="color:var(--text)">Step 1: Your coupon is fixed at the point of issue</strong></p>
+      <p>When you buy a bond or enter a receive-fixed swap, the rate you receive is locked in immediately. A 5Y bond at 4% will pay 4% for its entire life, no matter what happens to market rates afterwards.</p>
+
+      <p><strong style="color:var(--text)">Step 2: Market rates fall — now your fixed coupon is above market</strong></p>
+      <p>Suppose market rates drop from 4% to 3%. New bonds issued today only pay 3%. But your bond still pays 4%. Any buyer in the market would prefer your bond — it earns them 1% per year more than a new bond. So they are willing to pay a premium above face value to own it. That premium is the P&L gain on your position.</p>
+
+      <p><strong style="color:var(--text)">Step 3: The maths — present value and discounting</strong></p>
+      <p>The price of a bond is the <em>present value</em> of all its future cash flows. Present value means discounting — a cash flow received in 5 years is worth less today because you could have invested money in the meantime. The discount rate used is the current market yield. When that yield falls, you are discounting at a lower rate, so every future cash flow has a higher present value today. Summing them up gives a higher bond price.</p>
+      <div class="code-block">Price = Σ CF<sub>t</sub> / (1 + yield/2)<sup>2t</sup> &nbsp;→ &nbsp;yield ↓ means denominator ↓ means price ↑</div>
+
+      <p><strong style="color:var(--text)">Concrete example: $44,000 from one basis point</strong></p>
+      <p>You hold a $100M 5Y bond paying 4%. Market rates fall 1bp to 3.99%. Your bond now pays 1bp per year more than the market. Over 5 years that is 5bp of extra annual income, discounted back to today. On $100M notional that works out to approximately <strong style="color:var(--green)">$44,000</strong> — exactly the DV01. Rates fall 10bp → you earn $440,000. Rates fall 100bp (a full 1% move) → you earn $4.4M.</p>
+
+      <p><strong style="color:var(--text)">Why the equity analogy misleads people</strong></p>
+      <p>In equities, "long delta" means you profit when the stock price goes up — and you track the price directly. In rates, "long delta" also means you profit when the instrument price goes up — but rates markets quote the <em>yield</em>, not the price. Since price moves opposite to yield, a long delta position in rates profits when the quoted number (the yield) goes <em>down</em>. This feels backwards at first, but it is the same logic: you are long the price of the instrument, which just happens to be quoted inversely.</p>
+
+      <p><strong style="color:var(--text)">Receive-fixed swaps: identical logic</strong></p>
+      <p>A receive-fixed swap has no upfront bond price to track, but the same mechanics apply. You agreed to receive a fixed rate (say 4%) and pay floating (whatever the market rate is each period). When market rates fall, the floating rate you pay falls — but the fixed rate you receive stays at 4%. The net present value of your future net receipts increases. That increase is your positive DV01 P&L.</p>
+
+      <p><strong style="color:var(--text)">The sign convention summarised</strong></p>
+      <p>Positive DV01 = you profit when rates fall 1bp. Negative DV01 = you profit when rates rise 1bp. The size of the DV01 tells you by how many dollars. A $50k DV01 at the 5Y tenor means every 1bp move in the 5Y rate changes your P&L by $50,000.</p>
+    </div>
+  </details>
+
+  <div class="sc-btns" id="delta-btns">
+    <button class="sc-btn active" onclick="setDeltaScenario(0)">2s10s Steepener</button>
+    <button class="sc-btn" onclick="setDeltaScenario(1)">Long Duration</button>
+    <button class="sc-btn" onclick="setDeltaScenario(2)">Hedged Options Book</button>
+    <button class="sc-btn" onclick="setDeltaScenario(3)">Belly Butterfly</button>
+    <button class="sc-btn" onclick="setDeltaScenario(4)">Asset Swap Book</button>
+  </div>
+
+  <div class="toggle-row">
+    <button class="tog-btn active" id="tog-net" onclick="setDeltaView('net')">Net DV01</button>
+    <button class="tog-btn" id="tog-gross" onclick="setDeltaView('gross')">Gross DV01</button>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Net DV01</div>
+      <div class="stat-val" id="s-net">—</div>
+      <div class="stat-sub">per 1bp parallel shift</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Largest Long Bucket</div>
+      <div class="stat-val pos" id="s-max">—</div>
+      <div class="stat-sub" id="s-max-t">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Largest Short Bucket</div>
+      <div class="stat-val neg" id="s-min">—</div>
+      <div class="stat-sub" id="s-min-t">—</div>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <canvas id="deltaChart"></canvas>
+  </div>
+
+  <h3>Tenor Breakdown</h3>
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>Tenor</th>
+          <th>Net DV01</th>
+          <th>Gross Long</th>
+          <th>Gross Short</th>
+          <th>Position</th>
+        </tr>
+      </thead>
+      <tbody id="delta-tbody"></tbody>
+    </table>
+  </div>
+
+  <details>
+    <summary>Deep Dive: Key Rate DV01 vs Parallel DV01</summary>
+    <div class="details-body">
+      <p>A <em>parallel DV01</em> shifts all tenor rates by 1bp simultaneously — useful for a quick portfolio summary but misleading for curve risk. A <em>key rate DV01</em> (also called key rate duration or KRD) shifts only one tenor node by 1bp while holding all others fixed.</p>
+      <p>Example: a 5Y pay-fixed swap has a key rate DV01 of roughly −$45k at the 5Y point. But it also has small positive exposures at 1Y, 2Y, 3Y, 4Y from the floating leg resets. Summing all key rate DV01s equals the parallel DV01.</p>
+      <p>The delta ladder stacks key rate DV01s by bucket. A flat net DV01 row in the ladder means that specific point on the curve is hedged. A flat <em>total</em> means the book is parallel-shift neutral — but the individual rows tell you whether you're exposed to curve steepening, flattening, or belly moves.</p>
+    </div>
+  </details>
+
+  <div id="delta-hedge-panel"></div>
+</section>
+
+<!-- ═══════════════════════════════ GAMMA ═══════════════════════════════ -->
+<section id="gamma">
+  <div class="badge">Gamma Ladder</div>
+  <h2>The Gamma Ladder</h2>
+  <p class="lead">The delta ladder is a snapshot — it tells you your risk at this moment. The gamma ladder tells you where that snapshot is going the moment rates start moving.</p>
+
+  <div class="callout">
+    <div class="callout-label">The Hidden Risk in a Flat Delta Ladder</div>
+    <p>You sell a 5Y swaption to collect premium. You delta-hedge it immediately — your delta ladder goes back to flat. Perfect. But your gamma is now −$3,500/bp² at 5Y. When the ECB surprises and 5Y rates spike 40bp, your delta drifts to −$140k short. To re-flatten, you must buy $140k of 5Y DV01 — in a market that just moved 40bp against you. The gamma ladder showed this risk before the trade. The delta ladder showed nothing.</p>
+  </div>
+
+  <h3>What Goes Into the Gamma Ladder</h3>
+  <ul class="body-list">
+    <li><strong>Options positions (swaptions, caps, floors):</strong> the only instruments with meaningful gamma. Linear instruments (swaps, bonds, futures) have negligible gamma.</li>
+    <li><strong>Notional and strike:</strong> ATM options carry the highest gamma. Deep in- or out-of-the-money options have less.</li>
+    <li><strong>Time to expiry:</strong> shorter-dated options have higher gamma — the delta changes faster as they approach a binary outcome.</li>
+    <li><strong>Implied volatility:</strong> higher vol → slightly lower gamma (option already prices large moves as probable).</li>
+    <li><strong>Long vs short:</strong> buying options = positive gamma (convexity benefit). Selling = negative gamma (re-hedging risk).</li>
+  </ul>
+
+  <details open>
+    <summary>How Gamma Actually Makes (or Costs) Money — Without Re-Hedging</summary>
+    <div class="details-body">
+      <p><strong style="color:var(--text)">First: how does a rate move make you money at all?</strong></p>
+      <p>It is mark-to-market. Your position is worth more on the books — no trade required. If you hold a $100M bond paying 4% and rates fall 10bp, that bond now pays 4% in a 3.9% world. Anyone buying a new bond today gets 3.9%. Yours pays more. It is more valuable. Your books show +$440k immediately. Nothing was sold. If you want to lock in the gain you sell; if you want to reduce your exposure you re-hedge — but neither is required for the P&L to exist.</p>
+      <p>For a swap it is the same: the net present value of your future net cash flows (fixed received minus floating paid) increases when floating rates fall. That NPV increase hits your P&L statement the moment rates move.</p>
+
+      <p><strong style="color:var(--text)">Where re-hedging fits in</strong></p>
+      <p>Re-hedging does not <em>create</em> the P&L — it <em>freezes</em> your exposure. After a 10bp fall your DV01 has grown (because of gamma) and you are now more exposed than you want to be. Selling some DV01 brings you back to target. That sale itself also earns or costs money, but the main gain already happened through mark-to-market as rates moved.</p>
+
+      <p><strong style="color:var(--text)">Now: what does gamma add on top?</strong></p>
+      <p>Without gamma your DV01 stays fixed throughout the move — every basis point earns the same $44k, and 10bp earns exactly $440k. With positive gamma your DV01 <em>grows</em> as rates fall, so each successive basis point earns slightly more than the last. The total P&L is the area under a rising line, not a flat one.</p>
+
+      <p><strong style="color:var(--text)">Side-by-side: same starting delta, different gamma</strong></p>
+      <p>Starting position: $44k DV01 at the 5Y bucket. Rates fall 10bp.</p>
+
+      <div class="code-block">Without gamma (Γ = 0):
+  Delta stays $44k throughout the entire 10bp move
+  P&L = $44,000 × 10bp = $440,000
+
+With positive gamma (Γ = +$2,000/bp²):
+  At 0bp fallen:  delta = $44,000  →  earns $44k on the next bp
+  At 3bp fallen:  delta = $50,000  →  earns $50k on the next bp
+  At 6bp fallen:  delta = $56,000  →  earns $56k on the next bp
+  At 10bp fallen: delta = $64,000
+  Average delta during the move ≈ ($44k + $64k) / 2 = $54,000
+  P&L ≈ $54,000 × 10bp = $540,000
+
+Gamma added: $540k − $440k = +$100,000 = ½ × $2,000 × 10²</div>
+
+      <p>Nothing was re-hedged. The extra $100k came purely from owning a progressively larger position in an instrument that kept getting more valuable as rates fell.</p>
+
+      <p><strong style="color:var(--text)">With negative gamma, the opposite happens</strong></p>
+      <div class="code-block">With negative gamma (Γ = −$2,000/bp²):
+  At 0bp fallen:  delta = $44,000
+  At 3bp fallen:  delta = $38,000
+  At 6bp fallen:  delta = $32,000
+  At 10bp fallen: delta = $24,000
+  Average delta during the move ≈ ($44k + $24k) / 2 = $34,000
+  P&L ≈ $34,000 × 10bp = $340,000
+
+Gamma cost: $440k − $340k = −$100,000</div>
+      <p>You were right about the direction. But negative gamma shrank your DV01 as the move played out — so you captured less of the mark-to-market gain than your starting position implied.</p>
+
+      <p><strong style="color:var(--text)">The one-sentence version</strong></p>
+      <p>Positive gamma means your position gets <em>bigger</em> as it moves in your favour and <em>smaller</em> as it moves against you — you always have more mark-to-market exposure when you're winning. Negative gamma is the opposite.</p>
+
+      <p><strong style="color:var(--text)">Why direction doesn't matter — ΔR is squared</strong></p>
+      <p>The formula ½ × Γ × (ΔR)² squares the rate move, so it is always positive for long gamma regardless of direction. Whether rates fall 10bp or rise 10bp, positive gamma adds $100k to mark-to-market P&L relative to a fixed-delta baseline.</p>
+
+      <p><strong style="color:var(--text)">Why long gamma still costs money (theta)</strong></p>
+      <p>If long gamma always adds mark-to-market P&L on any move, why doesn't everyone own it? Because you pay for it every day through <em>theta</em> — the time decay of the option. The position that gives you +$2,000/bp² of gamma might cost $30,000/day just to hold. If rates barely move, the gamma P&L is tiny and the theta destroys you. Long gamma only wins when the market is volatile enough: specifically when daily moves exceed √(2 × theta / gamma) — the break-even volatility.</p>
+    </div>
+  </details>
+
+  <div class="sc-btns" id="gamma-btns">
+    <button class="sc-btn active" onclick="setGammaScenario(0)">No Options</button>
+    <button class="sc-btn" onclick="setGammaScenario(1)">Long 5Y Straddle</button>
+    <button class="sc-btn" onclick="setGammaScenario(2)">Short Gamma Book</button>
+    <button class="sc-btn" onclick="setGammaScenario(3)">Cap / Floor Book</button>
+    <button class="sc-btn" onclick="setGammaScenario(4)">Mixed Gamma</button>
+  </div>
+
+  <div class="chart-wrap">
+    <canvas id="gammaChart"></canvas>
+  </div>
+
+  <h3>Rate Shock: See Gamma in Action</h3>
+  <p style="margin-bottom:16px">Drag the slider below to apply a parallel rate shock. The chart shows how your <strong style="color:var(--muted)">original delta ladder</strong> (grey) becomes a <strong style="color:var(--green)">new delta ladder</strong> (coloured) based on the gamma at each tenor bucket. This is why traders check the gamma ladder before any central bank event.</p>
+
+  <div class="shock-box">
+    <div class="sl-row">
+      <span class="sl-label">Rate Shock</span>
+      <input type="range" id="shock-slider" min="-50" max="50" value="0" oninput="onShockChange(this.value)">
+      <span class="sl-val-box"><span id="shock-val">0</span>bp</span>
+    </div>
+    <div class="shock-indicator" id="shock-indicator">Move the slider to apply a rate shock and see how gamma shifts your delta ladder.</div>
+  </div>
+
+  <div class="chart-wrap">
+    <canvas id="shockChart"></canvas>
+  </div>
+
+  <h3>Gamma Breakdown</h3>
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>Tenor</th>
+          <th>Gamma ($/bp²)</th>
+          <th>Delta Shift @ 25bp</th>
+          <th>Delta Shift @ 50bp</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody id="gamma-tbody"></tbody>
+    </table>
+  </div>
+
+  <details>
+    <summary>Deep Dive: The Gamma P&L Formula and Break-Even Vol</summary>
+    <div class="details-body">
+      <p>For a position with delta Δ (in DV01 terms) and gamma Γ at a given tenor, a rate move ΔR produces:</p>
+      <div class="code-block">P&L ≈ Δ × ΔR  +  ½ × Γ × (ΔR)²</div>
+      <p>The second term is the <em>gamma P&L</em>. For long gamma (Γ > 0), this is always positive — you profit whether rates go up or down. For short gamma (Γ < 0), you lose on both sides.</p>
+      <p>But long gamma isn't free. You pay <em>theta</em> — time decay — every day to hold the option. The break-even daily rate move is:</p>
+      <div class="code-block">Break-even vol = √(2 × Theta / Gamma)</div>
+      <p>Example: long 5Y straddle costs $50k theta/day with $2,000/bp² gamma. Break-even = √(2 × 50,000 / 2,000) = 7.1 bp/day. If realised vol in the 5Y rate exceeds 7.1bp/day on average over the option's life, the trade is profitable.</p>
+      <p>Delta re-hedging: after a 30bp move with Γ = +$2,000/bp², your 5Y DV01 shifts by 2,000 × 30 = $60,000. You sell $60k DV01 of 5Y bonds to re-flatten. That re-hedging trade at the new level locks in the gamma P&L — this is why long gamma positions get re-hedged frequently.</p>
+    </div>
+  </details>
+
+  <div id="gamma-hedge-panel"></div>
+</section>
+
+<!-- ═══════════════════════════════ TOGETHER ═══════════════════════════════ -->
+<section id="together">
+  <div class="badge">Combined View</div>
+  <h2>Reading Them Together</h2>
+  <p class="lead">A flat delta ladder is not a flat risk. The gamma ladder tells you whether that flatness survives the next 30bp move — and what it costs to restore it.</p>
+
+  <div class="callout">
+    <div class="callout-label">What Traders Actually Ask Every Morning</div>
+    <p>Before any central bank event or data release: (1) Net delta per bucket — am I positioned for the move I expect? (2) Net gamma per bucket — if I'm wrong about direction, how badly does my delta drift? (3) Theta vs expected gamma P&L — is the option premium worth paying given implied vs realised vol? The delta ladder answers (1). The gamma ladder answers (2) and enables (3).</p>
+  </div>
+
+  <h3>The Four Quadrants of Risk</h3>
+  <p style="margin-bottom:16px">All examples below use a 5Y position with <strong style="color:var(--text)">DV01 = $44k/bp</strong> and <strong style="color:var(--text)">gamma = ±$2,000/bp²</strong>. These are realistic numbers for a $100M notional position.</p>
+  <div class="four-grid">
+    <div class="q-card">
+      <div class="q-card-name" style="color:var(--green)">Long Delta + Long Gamma</div>
+      <div class="q-card-desc">You hold fixed-rate instruments — when rates fall, your locked-in coupon is above market so bond prices rise and you profit (see explainer in the Delta Ladder section). Positive gamma makes it better: the bigger the rate fall, the more your delta grows, accelerating gains. Even if wrong (rates rise), gamma cushions the loss.</div>
+      <div class="q-example">
+        Rates fall 20bp:<br>
+        &nbsp;&nbsp;Delta P&L: +$44k × 20 = <strong class="pos">+$880k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: ½ × $2,000 × 20² = <strong class="pos">+$400k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="pos">+$1,280k</strong> · new DV01: +$84k<br><br>
+        Rates rise 20bp (wrong way):<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="neg">−$880k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: <strong class="pos">+$400k</strong> (always positive)<br>
+        &nbsp;&nbsp;Total: <strong class="neg">−$480k</strong> instead of −$880k ✓
+      </div>
+    </div>
+    <div class="q-card">
+      <div class="q-card-name" style="color:var(--yellow)">Long Delta + Short Gamma</div>
+      <div class="q-card-desc">You hold fixed-rate instruments (profit when rates fall) but sold options to earn premium. A moderate rally is great. A large move in either direction hurts — gamma bleeds away your delta on a rally or accelerates losses on a sell-off.</div>
+      <div class="q-example">
+        Rates fall 20bp:<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="pos">+$880k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: ½ × (−$2,000) × 20² = <strong class="neg">−$400k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="pos">+$480k</strong> · new DV01: +$4k only<br><br>
+        Rates rise 20bp (wrong way):<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="neg">−$880k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: <strong class="neg">−$400k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="neg">−$1,280k</strong> · losses accelerate ✗
+      </div>
+    </div>
+    <div class="q-card">
+      <div class="q-card-name" style="color:var(--yellow)">Short Delta + Long Gamma</div>
+      <div class="q-card-desc">Positioned for a sell-off with convexity protection. A sharp sell-off is very profitable. Even a big rally pays off via gamma. The daily cost is theta — you pay to hold this profile.</div>
+      <div class="q-example">
+        Rates rise 30bp (right way):<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="pos">+$1,320k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: ½ × $2,000 × 30² = <strong class="pos">+$900k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="pos">+$2,220k</strong><br><br>
+        Rates fall 30bp (wrong way):<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="neg">−$1,320k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: <strong class="pos">+$900k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="neg">−$420k</strong> — gamma saved $900k ✓
+      </div>
+    </div>
+    <div class="q-card">
+      <div class="q-card-name" style="color:var(--red)">Short Delta + Short Gamma</div>
+      <div class="q-card-desc">The most dangerous quadrant. Right-way moves give muted gains. Wrong-way moves produce accelerating losses. Only viable when implied vol is very rich relative to realised vol.</div>
+      <div class="q-example">
+        Rates rise 30bp (right way):<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="pos">+$1,320k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: <strong class="neg">−$900k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="pos">+$420k</strong> — muted gain<br><br>
+        Rates fall 30bp (wrong way):<br>
+        &nbsp;&nbsp;Delta P&L: <strong class="neg">−$1,320k</strong><br>
+        &nbsp;&nbsp;Gamma P&L: <strong class="neg">−$900k</strong><br>
+        &nbsp;&nbsp;Total: <strong class="neg">−$2,220k</strong> — accelerating ✗
+      </div>
+    </div>
+  </div>
+
+  <h3>Key Ratios — What They Mean With Real Numbers</h3>
+  <div class="ratio-cards">
+
+    <div class="ratio-card">
+      <div class="ratio-card-head">
+        <span class="ratio-name">Net DV01 per bucket</span>
+        <span class="ratio-formula">Σ(Notional × Duration × 0.0001)</span>
+      </div>
+      <div class="ratio-reveal">Your rate sensitivity at each tenor — how many dollars you make or lose for every 1bp move at that specific point on the curve. This is the primary number in the delta ladder.</div>
+      <div class="ratio-worked">
+        Example: $100M notional, 5Y bond, Modified Duration = 4.41 years<br>
+        DV01 = $100,000,000 × 4.41 × 0.0001 = <strong>$44,100 per bp</strong><br>
+        &nbsp;<br>
+        This $44,100 sits in the 5Y bucket.<br>
+        10bp sell-off in 5Y rates → you lose $44,100 × 10 = <strong>$441,000</strong><br>
+        100bp sell-off → you lose <strong>$4,410,000</strong>
+      </div>
+      <span class="ratio-trigger">⚠ Trigger: any bucket breaches risk limits</span>
+    </div>
+
+    <div class="ratio-card">
+      <div class="ratio-card-head">
+        <span class="ratio-name">Gross/Net DV01 ratio</span>
+        <span class="ratio-formula">Σ|DV01| / |Σ(DV01)|</span>
+      </div>
+      <div class="ratio-reveal">Detects hidden size in a "flat" book. A net-zero bucket can still hide enormous offsetting positions that move against you when the curve shifts non-uniformly.</div>
+      <div class="ratio-worked">
+        2Y bucket: +$200,000 DV01 (receive-fixed swaps)<br>
+        10Y bucket: −$195,000 DV01 (pay-fixed swaps)<br>
+        &nbsp;<br>
+        Net DV01 = $200k − $195k = <strong>$5,000</strong> — looks flat<br>
+        Gross DV01 = $200k + $195k = <strong>$395,000</strong><br>
+        Ratio = $395k / $5k = <strong>79× ← massive warning</strong><br>
+        &nbsp;<br>
+        A 15bp curve flattening (2Y up, 10Y flat):<br>
+        Loss = $200,000 × 15 = <strong>$3,000,000</strong> — the $5k net told you nothing
+      </div>
+      <span class="ratio-trigger">⚠ Trigger: ratio above 5× warrants investigation</span>
+    </div>
+
+    <div class="ratio-card">
+      <div class="ratio-card-head">
+        <span class="ratio-name">Gamma / DV01</span>
+        <span class="ratio-formula">Γ / DV01 per bucket</span>
+      </div>
+      <div class="ratio-reveal">How fast your delta changes relative to its current size. A high ratio means your hedge will be meaningfully wrong after even a small rate move — you'll need to re-hedge frequently.</div>
+      <div class="ratio-worked">
+        5Y DV01 = +$44,000 &nbsp;|&nbsp; 5Y gamma = −$2,000/bp²<br>
+        Ratio = $2,000 / $44,000 = <strong>4.5% per bp</strong><br>
+        &nbsp;<br>
+        Interpretation: for every 1bp move in 5Y rates,<br>
+        your 5Y delta changes by 4.5% of its current size.<br>
+        &nbsp;<br>
+        After a 10bp move: delta changes by 4.5% × 10 = 45% — you<br>
+        need to re-hedge nearly <strong>half your position</strong><br>
+        After a 22bp move: delta is fully gone (100% change)
+      </div>
+      <span class="ratio-trigger">⚠ Trigger: above 5%/bp means active re-hedging required</span>
+    </div>
+
+    <div class="ratio-card">
+      <div class="ratio-card-head">
+        <span class="ratio-name">Break-even volatility</span>
+        <span class="ratio-formula">√(2 × Theta / Gamma)</span>
+      </div>
+      <div class="ratio-reveal">For a long-gamma position: the average daily rate move you need to cover the theta you pay each day. If realised vol exceeds this, long gamma is profitable. Below it, you're paying more in theta than you earn from re-hedging.</div>
+      <div class="ratio-worked">
+        Long 5Y straddle: theta = $30,000/day &nbsp;|&nbsp; gamma = +$1,500/bp²<br>
+        Break-even = √(2 × $30,000 / $1,500) = √40 = <strong>6.3 bp/day</strong><br>
+        &nbsp;<br>
+        If 5Y rates move <strong>4 bp/day</strong> on average (below break-even):<br>
+        &nbsp;&nbsp;Gamma P&L/day: ½ × $1,500 × 4² = $12,000<br>
+        &nbsp;&nbsp;Theta cost/day: $30,000 → net <strong class="neg">−$18,000/day</strong> ✗<br>
+        &nbsp;<br>
+        If 5Y rates move <strong>9 bp/day</strong> (above break-even):<br>
+        &nbsp;&nbsp;Gamma P&L/day: ½ × $1,500 × 9² = $60,750<br>
+        &nbsp;&nbsp;Theta cost/day: $30,000 → net <strong class="pos">+$30,750/day</strong> ✓
+      </div>
+      <span class="ratio-trigger">⚠ Compare to trailing 20-day realised vol before buying options</span>
+    </div>
+
+    <div class="ratio-card">
+      <div class="ratio-card-head">
+        <span class="ratio-name">Gamma P&L at scenario</span>
+        <span class="ratio-formula">½ × Γ × (ΔR)²</span>
+      </div>
+      <div class="ratio-reveal">The convexity P&L from a specific rate shock — independent of delta. For long gamma this is the "free money" on a big move. For short gamma it's the hidden loss that compounds on top of any delta P&L.</div>
+      <div class="ratio-worked">
+        Short gamma −$2,000/bp² in 5Y bucket. ECB surprises +40bp.<br>
+        &nbsp;<br>
+        Gamma P&L = ½ × (−$2,000) × 40² = ½ × (−$2,000) × 1,600<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <strong class="neg">−$1,600,000</strong><br>
+        &nbsp;<br>
+        This loss is on top of any delta P&L and re-hedging costs.<br>
+        It compounds: a 40bp move costs 4× as much as a 20bp move<br>
+        (40² = 1,600 vs 20² = 400) — gamma risk is non-linear.
+      </div>
+      <span class="ratio-trigger">⚠ Run this before every central bank meeting and major data release</span>
+    </div>
+
+  </div>
+
+  <h3>Live Ratio Check — Current Scenario</h3>
+  <p style="margin-bottom:16px">Computed from whichever delta and gamma scenarios you have selected on this page.</p>
+  <div id="live-ratios"></div>
+</section>
+
+<!-- ═══════════════════════════════ SCENARIOS ═══════════════════════════════ -->
+<section id="scenarios">
+  <div class="badge">Desk Scenarios</div>
+  <h2>Real Desk Scenarios</h2>
+  <p class="lead">Five situations where reading the ladders correctly is the difference between a clean book and a blown stop.</p>
+
+  <div class="sc-cards">
+    <div class="scenario-card">
+      <div class="sc-icon">📉</div>
+      <div class="sc-name">The Invisible Steepener</div>
+      <div class="sc-desc">A trader's delta ladder shows net +$5k DV01 — essentially flat. But the gross view reveals $200k long at 2Y and $195k short at 10Y. The curve flattens 15bp that afternoon (2Y rates up, 10Y unchanged). The "flat" book loses $3M. Net DV01 said nothing. The bucketed gross ladder screamed.</div>
+      <div class="sc-chips">
+        <span class="chip chip-pos">+$200k 2Y</span>
+        <span class="chip chip-neg">−$195k 10Y</span>
+        <span class="chip chip-neu">Net: +$5k</span>
+      </div>
+    </div>
+
+    <div class="scenario-card">
+      <div class="sc-icon">⚡</div>
+      <div class="sc-name">ECB Day Gamma Squeeze</div>
+      <div class="sc-desc">Short gamma −$4,000/bp² in the 5Y bucket from a sold swaption. ECB surprises with a 50bp hike. The 5Y delta drifts to −$200k short. Re-hedging requires buying $200k DV01 of 5Y bonds in a market 50bp wider. The forced buying at the worst price costs $1.8M in slippage on top of the mark-to-market loss. The gamma ladder flagged this before 8am.</div>
+      <div class="sc-chips">
+        <span class="chip chip-neg">Gamma: −$4k/bp²</span>
+        <span class="chip chip-neg">Shock: +50bp</span>
+        <span class="chip chip-neg">Delta drift: −$200k</span>
+      </div>
+    </div>
+
+    <div class="scenario-card">
+      <div class="sc-icon">🦋</div>
+      <div class="sc-name">The Belly Butterfly</div>
+      <div class="sc-desc">Long 5Y delta (+$95k DV01), short 2Y and 10Y equally (−$45k each). Net roughly zero, positioned for the 5Y belly to outperform. Add a long 5Y straddle for gamma: if rates move more than expected, the convexity P&L offsets the butterfly cost. This is how macro funds bet on non-linear curve moves without taking a directional view.</div>
+      <div class="sc-chips">
+        <span class="chip chip-pos">Long 5Y delta</span>
+        <span class="chip chip-neg">Short 2Y & 10Y</span>
+        <span class="chip chip-pos">Long belly gamma</span>
+      </div>
+    </div>
+
+    <div class="scenario-card">
+      <div class="sc-icon">🏦</div>
+      <div class="sc-name">The Duration Hedge Mismatch</div>
+      <div class="sc-desc">An asset manager holds $2B in long-dated bonds: +$160k DV01 at 20Y, +$120k at 30Y. They hedge with 10Y futures to cut duration by half. Net DV01 now looks flat. But the delta ladder shows they're long at 20Y–30Y and short at 10Y — a pure curve flattener bet they didn't intend to make. The "hedged" portfolio still has $280k of curve risk.</div>
+      <div class="sc-chips">
+        <span class="chip chip-pos">+$160k 20Y</span>
+        <span class="chip chip-pos">+$120k 30Y</span>
+        <span class="chip chip-neg">−$280k 10Y</span>
+      </div>
+    </div>
+
+    <div class="scenario-card">
+      <div class="sc-icon">🎯</div>
+      <div class="sc-name">The Break-Even Vol Trade</div>
+      <div class="sc-desc">Before buying a 3M5Y straddle, a vol trader computes: theta = $50k/day, gamma = $2,000/bp². Break-even daily move = √(2 × 50,000 / 2,000) = 7.1 bp/day. Trailing 30-day realised vol in 5Y rates is 9bp/day. Implied vol looks cheap. The gamma ladder makes this arithmetic explicit: every tenor where gamma > break-even vol is a buy; every tenor where it's below is a sell.</div>
+      <div class="sc-chips">
+        <span class="chip chip-neu">Theta: $50k/day</span>
+        <span class="chip chip-pos">Gamma: $2,000/bp²</span>
+        <span class="chip chip-acc">Break-even: 7.1bp/day</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ GLOSSARY ═══════════════════════════════ -->
+<section id="glossary">
+  <div class="badge">Reference</div>
+  <h2>Glossary</h2>
+  <div class="glos-grid">
+    <div class="glos-item">
+      <div class="glos-term">DV01</div>
+      <div class="glos-def">Dollar Value of a Basis Point — the P&L for a 1bp (0.01%) move in rates. The primary unit of delta risk for all rates instruments. Units: $/bp.</div>
+    </div>
+    <div class="glos-item">
+      <div class="glos-term">Delta Ladder</div>
+      <div class="glos-def">A chart or table of DV01 values bucketed by tenor (3M, 1Y, 5Y, 10Y, etc.). Shows where rate sensitivity is concentrated across the yield curve.</div>
+    </div>
+    <div class="glos-item">
+      <div class="glos-term">Gamma Ladder</div>
+      <div class="glos-def">Rate of change of DV01 per basis point, bucketed by tenor. Units: $/bp². Tells you how fast your delta ladder changes when rates move.</div>
+    </div>
+    <div class="glos-item">
+      <div class="glos-term">Key Rate DV01</div>
+      <div class="glos-def">DV01 from shifting only one tenor node (e.g. 5Y) by 1bp while holding all others fixed. Reveals curve-specific risk that parallel DV01 hides entirely.</div>
+    </div>
+    <div class="glos-item">
+      <div class="glos-term">Tenor Bucket</div>
+      <div class="glos-def">A maturity point (e.g. "5Y bucket") to which rate sensitivity is assigned. Multiple instruments' DV01s are summed within each bucket to show net exposure at that point.</div>
+    </div>
+    <div class="glos-item">
+      <div class="glos-term">Net vs Gross DV01</div>
+      <div class="glos-def">Net = long minus short per bucket. Gross = total long + total short. A net-zero bucket can still hide $500k of offsetting positions. Gross/net > 5× is a red flag.</div>
+    </div>
+    <div class="glos-item">
+      <div class="glos-term">Positive Gamma</div>
+      <div class="glos-def">Long convexity — your delta increases as rates fall (you get longer in rallies) and decreases as rates rise. Comes from buying options. Always costs theta.</div>
+    </div>
+    <div class="glos-item">
+      <div class="glos-term">Negative Gamma</div>
+      <div class="glos-def">Short convexity — your delta moves the wrong way after a rate move. From selling options. Forces you to buy when markets are rising and sell when falling — a systematic loss in volatile markets.</div>
+    </div>
+    <div class="glos-item">
+      <div class="glos-term">Theta</div>
+      <div class="glos-def">Daily time-decay cost of long options positions, in dollars. Long gamma costs theta daily; short gamma earns it. The theta/gamma ratio determines break-even volatility.</div>
+    </div>
+    <div class="glos-item">
+      <div class="glos-term">Re-hedging</div>
+      <div class="glos-def">Buying or selling delta after a rate move to restore a flat delta ladder. Short-gamma books must re-hedge frequently — buying high and selling low in volatile markets — generating a systematic P&L drag.</div>
+    </div>
+    <div class="glos-item">
+      <div class="glos-term">Break-even Vol</div>
+      <div class="glos-def">The daily rate move at which long-gamma P&L equals theta cost: √(2 × Theta / Gamma). If realised vol exceeds this, long gamma wins. Used to decide whether to buy or sell options at current implied vol.</div>
+    </div>
+    <div class="glos-item">
+      <div class="glos-term">Convexity</div>
+      <div class="glos-def">The second derivative of bond price with respect to yield — equivalent to gamma for bonds. Positive convexity means you gain more when rates fall than you lose when rates rise by the same amount.</div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ─── DV01 CALCULATOR ───────────────────────────────────────────────────────
+
+let calcInstrument = 'bond';
+
+function setInstrument(v) {
+  calcInstrument = v;
+  document.querySelectorAll('#inst-btns .sc-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  onCalcChange();
+}
+
+function bondPrice(notional, years, y, yOverride) {
+  const rate = (yOverride !== undefined ? yOverride : y) / 100;
+  const coupon = y / 100 * notional / 2;
+  const n = years * 2;
+  let price = 0;
+  for (let i = 1; i <= n; i++) {
+    const cf = i === n ? coupon + notional : coupon;
+    price += cf / Math.pow(1 + rate / 2, i);
+  }
+  return price;
+}
+
+function calcDV01(notional, years, yieldPct) {
+  const y = yieldPct / 100;
+  const coupon = yieldPct / 100 * notional / 2;
+  const n = years * 2;
+  let cfs = [], totalPV = 0, totalPVt = 0;
+  for (let i = 1; i <= n; i++) {
+    const t = i / 2;
+    const cf = i === n ? coupon + notional : coupon;
+    const pv = cf / Math.pow(1 + y / 2, i);
+    cfs.push({ period: i, t, cf, pv, pvt: pv * t });
+    totalPV += pv;
+    totalPVt += pv * t;
+  }
+  const macaulay = totalPVt / totalPV;
+  const modified = macaulay / (1 + y / 2);
+  const dv01 = totalPV * modified * 0.0001;
+  // bump-and-reprice check
+  const pDown = bondPrice(notional, years, yieldPct, yieldPct - 0.01);
+  const pUp   = bondPrice(notional, years, yieldPct, yieldPct + 0.01);
+  const dv01Bump = (pDown - pUp) / 2;
+  return { cfs, totalPV, macaulay, modified, dv01, dv01Bump };
+}
+
+function fmtDol(v) {
+  const abs = Math.abs(v);
+  if (abs >= 1e6) return (v < 0 ? '−' : '') + '$' + (abs / 1e6).toFixed(2) + 'M';
+  if (abs >= 1e3) return (v < 0 ? '−' : '') + '$' + Math.round(abs).toLocaleString();
+  return (v < 0 ? '−' : '') + '$' + abs.toFixed(0);
+}
+
+function fmtPct(v) { return (v * 100).toFixed(2) + '%'; }
+
+function onCalcChange() {
+  const notional = parseFloat(document.getElementById('sl-notional').value) * 1e6;
+  const years    = parseInt(document.getElementById('sl-maturity').value);
+  const yieldPct = parseFloat(document.getElementById('sl-yield').value);
+  const isSwap   = calcInstrument === 'swap';
+
+  document.getElementById('c-notional').textContent = '$' + (notional / 1e6).toFixed(0) + 'M';
+  document.getElementById('c-maturity').textContent  = years + 'Y';
+  document.getElementById('c-yield').textContent     = yieldPct.toFixed(2) + '%';
+
+  const { cfs, totalPV, macaulay, modified, dv01, dv01Bump } = calcDV01(notional, years, yieldPct);
+  const coupon = yieldPct / 100 * notional / 2;
+  const n = years * 2;
+
+  // Big DV01 display
+  const dv01Disp = fmtDol(dv01);
+  document.getElementById('c-dv01-big').textContent = dv01Disp;
+
+  const instName = isSwap ? 'receive-fixed swap' : 'bond';
+  document.getElementById('c-dv01-sentence').textContent =
+    `On a $${(notional/1e6).toFixed(0)}M notional ${years}Y ${instName} at ${yieldPct.toFixed(2)}%, every 1bp move changes the value by ${dv01Disp}. 10bp = ${fmtDol(dv01*10)}. 100bp = ${fmtDol(dv01*100)}.`;
+  document.getElementById('c-bump-check').innerHTML =
+    `Verified via bump-and-reprice: <span>P(y−0.5bp) − P(y+0.5bp) = ${fmtDol(dv01Bump)}</span> ✓`;
+
+  // ── Worked panel ──────────────────────────────────────────────────────────
+  const factor      = 1 + yieldPct / 100 / 2;
+  const pvtTotal    = cfs.reduce((a, r) => a + r.pvt, 0);
+  const SHOW_N      = 3;
+  const showCFs     = n <= SHOW_N + 1 ? cfs : [...cfs.slice(0, SHOW_N), null, cfs[cfs.length - 1]];
+
+  const pvRows = showCFs.map(r => {
+    if (!r) return `<div class="wc-dim">&nbsp;&nbsp;&nbsp;&nbsp;⋮ &nbsp;(periods ${SHOW_N + 1}–${n - 1} same pattern)</div>`;
+    return `<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">t=${r.t.toFixed(1)}yr &nbsp;(period&nbsp;${r.period}): &nbsp;</span>`
+      + `<span class="wc-val">${fmtDol(r.cf)} &nbsp;÷ &nbsp;${factor.toFixed(5)}<sup>${r.period}</sup></span>`
+      + `<span class="wc-dim"> = </span><strong class="wc-val">${fmtDol(r.pv)}</strong>`
+      + `&nbsp;&nbsp;<span class="wc-dim">|&nbsp;t×PV = </span><strong class="wc-pvt-val">${fmtDol(r.pvt)}</strong></div>`;
+  }).join('');
+
+  const pvtRows = showCFs.map(r => {
+    if (!r) return `<div class="wc-dim">&nbsp;&nbsp;&nbsp;&nbsp;⋮</div>`;
+    return `<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">${r.t.toFixed(1)} &nbsp;× &nbsp;${fmtDol(r.pv)}</span>`
+      + `<span class="wc-dim"> = </span><strong class="wc-pvt-val">${fmtDol(r.pvt)}</strong></div>`;
+  }).join('');
+
+  const swapFootnote = isSwap
+    ? `<div class="wc-dim" style="margin-top:8px;font-size:12px">(Floating leg always resets to par → its duration ≈ 0. Swap DV01 = fixed-leg DV01 above.)</div>`
+    : '';
+
+  document.getElementById('worked-panel').innerHTML = `
+    <div class="worked-panel">
+      <div class="wc-header">Full Worked Calculation — every number shown</div>
+
+      <div class="wc-given"><strong>Given:</strong> &nbsp;Notional = ${fmtDol(notional)} &nbsp;|&nbsp; Maturity = ${years} years &nbsp;|&nbsp; Yield = ${yieldPct.toFixed(2)}% &nbsp;(semiannual compounding, ${isSwap ? 'receive-fixed IRS' : 'par fixed-rate bond'})</div>
+
+      <div class="wc-block">
+        <div class="wc-step-label">[1] Cash Flows</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;Semiannual coupon = ${fmtDol(notional)} × ${yieldPct.toFixed(2)}% ÷ 2 = <strong class="wc-val">${fmtDol(coupon)}</strong> per period</div>
+        <div class="wc-dim">&nbsp;&nbsp;&nbsp;&nbsp;Periods 1 to ${n - 1}: &nbsp;CF = ${fmtDol(coupon)}</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">Period ${n} (final): CF = ${fmtDol(coupon)} + ${fmtDol(notional)} = </span><strong class="wc-val">${fmtDol(coupon + notional)}</strong></div>
+      </div>
+
+      <div class="wc-block">
+        <div class="wc-step-label">[2] Discount Each Cash Flow &nbsp;<span class="wc-dim" style="font-weight:400">PV = CF ÷ (1 + ${yieldPct.toFixed(2)}%/2)<sup>period</sup> = CF ÷ ${factor.toFixed(5)}<sup>period</sup></span></div>
+        ${pvRows}
+        <div class="wc-divider"></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">Price (Σ all PVs) = </span><strong class="wc-val">${fmtDol(totalPV)}</strong>${Math.abs(totalPV - notional) < 2 ? ' &nbsp;<span class="wc-dim">✓ equals notional (par bond)</span>' : ''}</div>
+      </div>
+
+      <div class="wc-block">
+        <div class="wc-step-label">[3] Macaulay Duration = Σ(t × PV) ÷ Price</div>
+        <div class="wc-dim">&nbsp;&nbsp;&nbsp;&nbsp;Numerator = Σ(t × PV):</div>
+        ${pvtRows}
+        <div class="wc-divider"></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">Σ(t × PV) = </span><strong class="wc-pvt-val">${fmtDol(pvtTotal)}</strong></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">Macaulay Duration = ${fmtDol(pvtTotal)} ÷ ${fmtDol(totalPV)} = </span><strong class="wc-val">${macaulay.toFixed(4)} years</strong></div>
+        <div class="wc-dim" style="font-size:12px">&nbsp;&nbsp;&nbsp;&nbsp;(Shorter than ${years}Y maturity because coupons arrive before the final date)</div>
+      </div>
+
+      <div class="wc-block">
+        <div class="wc-step-label">[4] Modified Duration = Macaulay ÷ (1 + yield/2)</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">ModDur = ${macaulay.toFixed(4)} ÷ (1 + ${yieldPct.toFixed(2)}%/2) = ${macaulay.toFixed(4)} ÷ ${factor.toFixed(5)} = </span><strong class="wc-val">${modified.toFixed(4)} years</strong></div>
+        <div class="wc-dim" style="font-size:12px">&nbsp;&nbsp;&nbsp;&nbsp;(This tells you: a 1% rise in yield → ~${modified.toFixed(2)}% fall in price, i.e. ${fmtDol(totalPV * modified / 100)} on this position)</div>
+      </div>
+
+      <div class="wc-block">
+        <div class="wc-step-label">[5] DV01 = Price × Modified Duration × 0.0001</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="wc-dim">DV01 = ${fmtDol(totalPV)} × ${modified.toFixed(4)} × 0.0001</span></div>
+        <div class="wc-answer">&nbsp;&nbsp;&nbsp;&nbsp;DV01 = ${fmtDol(dv01)}</div>
+        ${swapFootnote}
+      </div>
+    </div>`;
+
+  // Cash flow table (show first 12 + last 1 if long)
+  const SHOW = 12;
+  const tbody = document.getElementById('cf-tbody');
+  const tfoot = document.getElementById('cf-tfoot');
+  tbody.innerHTML = '';
+  let shown = cfs;
+  let truncated = false;
+  if (cfs.length > SHOW + 1) {
+    shown = cfs.slice(0, SHOW);
+    truncated = true;
+  }
+  document.getElementById('cf-showing').textContent =
+    truncated ? `(showing first ${SHOW} of ${n} periods)` : `(${n} periods)`;
+
+  shown.forEach(r => {
+    const pctPrice = (r.pv / totalPV * 100).toFixed(1) + '%';
+    tbody.innerHTML += `<tr>
+      <td style="color:var(--muted)">${r.period}</td>
+      <td>${r.t.toFixed(1)}</td>
+      <td>${fmtDol(r.cf)}</td>
+      <td>${fmtDol(r.pv)}</td>
+      <td class="pos">${fmtDol(r.pvt)}</td>
+      <td style="color:var(--muted)">${pctPrice}</td>
+    </tr>`;
+  });
+  if (truncated) {
+    const last = cfs[cfs.length - 1];
+    tbody.innerHTML += `<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:6px">… ${cfs.length - SHOW - 1} periods omitted …</td></tr>`;
+    tbody.innerHTML += `<tr>
+      <td style="color:var(--muted)">${last.period}</td>
+      <td>${last.t.toFixed(1)}</td>
+      <td>${fmtDol(last.cf)}</td>
+      <td>${fmtDol(last.pv)}</td>
+      <td class="pos">${fmtDol(last.pvt)}</td>
+      <td style="color:var(--muted)">${(last.pv / totalPV * 100).toFixed(1)}%</td>
+    </tr>`;
+  }
+  tfoot.innerHTML = `<tr style="border-top:1px solid var(--border);font-weight:700">
+    <td colspan="2" style="color:var(--muted)">Total</td>
+    <td>—</td>
+    <td style="color:var(--text)">${fmtDol(totalPV)}</td>
+    <td class="pos">${fmtDol(cfs.reduce((a,r)=>a+r.pvt,0))}</td>
+    <td style="color:var(--muted)">100%</td>
+  </tr>`;
+}
+
+// ─── END DV01 CALCULATOR ────────────────────────────────────────────────────
+
+const TENORS = ['3M','6M','1Y','2Y','3Y','5Y','7Y','10Y','15Y','20Y','30Y'];
+
+const DELTA_DATA = [
+  {
+    name: '2s10s Steepener',
+    long:  [  0,  0,  0, 85, 15,  0,  0,   0,  0,  0,  0],
+    short: [  0,  0,  0,  0,  0,  0,-10, -90,  0,  0,  0],
+  },
+  {
+    name: 'Long Duration',
+    long:  [  5,  8, 12, 20, 25, 45, 60, 120, 85, 65, 40],
+    short: [  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0],
+  },
+  {
+    name: 'Hedged Options Book',
+    long:  [  2,  0,  5,  0, 10,  0,  3,   0,  0,  0,  0],
+    short: [  0, -3,  0, -8,  0, -5,  0,  -4,  0,  0,  0],
+  },
+  {
+    name: 'Belly Butterfly',
+    long:  [  0,  0,  0,  0,  0, 95, 15,   0,  0,  0,  0],
+    short: [  0,  0,  0,-45,-10,  0,  0, -55,  0,  0,  0],
+  },
+  {
+    name: 'Asset Swap Book',
+    long:  [ 30, 55, 80, 95, 45,  0,  0,   0,  0,  0,  0],
+    short: [  0,  0,  0,  0,  0,-120,-85,-60,-20,  0,  0],
+  },
+];
+
+const GAMMA_DATA = [
+  { name: 'No Options',       gamma: [   0,    0,    0,    0,    0,     0,    0,    0,   0, 0, 0] },
+  { name: 'Long 5Y Straddle', gamma: [   0,    0,    0,  500, 1200,  3500, 1800,  400,   0, 0, 0] },
+  { name: 'Short Gamma Book', gamma: [   0,    0, -800,-1500,-2000,-3000,-1500, -800,   0, 0, 0] },
+  { name: 'Cap / Floor Book', gamma: [2000, 4000, 3500, 2000,  800,  -500, -200,    0,   0, 0, 0] },
+  { name: 'Mixed Gamma',      gamma: [ 500,  800,  600,  400, -800, -1200,  600,  400,-300, 0, 0] },
+];
+
+let deltaScenario = 0;
+let gammaScenario = 0;
+let deltaView = 'net';
+let shockBp = 0;
+
+let deltaChart, gammaChart, shockChart;
+
+const DELTA_HEDGES = [
+  {
+    summary: "You're long the 2Y and short the 10Y — net flat but exposed to curve flattening. A 15bp flattening (2Y rates up, 10Y unchanged) costs you ~$1.2M on a $100M notional book. The hedge target is the curve spread, not the level.",
+    options: [
+      { name: 'Short 2Y SOFR Futures', action: 'Sell front 2Y futures contracts to offset the long 2Y DV01 bucket by bucket.', pro: 'Extremely liquid, tight bid/offer (~0.1bp equivalent), no counterparty credit.', con: 'Quarterly roll risk; CTD basket introduces small basis vs par swap rate.', cost: 'low' },
+      { name: 'Pay Fixed 2Y IRS', action: 'Enter a 2Y pay-fixed interest rate swap to directly cancel the 2Y long.', pro: 'Precise tenor and DV01 match; no roll; OTC flexibility on fixing date.', con: 'Bid/offer ~0.5bp; adds counterparty exposure; harder to unwind in size.', cost: 'low' },
+      { name: 'Buy 10Y Bond Futures', action: 'Long 10Y futures (or Ultra) to cover the short 10Y bucket.', pro: 'Very liquid; single instrument covers the 10Y point cleanly.', con: 'CTD convexity at long end; roll every quarter; imperfect key-rate match.', cost: 'low' },
+      { name: '2Y Receiver Swaption', action: 'Buy a 2Y receiver swaption — profits if 2Y rates rally, adding positive gamma to the steepener.', pro: 'Limits loss if the steepener extends sharply; keeps directional view intact.', con: 'Premium cost; introduces theta drag and vega exposure.', cost: 'med' },
+    ],
+    consideration: '<strong>Key choice:</strong> futures are cheapest for parallel reduction; swaps give a cleaner key-rate match. If the steepener is a structural view (held weeks), accept the quarterly roll and use futures. If precision matters, use swaps. The swaption is only worth it if implied vol is cheap and you expect a large move.',
+  },
+  {
+    summary: "A parallel-shift book: every basis point up costs you across every tenor. The 10Y–30Y concentration is the main vulnerability. A 50bp sell-off costs ~$24M. The priority is reducing duration at the long end without disrupting the short-end P&L.",
+    options: [
+      { name: 'Pay Fixed Long-Dated Swap', action: 'Pay fixed on 10Y, 20Y, or 30Y IRS to offset the largest DV01 buckets first.', pro: 'Exact tenor match; no roll; straightforward Greeks.', con: 'Large notionals required at long tenors; 30Y swap market is thinner; wide bid/offer.', cost: 'low' },
+      { name: 'Short Bond Futures (Ultra / 30Y)', action: 'Short ultra-long or 30Y futures to reduce duration at the long end efficiently.', pro: 'Very liquid; small margin requirement; easy to scale in/out.', con: 'CTD convexity diverges from par bonds at 30Y; quarterly roll adds cost; imperfect long-end match.', cost: 'low' },
+      { name: 'Buy Payer Swaptions', action: 'Buy ATM payer swaptions at 10Y and 30Y — profit accelerates if the sell-off is large.', pro: 'Adds positive gamma: the bigger the sell-off, the more the hedge pays. Limits basis risk vs linear hedge.', con: 'Significant premium; theta drag every day the sell-off doesn\'t arrive.', cost: 'high' },
+      { name: 'Zero-Cost Collar', action: 'Buy payer swaption, sell receiver swaption at same expiry — zero net premium.', pro: 'No upfront cost; protects against sell-off; surrenders rally upside.', con: 'Caps gains if rates fall sharply; complex Greeks; spread between strikes affects protection level.', cost: 'med' },
+    ],
+    consideration: '<strong>Key choice:</strong> futures for speed and liquidity; swaps for precision. For a bond fund manager who needs to reduce duration quickly before a data release, futures are the answer. For a bank managing structural long-end exposure, pay-fixed swaps avoid the roll. Payer swaptions add value only when vol is cheap relative to realised.',
+  },
+  {
+    summary: "Small residuals from delta-hedging options positions — each bucket is only a few $k. The cost of hedging every residual (bid/offer on 10 small swaps) typically exceeds the risk. The decision is which residuals to clean up and which to leave.",
+    options: [
+      { name: 'Threshold Netting', action: 'Define a minimum hedge threshold (e.g. $5k DV01 per bucket). Only hedge buckets above it. Net residuals across nearby tenors where possible.', pro: 'Avoids paying bid/offer on immaterial risk; reduces book complexity.', con: 'Small residuals accumulate over time; discipline on threshold is needed.', cost: 'low' },
+      { name: 'Targeted Swap per Bucket', action: 'Enter small notional swaps precisely at each residual tenor to zero out the ladder.', pro: 'Perfect DV01 match; clean risk report for audit and compliance.', con: 'Multiple small OTC trades; each has bid/offer cost; notionals may be too small for dealer interest.', cost: 'med' },
+      { name: '2Y / 10Y Futures Fine-Tune', action: 'Use liquid 2Y and 10Y futures to absorb most of the residual DV01 in a single trade.', pro: 'Low cost, liquid, no credit; consolidates multiple small residuals into two positions.', con: 'Won\'t match each tenor exactly; leaves some residual curve mis-match.', cost: 'low' },
+    ],
+    consideration: '<strong>Key choice:</strong> for a delta-hedged options book, residuals below $5k DV01 per bucket are often cheaper to accept than to trade. Review the full book at end-of-day and net across adjacent tenors first — a +$3k at 2Y and −$2k at 3Y are nearly the same risk and can be addressed with one swap rather than two.',
+  },
+  {
+    summary: "Long 5Y belly, short 2Y and 10Y wings. The trade profits if the 5Y yield falls more than the 2Y/10Y average. Hedging the butterfly flattens the view — so the question is which risk to reduce without destroying the trade.",
+    options: [
+      { name: 'Reduce 5Y Long (Pay Fixed 5Y)', action: 'Partially pay fixed on a 5Y swap to reduce the belly DV01 without touching the wings.', pro: 'Reduces the largest single-bucket risk; book stays butterfly-shaped.', con: 'Reduces P&L if the belly does outperform; partial hedge needs monitoring.', cost: 'low' },
+      { name: 'Buy 5Y Straddle (Add Gamma)', action: 'Overlay a long 5Y straddle to add positive gamma at the belly — keep the delta, add convexity.', pro: 'Protects against large belly moves in either direction; doesn\'t change the directional view.', con: 'Daily theta cost; adds vega; effective only if realised vol exceeds break-even.', cost: 'med' },
+      { name: 'Rebalance Wing Ratios', action: 'If the 2Y or 10Y legs have drifted (rates moved), re-size the short wing to maintain DV01 neutrality.', pro: 'Keeps the butterfly DV01-flat without adding new risk types; simple to execute.', con: 'Transaction costs on rebalance; frequency depends on how fast rates move.', cost: 'low' },
+      { name: 'Parallel Shift Overlay', action: 'Add a small parallel hedge (short futures) if worried about a sharp parallel move drowning out the butterfly.', pro: 'Isolates the curve view from the level view; useful before a central bank meeting.', con: 'Adds a position that competes with the butterfly view if rates also shift in parallel.', cost: 'low' },
+    ],
+    consideration: '<strong>Key choice:</strong> don\'t fully hedge the butterfly unless you\'ve abandoned the trade. Instead, add gamma at the 5Y to protect against large moves while preserving the relative-value view. Rebalancing the wings to stay DV01-neutral is routine maintenance, not a hedge — do it whenever the wing DV01s drift more than 10% from target.',
+  },
+  {
+    summary: "Long 3M–3Y (asset swap floater side), short 5Y–15Y (fixed bond hedge). The curve exposure is a classic 2s5s or 2s10s flattener embedded in the asset swap. A curve steepening (front rates fall, back rates rise) causes double pain.",
+    options: [
+      { name: 'Front-End Futures (Short)', action: 'Short SOFR or Euribor futures at the 3M–1Y point to offset the short-term long DV01.', pro: 'Very liquid; daily margining keeps exposure current; low bid/offer.', con: 'Quarterly rolls at every IMM date; limited precision beyond 2Y.', cost: 'low' },
+      { name: '2s5s Flattener Swap', action: 'Rather than hedging each bucket, put on a 2s5s swap spread — receive 5Y fixed, pay 2Y fixed in DV01-weighted ratio.', pro: 'Single trade hedges the curve slope directly; cleaner P&L attribution.', con: 'Doesn\'t address residual non-parallel mismatches; requires DV01 ratio calculation.', cost: 'low' },
+      { name: 'Buy 5Y Receiver Swaption', action: 'Buy a 5Y receiver — profit if 5Y rates fall (covering the short 5Y position) and add positive gamma.', pro: 'Asymmetric payoff: limits loss if 5Y rallies hard; keeps short-term carry.', con: 'Premium; theta; only helps one leg of the curve trade.', cost: 'med' },
+      { name: 'Accept Natural Offset', action: 'Review whether the long front-end and short back-end are genuinely correlated in the book\'s mandate — some asset swap books are designed to hold this exposure.', pro: 'No transaction cost; if the book\'s mandate allows curve risk, holding it earns the curve carry.', con: 'Curve risk is real; a 30bp steepening can cost $500k–$1M in a moderate-size book.', cost: 'low' },
+    ],
+    consideration: '<strong>Key choice:</strong> asset swap books often run this curve exposure intentionally as part of the carry strategy. The key question is whether the steepening risk is within limits. If it is, a 2s5s flattener swap is the cleanest hedge — one trade, precisely captures the slope. Futures for the front end are cheaper but require roll management.',
+  },
+];
+
+const GAMMA_HEDGES = [
+  {
+    summary: "A linear book has no meaningful gamma — bonds and swaps have negligible convexity. No gamma hedge is needed. If rates move, your delta shifts only from the mark-to-market of the positions themselves, not from options. The only gamma management is ensuring the delta ladder stays within limits after a rate move.",
+    options: [
+      { name: 'Monitor Delta Drift', action: 'Set automated alerts when any tenor bucket\'s DV01 drifts more than a threshold (e.g. $10k) from target after a rate move.', pro: 'Zero cost; addresses the only gamma risk a linear book faces — rate-move-driven repricing.', con: 'Requires real-time risk system; alerts can be noisy in volatile markets.', cost: 'low' },
+      { name: 'Add Optionality Selectively', action: 'If market vol is cheap, buy a small straddle at the most concentrated tenor to gain positive gamma.', pro: 'Converts a pure linear book into one with convexity benefit; theta cost is low when vol is cheap.', con: 'Changes the risk profile; introduces vega and theta as new risk dimensions to manage.', cost: 'med' },
+    ],
+    consideration: '<strong>Note:</strong> linear books don\'t need gamma hedges — they need active delta management. The discipline is re-running the delta ladder after every 10bp move and adjusting positions that breach limits.',
+  },
+  {
+    summary: "Long gamma at the 5Y point is a risk you're paying for (via theta). The goal is not to eliminate it but to optimise it: reduce theta drag where gamma is abundant, ensure the re-hedging frequency captures the P&L, and consider whether the gamma profile matches the expected rate move.",
+    options: [
+      { name: 'Sell OTM 5Y Strangle', action: 'Sell out-of-the-money receiver + payer at 5Y to reduce gamma in the wings while keeping ATM gamma.', pro: 'Collects premium; reduces net theta; keeps gamma for moderate moves.', con: 'Caps the convexity benefit if rates move very far; creates short gamma at OTM strikes.', cost: 'low' },
+      { name: 'Optimise Re-Hedge Frequency', action: 'Re-hedge delta whenever the 5Y bucket drifts by more than 1/Γ × target_max_drift. With Γ = $3,500/bp², re-hedge every ~8bp move to capture gamma P&L systematically.', pro: 'Zero instrument cost; the gamma P&L is realised through disciplined delta hedging.', con: 'Requires active management; transaction costs scale with frequency.', cost: 'low' },
+      { name: 'Roll to Shorter Expiry', action: 'Replace the straddle with a shorter-dated version (1M vs 3M) for the same notional — higher gamma per dollar, lower total theta.', pro: 'More gamma concentration around near-term events (central bank meetings); lower theta drag between events.', con: 'Must roll more frequently; gamma disappears quickly after the event.', cost: 'med' },
+    ],
+    consideration: '<strong>Key insight:</strong> long gamma doesn\'t need hedging — it needs managing. The P&L from positive gamma is realised by re-hedging delta regularly. The risk is paying theta without realising enough gamma P&L. Track daily: (realised gamma P&L) vs (theta paid). If the ratio falls below 1.0 consistently, reduce the gamma position.',
+  },
+  {
+    summary: "Short gamma across all tenors is the most dangerous gamma profile. Every large rate move forces you to re-hedge at a loss — buying high and selling low. The priority is protecting against tail moves while preserving the option premium income that created this position.",
+    options: [
+      { name: 'Buy ATM Straddles (Worst Bucket)', action: 'Buy ATM straddles at the tenors with the most negative gamma (3Y–5Y in this case) to directly offset the worst exposure.', pro: 'Direct gamma neutralisation; most efficient use of premium dollar.', con: 'Significant premium cost; may consume most of the original option premium earned.', cost: 'high' },
+      { name: 'Buy OTM Strangles (Tail Protection)', action: 'Buy cheaper out-of-the-money strangles — lower gamma per dollar but activates only on large moves (>15bp).', pro: 'Lower premium; protects specifically against the blow-up scenario; allows small moves to be absorbed.', con: 'No gamma benefit for moderate moves (5–10bp); still pays theta.', cost: 'med' },
+      { name: 'Tighten Delta Re-Hedge Bands', action: 'Re-hedge delta more frequently — every 2bp instead of every 5bp. Reduces the path-dependency loss from negative gamma.', pro: 'No instrument cost; limits the delta drift between re-hedges.', con: 'Transaction costs scale quadratically with re-hedge frequency; in fast markets, execution is difficult.', cost: 'low' },
+      { name: 'Gamma VaR Limit', action: 'Set a maximum gamma VaR: the P&L impact of a 2-sigma rate move across all buckets. If breached, buy straddles until back within limit.', pro: 'Systematic risk discipline; prevents gradual build-up of dangerous short gamma.', con: 'Reactive — only triggers after the risk has already grown; needs real-time monitoring.', cost: 'low' },
+    ],
+    consideration: '<strong>Critical trade-off:</strong> short gamma cannot be fully hedged without giving back the premium income that created it. The professional approach: (1) set a maximum loss per bucket for a 30bp move, (2) buy tail protection (OTM strangles) for anything beyond that, (3) accept moderate-move re-hedging costs as the cost of running a short-vol book, (4) monitor theta vs realised gamma P&L weekly.',
+  },
+  {
+    summary: "Front-end gamma (3M–2Y) from the cap book is large and positive. The 5Y–7Y shows small negative gamma from sold floors. The priority: the negative belly gamma is manageable; the large front-end gamma is a theta drag that can be partially monetised.",
+    options: [
+      { name: 'Sell Front-End OTM Caps', action: 'Sell out-of-the-money caps at 1Y–2Y to reduce the large positive gamma in those buckets and collect premium.', pro: 'Offsets theta drag; keeps some gamma for large moves; monetises rich implied vol in front end.', con: 'Caps the cap book\'s P&L on extreme moves; adds short gamma at OTM strikes.', cost: 'low' },
+      { name: 'Buy 5Y Swaption (Belly Fix)', action: 'Buy a small notional 5Y ATM straddle to directly address the negative gamma in the 5Y–7Y bucket.', pro: 'Clean fix; gamma-neutral across all buckets; minimal size needed given the small negative gamma.', con: 'Premium cost; adds theta drag; may not be worth the cost for a small negative gamma bucket.', cost: 'med' },
+      { name: 'Manage 5Y–7Y via Delta Re-Hedging', action: 'The belly negative gamma (−$500–$200/bp²) is small. Accept it and re-hedge the delta every 5bp move rather than buying options.', pro: 'Zero premium cost; re-hedging at small intervals limits the P&L drag.', con: 'Requires active monitoring; works only if vol stays moderate (< 10bp/day realised).', cost: 'low' },
+    ],
+    consideration: '<strong>Key decision:</strong> the small negative belly gamma (−$500/bp²) produces only −$12,500 in delta drift per 25bp move — small relative to the P&L of the cap book. The cost of buying a 5Y straddle to fix it may exceed the expected loss. Use re-hedging rather than options for this bucket, and focus gamma management on the front end where the exposure is large.',
+  },
+  {
+    summary: "Complex profile: long gamma at 3M–2Y and 7Y–10Y, short at 3Y–5Y. The negative belly gamma is sandwiched between two long-gamma positions — creating a profile that loses money on moderate belly moves but gains on extreme moves or when wings move independently.",
+    options: [
+      { name: 'Gamma Swap (Sell Front, Buy Belly)', action: 'Sell some 1Y gamma (where you\'re long) via a short straddle, use proceeds to buy 5Y gamma (where you\'re short). Net theta close to zero.', pro: 'Self-financing; reshapes the gamma ladder without net premium cost; reduces the mixed profile.', con: 'Complex to size exactly; two OTC trades; introduces basis between 1Y and 5Y vol surfaces.', cost: 'med' },
+      { name: 'Buy 5Y ATM Straddle', action: 'Directly buy 5Y gamma to flip the −$1,200/bp² bucket to neutral or positive.', pro: 'Simplest fix; direct neutralisation of the problem bucket.', con: 'Premium cost; if 1Y–2Y long gamma is already paying theta, adding more theta at 5Y increases the break-even vol.', cost: 'high' },
+      { name: 'Sell 1Y–2Y Gamma (Monetise the Long)', action: 'Sell some of the long front-end gamma via short straddles. Use the premium to fund the belly gamma buy, or simply take the theta income.', pro: 'Generates premium income; reduces theta drag from the front-end long gamma.', con: 'Increases vulnerability at 1Y–2Y if rates move sharply; reduces the natural hedge for the belly short.', cost: 'low' },
+      { name: 'Accept the Profile for Event Risk', action: 'The current profile is long wings, short belly — it profits on large parallel moves and on wing-only moves, but loses if only the belly moves. This may be intentional.', pro: 'Zero cost; the profile has a natural positive P&L for most central bank surprises (parallel moves).', con: 'Loses on curve butterfly moves (belly moves without wings); requires monitoring the cross-gamma terms.', cost: 'low' },
+    ],
+    consideration: '<strong>Key insight:</strong> a long-wing, short-belly gamma profile is not always bad. It profits when parallel rate moves are large (central bank surprises) and loses only when the belly outperforms in isolation. Before hedging, ask: what is the likely source of rate volatility? If it\'s macro-driven (central bank), the current profile may be the right one to hold.',
+  },
+];
+
+function hedgeCostLabel(c) {
+  if (c === 'low') return '<span class="hedge-cost cost-low">Low Cost</span>';
+  if (c === 'med') return '<span class="hedge-cost cost-med">Medium Cost</span>';
+  return '<span class="hedge-cost cost-high">Higher Cost</span>';
+}
+
+function renderHedge(panelId, data) {
+  const panel = document.getElementById(panelId);
+  if (!data) { panel.innerHTML = ''; return; }
+  const cards = data.options.map(o => `
+    <div class="hedge-card">
+      <div class="hedge-card-name">${o.name}</div>
+      <div class="hedge-card-action">${o.action}</div>
+      <div class="hedge-card-meta">
+        <div class="hedge-pro">✓ ${o.pro}</div>
+        <div class="hedge-con">✗ ${o.con}</div>
+        ${hedgeCostLabel(o.cost)}
+      </div>
+    </div>`).join('');
+  panel.innerHTML = `
+    <div class="hedge-panel">
+      <div class="hedge-panel-title">Hedging Options & Considerations</div>
+      <div class="hedge-summary">${data.summary}</div>
+      <div class="hedge-cards">${cards}</div>
+      <div class="hedge-consideration">${data.consideration}</div>
+    </div>`;
+}
+
+function fmt(v, unit) {
+  if (v === 0) return '—';
+  const sign = v > 0 ? '+' : '−';
+  const abs = Math.abs(v);
+  const str = abs >= 1000 ? (abs/1000).toFixed(0)+'k' : abs.toFixed(0);
+  return sign + '$' + str + (unit ? unit : '');
+}
+
+function fmtK(v) {
+  if (v === 0) return '—';
+  return (v > 0 ? '+' : '') + (Math.abs(v) >= 1000 ? (v/1000).toFixed(0)+'k' : v.toFixed(0));
+}
+
+function netArr(s) {
+  return TENORS.map((_, i) => (s.long[i] || 0) + (s.short[i] || 0));
+}
+
+const CHART_DEFAULTS = {
+  animation: false,
+  maintainAspectRatio: false,
+  plugins: { tooltip: { enabled: false } },
+};
+
+function initDeltaChart() {
+  const ctx = document.getElementById('deltaChart').getContext('2d');
+  deltaChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: TENORS, datasets: [] },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: {
+        ...CHART_DEFAULTS.plugins,
+        legend: { display: true, labels: { color: '#7a8faa', font: { size: 12 } } },
+      },
+      scales: {
+        x: { ticks: { color: '#7a8faa' }, grid: { color: 'rgba(42,51,71,.5)' } },
+        y: { ticks: { color: '#7a8faa', callback: v => fmtK(v) }, grid: { color: 'rgba(42,51,71,.5)' }, border: { dash: [3, 3] } },
+      },
+    },
+  });
+}
+
+function initGammaChart() {
+  const ctx = document.getElementById('gammaChart').getContext('2d');
+  gammaChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: TENORS, datasets: [] },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: {
+        ...CHART_DEFAULTS.plugins,
+        legend: { display: false },
+      },
+      scales: {
+        x: { ticks: { color: '#7a8faa' }, grid: { color: 'rgba(42,51,71,.5)' } },
+        y: { ticks: { color: '#7a8faa' }, grid: { color: 'rgba(42,51,71,.5)' }, border: { dash: [3, 3] } },
+      },
+    },
+  });
+}
+
+function initShockChart() {
+  const ctx = document.getElementById('shockChart').getContext('2d');
+  shockChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: TENORS, datasets: [] },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: {
+        ...CHART_DEFAULTS.plugins,
+        legend: { display: true, labels: { color: '#7a8faa', font: { size: 12 } } },
+      },
+      scales: {
+        x: { ticks: { color: '#7a8faa' }, grid: { color: 'rgba(42,51,71,.5)' } },
+        y: { ticks: { color: '#7a8faa', callback: v => fmtK(v) }, grid: { color: 'rgba(42,51,71,.5)' }, border: { dash: [3, 3] } },
+      },
+    },
+  });
+}
+
+function renderDelta() {
+  const s = DELTA_DATA[deltaScenario];
+  const net = netArr(s);
+
+  if (deltaView === 'net') {
+    deltaChart.data.datasets = [{
+      label: 'Net DV01 ($k)',
+      data: net,
+      backgroundColor: net.map(v => v > 0 ? 'rgba(34,211,160,.75)' : v < 0 ? 'rgba(248,113,113,.75)' : 'rgba(122,143,170,.3)'),
+      borderColor: net.map(v => v > 0 ? '#22d3a0' : v < 0 ? '#f87171' : '#7a8faa'),
+      borderWidth: 1,
+      borderRadius: 4,
+    }];
+  } else {
+    deltaChart.data.datasets = [
+      {
+        label: 'Long DV01 ($k)',
+        data: s.long,
+        backgroundColor: 'rgba(34,211,160,.65)',
+        borderColor: '#22d3a0',
+        borderWidth: 1,
+        borderRadius: 4,
+      },
+      {
+        label: 'Short DV01 ($k)',
+        data: s.short,
+        backgroundColor: 'rgba(248,113,113,.65)',
+        borderColor: '#f87171',
+        borderWidth: 1,
+        borderRadius: 4,
+      },
+    ];
+  }
+  deltaChart.update();
+
+  const totalNet = net.reduce((a, b) => a + b, 0);
+  const maxVal = Math.max(...net);
+  const minVal = Math.min(...net);
+  const maxIdx = net.indexOf(maxVal);
+  const minIdx = net.indexOf(minVal);
+
+  const netEl = document.getElementById('s-net');
+  netEl.textContent = (totalNet >= 0 ? '+' : '') + fmtK(totalNet);
+  netEl.className = 'stat-val ' + (totalNet > 0 ? 'pos' : totalNet < 0 ? 'neg' : 'neu');
+  document.getElementById('s-max').textContent = maxVal > 0 ? fmtK(maxVal) : '—';
+  document.getElementById('s-max-t').textContent = maxVal > 0 ? TENORS[maxIdx] + ' tenor' : 'No long positions';
+  document.getElementById('s-min').textContent = minVal < 0 ? fmtK(minVal) : '—';
+  document.getElementById('s-min-t').textContent = minVal < 0 ? TENORS[minIdx] + ' tenor' : 'No short positions';
+
+  const tbody = document.getElementById('delta-tbody');
+  tbody.innerHTML = '';
+  TENORS.forEach((t, i) => {
+    const n = net[i], lg = s.long[i] || 0, sh = s.short[i] || 0;
+    if (n === 0 && lg === 0 && sh === 0) return;
+    const cls = n > 0 ? 'pos' : n < 0 ? 'neg' : 'neu';
+    const chipCls = n > 0 ? 'chip-pos' : n < 0 ? 'chip-neg' : 'chip-neu';
+    const chipText = n > 0 ? 'Long' : n < 0 ? 'Short' : 'Flat';
+    tbody.innerHTML += `<tr>
+      <td style="font-weight:700;color:var(--text)">${t}</td>
+      <td class="${cls}">${n >= 0 ? '+' : ''}$${Math.abs(n * 1000).toLocaleString()}</td>
+      <td class="pos">${lg > 0 ? '+$' + (lg * 1000).toLocaleString() : '—'}</td>
+      <td class="neg">${sh < 0 ? '−$' + (Math.abs(sh) * 1000).toLocaleString() : '—'}</td>
+      <td><span class="chip ${chipCls}">${chipText}</span></td>
+    </tr>`;
+  });
+}
+
+function renderGamma() {
+  const g = GAMMA_DATA[gammaScenario].gamma;
+
+  gammaChart.data.datasets = [{
+    label: 'Gamma ($/bp²)',
+    data: g,
+    backgroundColor: g.map(v => v > 0 ? 'rgba(74,158,255,.75)' : v < 0 ? 'rgba(251,191,36,.75)' : 'rgba(122,143,170,.3)'),
+    borderColor: g.map(v => v > 0 ? '#4a9eff' : v < 0 ? '#fbbf24' : '#7a8faa'),
+    borderWidth: 1,
+    borderRadius: 4,
+  }];
+  gammaChart.update();
+
+  const tbody = document.getElementById('gamma-tbody');
+  tbody.innerHTML = '';
+  TENORS.forEach((t, i) => {
+    const gv = g[i];
+    if (gv === 0) return;
+    const shift25 = gv * 25;
+    const shift50 = gv * 50;
+    const type = gv > 0
+      ? '<span class="chip chip-pos">Long Gamma</span>'
+      : '<span class="chip chip-neg">Short Gamma</span>';
+    tbody.innerHTML += `<tr>
+      <td style="font-weight:700;color:var(--text)">${t}</td>
+      <td class="${gv > 0 ? 'pos' : 'neg'}">${gv > 0 ? '+' : ''}$${Math.abs(gv).toLocaleString()}</td>
+      <td class="${shift25 > 0 ? 'pos' : 'neg'}">${shift25 >= 0 ? '+' : '−'}$${(Math.abs(shift25) * 1000).toLocaleString()}</td>
+      <td class="${shift50 > 0 ? 'pos' : 'neg'}">${shift50 >= 0 ? '+' : '−'}$${(Math.abs(shift50) * 1000).toLocaleString()}</td>
+      <td>${type}</td>
+    </tr>`;
+  });
+
+  renderShock();
+}
+
+function renderShock() {
+  const ds = DELTA_DATA[deltaScenario];
+  const gs = GAMMA_DATA[gammaScenario].gamma;
+  const origNet = netArr(ds);
+  const shock = parseInt(shockBp);
+  const shifted = origNet.map((d, i) => d + gs[i] * shock);
+
+  const shockLabel = shock === 0 ? 'Current Delta' : `Delta after ${shock >= 0 ? '+' : ''}${shock}bp`;
+
+  shockChart.data.datasets = [
+    {
+      label: 'Original Delta',
+      data: origNet,
+      backgroundColor: 'rgba(122,143,170,.2)',
+      borderColor: 'rgba(122,143,170,.5)',
+      borderWidth: 1,
+      borderRadius: 4,
+    },
+    {
+      label: shockLabel,
+      data: shifted,
+      backgroundColor: shifted.map(v => v > 0 ? 'rgba(34,211,160,.75)' : v < 0 ? 'rgba(248,113,113,.75)' : 'rgba(122,143,170,.3)'),
+      borderColor: shifted.map(v => v > 0 ? '#22d3a0' : v < 0 ? '#f87171' : '#7a8faa'),
+      borderWidth: 1,
+      borderRadius: 4,
+    },
+  ];
+  shockChart.update();
+
+  const ind = document.getElementById('shock-indicator');
+  if (shock === 0) {
+    ind.textContent = 'Move the slider to apply a rate shock and see how gamma shifts your delta ladder.';
+    return;
+  }
+
+  const totOrig = origNet.reduce((a, b) => a + b, 0);
+  const totShifted = shifted.reduce((a, b) => a + b, 0);
+  const drift = totShifted - totOrig;
+  const dir = shock > 0 ? 'rate rise' : 'rate fall';
+  const driftDesc = Math.abs(drift) < 0.5
+    ? 'unchanged'
+    : (drift > 0 ? `<span class="pos">+$${(Math.abs(drift) * 1000).toLocaleString()} DV01 longer</span>` : `<span class="neg">−$${(Math.abs(drift) * 1000).toLocaleString()} DV01 shorter</span>`);
+
+  ind.innerHTML = `After a <strong style="color:var(--accent2)">${shock >= 0 ? '+' : ''}${shock}bp ${dir}</strong>: total DV01 shifts from <strong>$${(Math.abs(totOrig) * 1000).toLocaleString()}</strong> to <strong>$${(Math.abs(totShifted) * 1000).toLocaleString()}</strong>. Re-hedging required: ${driftDesc}.`;
+}
+
+function renderLiveRatios() {
+  const ds = DELTA_DATA[deltaScenario];
+  const gs = GAMMA_DATA[gammaScenario].gamma;
+  const net = netArr(ds);
+
+  const totalNet  = net.reduce((a, b) => a + b, 0);
+  const totalLong = ds.long.reduce((a, b) => a + b, 0);
+  const totalShort = Math.abs(ds.short.reduce((a, b) => a + b, 0));
+  const totalGross = totalLong + totalShort;
+  const grossNet  = totalNet !== 0 ? (totalGross / Math.abs(totalNet)).toFixed(1) + '×' : totalGross > 0 ? '∞ (net zero)' : '—';
+
+  const maxAbsIdx = net.map(Math.abs).indexOf(Math.max(...net.map(Math.abs)));
+  const bigDV01   = net[maxAbsIdx];
+  const bigGamma  = gs[maxAbsIdx];
+  const gammaDV01 = bigDV01 !== 0 ? ((Math.abs(bigGamma) / Math.abs(bigDV01)) * 100).toFixed(1) + '%/bp' : '—';
+
+  const totalGamma = gs.reduce((a, b) => a + b, 0);
+  const gammaSign  = totalGamma > 0 ? 'Long' : totalGamma < 0 ? 'Short' : 'None';
+  const gammaCol   = totalGamma > 0 ? 'var(--green)' : totalGamma < 0 ? 'var(--red)' : 'var(--muted)';
+
+  const move25 = gs.reduce((a, g) => a + 0.5 * g * 625, 0);
+  const move50 = gs.reduce((a, g) => a + 0.5 * g * 2500, 0);
+
+  const grossNetCol = totalGross / Math.abs(totalNet || 1) > 5 ? 'var(--red)' : 'var(--green)';
+
+  document.getElementById('live-ratios').innerHTML = `
+    <div class="live-panel">
+      <div class="live-panel-title">Live Ratios — ${ds.name} + ${GAMMA_DATA[gammaScenario].name}</div>
+      <div class="live-stats">
+        <div class="live-stat">
+          <div class="live-stat-label">Total Net DV01</div>
+          <div class="live-stat-val ${totalNet > 0 ? 'pos' : totalNet < 0 ? 'neg' : 'neu'}">${totalNet >= 0 ? '+' : ''}$${(Math.abs(totalNet)*1000).toLocaleString()}</div>
+          <div class="live-stat-sub">per 1bp parallel shift</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-label">Gross DV01</div>
+          <div class="live-stat-val" style="color:var(--text)">$${(totalGross*1000).toLocaleString()}</div>
+          <div class="live-stat-sub">total long + short exposure</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-label">Gross / Net Ratio</div>
+          <div class="live-stat-val" style="color:${grossNetCol}">${grossNet}</div>
+          <div class="live-stat-sub">${totalGross / Math.abs(totalNet || 1) > 5 ? '⚠ hidden offsetting size' : 'within normal range'}</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-label">Total Gamma</div>
+          <div class="live-stat-val" style="color:${gammaCol}">${gammaSign !== 'None' ? (totalGamma > 0 ? '+' : '') + '$' + Math.abs(totalGamma).toLocaleString() + '/bp²' : '—'}</div>
+          <div class="live-stat-sub">${gammaSign} gamma overall</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-label">Γ/DV01 (largest bucket)</div>
+          <div class="live-stat-val" style="color:${Math.abs(bigGamma)/Math.abs(bigDV01||1)*100 > 5 ? 'var(--yellow)' : 'var(--text)'}">${gammaDV01}</div>
+          <div class="live-stat-sub">${TENORS[maxAbsIdx]} tenor · ${Math.abs(bigGamma)/Math.abs(bigDV01||1)*100 > 5 ? '⚠ active re-hedging likely' : 'moderate'}</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-label">Gamma P&L at 25bp</div>
+          <div class="live-stat-val ${move25 > 0 ? 'pos' : move25 < 0 ? 'neg' : 'neu'}">${move25 !== 0 ? (move25 > 0 ? '+' : '−') + '$' + (Math.abs(move25)/1000).toFixed(0) + 'k' : '—'}</div>
+          <div class="live-stat-sub">½ × Σ(Γ) × 25²</div>
+        </div>
+        <div class="live-stat">
+          <div class="live-stat-label">Gamma P&L at 50bp</div>
+          <div class="live-stat-val ${move50 > 0 ? 'pos' : move50 < 0 ? 'neg' : 'neu'}">${move50 !== 0 ? (move50 > 0 ? '+' : '−') + '$' + (Math.abs(move50)/1000).toFixed(0) + 'k' : '—'}</div>
+          <div class="live-stat-sub">½ × Σ(Γ) × 50²</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function setDeltaScenario(i) {
+  deltaScenario = i;
+  document.querySelectorAll('#delta-btns .sc-btn').forEach((b, j) => b.classList.toggle('active', i === j));
+  renderDelta();
+  renderShock();
+  renderHedge('delta-hedge-panel', DELTA_HEDGES[i]);
+  renderLiveRatios();
+}
+
+function setGammaScenario(i) {
+  gammaScenario = i;
+  document.querySelectorAll('#gamma-btns .sc-btn').forEach((b, j) => b.classList.toggle('active', i === j));
+  renderGamma();
+  renderHedge('gamma-hedge-panel', GAMMA_HEDGES[i]);
+  renderLiveRatios();
+}
+
+function setDeltaView(v) {
+  deltaView = v;
+  document.getElementById('tog-net').classList.toggle('active', v === 'net');
+  document.getElementById('tog-gross').classList.toggle('active', v === 'gross');
+  renderDelta();
+}
+
+function onShockChange(v) {
+  shockBp = v;
+  document.getElementById('shock-val').textContent = (v >= 0 ? '+' : '') + v;
+  renderShock();
+}
+
+window.addEventListener('load', () => {
+  requestAnimationFrame(() => {
+    onCalcChange();
+    initDeltaChart();
+    initGammaChart();
+    initShockChart();
+    renderDelta();
+    renderGamma();
+    renderHedge('delta-hedge-panel', DELTA_HEDGES[0]);
+    renderHedge('gamma-hedge-panel', GAMMA_HEDGES[0]);
+    renderLiveRatios();
+
+    window.addEventListener('resize', () => {
+      deltaChart.resize();
+      gammaChart.resize();
+      shockChart.resize();
+    });
+  });
+});
+</script>
+</body>
+</html>
