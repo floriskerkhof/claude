@@ -764,10 +764,10 @@ function onBond() {
       type: 'line',
       data: {
         datasets: [
-          { label: 'Actual', data: curve, borderColor: 'var(--accent)', borderWidth: 2.5, pointRadius: 0, tension: 0 },
+          { label: 'Actual', data: curve, borderColor: '#4a9eff', borderWidth: 2.5, pointRadius: 0, tension: 0 },
           { label: 'DV01 only', data: tangent, borderColor: 'rgba(122,143,170,0.45)', borderWidth: 1.5, borderDash: [6, 4], pointRadius: 0, tension: 0 },
-          { label: 'Start', data: [{ x: y0 * 100, y: P0 }], type: 'scatter', pointRadius: 8, pointBackgroundColor: 'var(--orange)', pointBorderColor: 'var(--bg)', pointBorderWidth: 2 },
-          { label: 'After move', data: [{ x: y1 * 100, y: P1 }], type: 'scatter', pointRadius: 8, pointBackgroundColor: 'var(--green)', pointBorderColor: 'var(--bg)', pointBorderWidth: 2 }
+          { label: 'Start', data: [{ x: y0 * 100, y: P0 }], type: 'scatter', pointRadius: 8, pointBackgroundColor: '#fb923c', pointBorderColor: '#07090f', pointBorderWidth: 2 },
+          { label: 'After move', data: [{ x: y1 * 100, y: P1 }], type: 'scatter', pointRadius: 8, pointBackgroundColor: '#22d3a0', pointBorderColor: '#07090f', pointBorderWidth: 2 }
         ]
       },
       options: {
@@ -776,8 +776,8 @@ function onBond() {
         responsive: true,
         plugins: { legend: { display: false }, tooltip: { enabled: false } },
         scales: {
-          x: { type: 'linear', title: { display: true, text: 'Yield (%)', color: 'var(--muted)', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: 'var(--muted)', callback: v => v.toFixed(1) + '%' } },
-          y: { title: { display: true, text: 'Price (% par)', color: 'var(--muted)', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: 'var(--muted)' } }
+          x: { type: 'linear', title: { display: true, text: 'Yield (%)', color: '#7a8faa', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: '#7a8faa', callback: v => v.toFixed(1) + '%' } },
+          y: { title: { display: true, text: 'Price (% par)', color: '#7a8faa', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: '#7a8faa' } }
         }
       }
     });
@@ -841,9 +841,9 @@ function onSwap() {
       type: 'line',
       data: {
         datasets: [
-          { label: 'Swap DV01', data: swapLine, borderColor: 'var(--accent)', borderWidth: 2.5, pointRadius: 0, tension: 0 },
-          { label: 'Bond DV01', data: bondLine, borderColor: 'var(--purple)', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, tension: 0 },
-          { label: 'Current', data: currentSwapPt, type: 'scatter', pointRadius: 8, pointBackgroundColor: 'var(--orange)', pointBorderColor: 'var(--bg)', pointBorderWidth: 2 }
+          { label: 'Swap DV01', data: swapLine, borderColor: '#4a9eff', borderWidth: 2.5, pointRadius: 0, tension: 0 },
+          { label: 'Bond DV01', data: bondLine, borderColor: '#a78bfa', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, tension: 0 },
+          { label: 'Current', data: currentSwapPt, type: 'scatter', pointRadius: 8, pointBackgroundColor: '#fb923c', pointBorderColor: '#07090f', pointBorderWidth: 2 }
         ]
       },
       options: {
@@ -852,8 +852,8 @@ function onSwap() {
         responsive: true,
         plugins: { legend: { display: false }, tooltip: { enabled: false } },
         scales: {
-          x: { type: 'linear', title: { display: true, text: 'Rate level (%)', color: 'var(--muted)', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: 'var(--muted)', callback: v => v.toFixed(1) + '%' } },
-          y: { title: { display: true, text: 'DV01 per $1M ($)', color: 'var(--muted)', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: 'var(--muted)', callback: v => '$' + Math.round(v).toLocaleString() } }
+          x: { type: 'linear', title: { display: true, text: 'Rate level (%)', color: '#7a8faa', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: '#7a8faa', callback: v => v.toFixed(1) + '%' } },
+          y: { title: { display: true, text: 'DV01 per $1M ($)', color: '#7a8faa', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: '#7a8faa', callback: v => '$' + Math.round(v).toLocaleString() } }
         }
       }
     });
@@ -914,8 +914,8 @@ function onCMS() {
         datasets: [
           { label: 'Adj +20% vol', data: adjHigh, borderColor: 'rgba(34,211,160,0.2)', backgroundColor: 'rgba(34,211,160,0.06)', borderWidth: 0, pointRadius: 0, fill: '+1', tension: 0.3 },
           { label: 'Adj −20% vol', data: adjLow,  borderColor: 'rgba(34,211,160,0.2)', borderWidth: 0, pointRadius: 0, fill: false, tension: 0.3 },
-          { label: 'CMS Adj', data: adjLine, borderColor: 'var(--green)', borderWidth: 2.5, pointRadius: 0, tension: 0.3 },
-          { label: 'Current', data: currentPt, type: 'scatter', pointRadius: 8, pointBackgroundColor: 'var(--yellow)', pointBorderColor: 'var(--bg)', pointBorderWidth: 2 }
+          { label: 'CMS Adj', data: adjLine, borderColor: '#22d3a0', borderWidth: 2.5, pointRadius: 0, tension: 0.3 },
+          { label: 'Current', data: currentPt, type: 'scatter', pointRadius: 8, pointBackgroundColor: '#fbbf24', pointBorderColor: '#07090f', pointBorderWidth: 2 }
         ]
       },
       options: {
@@ -924,8 +924,8 @@ function onCMS() {
         responsive: true,
         plugins: { legend: { display: false }, tooltip: { enabled: false } },
         scales: {
-          x: { type: 'linear', title: { display: true, text: 'Payment time (years)', color: 'var(--muted)', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: 'var(--muted)' } },
-          y: { title: { display: true, text: 'CMS adjustment (bp)', color: 'var(--muted)', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: 'var(--muted)', callback: v => v.toFixed(1) + 'bp' }, min: 0 }
+          x: { type: 'linear', title: { display: true, text: 'Payment time (years)', color: '#7a8faa', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: '#7a8faa' } },
+          y: { title: { display: true, text: 'CMS adjustment (bp)', color: '#7a8faa', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: '#7a8faa', callback: v => v.toFixed(1) + 'bp' }, min: 0 }
         }
       }
     });
@@ -973,8 +973,8 @@ function onFutures() {
       type: 'line',
       data: {
         datasets: [
-          { label: 'Adjustment', data: line, borderColor: 'var(--accent2)', borderWidth: 2.5, pointRadius: 0, tension: 0.3, fill: { target: 'origin', above: 'rgba(74,158,255,0.07)' } },
-          { label: 'Current', data: currentPt, type: 'scatter', pointRadius: 8, pointBackgroundColor: 'var(--yellow)', pointBorderColor: 'var(--bg)', pointBorderWidth: 2 }
+          { label: 'Adjustment', data: line, borderColor: '#7bc4ff', borderWidth: 2.5, pointRadius: 0, tension: 0.3, fill: { target: 'origin', above: 'rgba(74,158,255,0.07)' } },
+          { label: 'Current', data: currentPt, type: 'scatter', pointRadius: 8, pointBackgroundColor: '#fbbf24', pointBorderColor: '#07090f', pointBorderWidth: 2 }
         ]
       },
       options: {
@@ -983,8 +983,8 @@ function onFutures() {
         responsive: true,
         plugins: { legend: { display: false }, tooltip: { enabled: false } },
         scales: {
-          x: { type: 'linear', title: { display: true, text: 'Expiry (years)', color: 'var(--muted)', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: 'var(--muted)' } },
-          y: { title: { display: true, text: 'Adj (bp) — futures below OIS by this', color: 'var(--muted)', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: 'var(--muted)', callback: v => v.toFixed(2) + 'bp' }, min: 0 }
+          x: { type: 'linear', title: { display: true, text: 'Expiry (years)', color: '#7a8faa', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: '#7a8faa' } },
+          y: { title: { display: true, text: 'Adj (bp) — futures below OIS by this', color: '#7a8faa', font: { size: 11 } }, grid: { color: 'rgba(42,51,71,0.5)' }, ticks: { color: '#7a8faa', callback: v => v.toFixed(2) + 'bp' }, min: 0 }
         }
       }
     });

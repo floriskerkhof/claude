@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rates Products – Field Guide</title>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--surface:#0d1117;--surface2:#161b27;--surface3:#1e2637;
+  --border:#2a3347;--text:#e2e8f0;--muted:#7a8faa;
+  --accent:#4a9eff;--accent2:#7bc4ff;--green:#22d3a0;--red:#f87171;
+  --yellow:#fbbf24;--purple:#a78bfa;--orange:#fb923c;--r:10px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;line-height:1.65;overflow-x:hidden}
+nav{position:sticky;top:0;z-index:100;background:rgba(7,9,15,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:20px;height:50px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+.nav-logo{font-weight:800;font-size:14px;color:var(--accent);white-space:nowrap;flex-shrink:0}
+nav a{color:var(--muted);font-size:13px;text-decoration:none;white-space:nowrap;flex-shrink:0;transition:color .15s}
+nav a:hover{color:var(--text)}
+.nav-spacer{flex:1}
+h1{font-size:clamp(26px,4vw,44px);font-weight:900;line-height:1.15;margin-bottom:14px;background:linear-gradient(135deg,#e2e8f0 30%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+h2{font-size:clamp(18px,2.5vw,24px);font-weight:700;color:var(--accent2);margin-bottom:6px}
+h3{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px}
+h4{font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+p{color:var(--muted);margin-bottom:10px}
+p.lead{color:var(--text);font-size:16px;margin-bottom:18px}
+ul{color:var(--muted);padding-left:18px;margin-bottom:10px}
+ul li{margin-bottom:4px;line-height:1.55}
+strong{color:var(--text)}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:1px;padding:3px 10px;border-radius:20px;text-transform:uppercase;margin-right:6px;margin-bottom:12px}
+.badge-linear{background:rgba(74,158,255,.12);border:1px solid rgba(74,158,255,.28);color:var(--accent)}
+.badge-curve{background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.28);color:var(--purple)}
+.badge-nonlinear{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.28);color:var(--yellow)}
+.badge-coming{background:rgba(122,143,170,.08);border:1px solid rgba(122,143,170,.2);color:var(--muted)}
+
+/* PAGE LAYOUT */
+.page-wrap{display:grid;grid-template-columns:220px 1fr;gap:0;max-width:1200px;margin:0 auto}
+@media(max-width:800px){.page-wrap{grid-template-columns:1fr}}
+
+/* SIDEBAR */
+.sidebar{padding:28px 0 80px 20px;border-right:1px solid var(--border)}
+@media(max-width:800px){.sidebar{display:none}}
+.sb-inner{position:sticky;top:70px}
+.sb-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);padding:14px 12px 5px;opacity:.6}
+.sb-link{display:block;padding:7px 12px;font-size:13px;color:var(--muted);text-decoration:none;border-radius:6px;transition:color .15s,background .15s;margin:1px 8px 1px 0;border-left:2px solid transparent}
+.sb-link:hover{color:var(--text);background:var(--surface2)}
+.sb-link.active{color:var(--accent2);border-left-color:var(--accent);background:rgba(74,158,255,.07)}
+.sb-dim{display:block;padding:6px 12px;font-size:12px;color:var(--muted);opacity:.4;cursor:default}
+
+/* CONTENT */
+.content{padding:0 32px 80px;min-width:0}
+@media(max-width:800px){.content{padding:0 20px 60px}}
+
+/* HERO */
+.hero{padding:52px 0 40px;border-bottom:1px solid var(--border);margin-bottom:0}
+
+/* PRODUCT SECTION */
+.product{padding:48px 0;border-bottom:1px solid var(--border)}
+.product:last-child{border-bottom:none}
+.product-header{margin-bottom:20px}
+.product-tagline{font-size:13px;color:var(--muted);margin-top:4px;margin-bottom:0;font-style:italic}
+
+/* CASH FLOW DIAGRAM */
+.cf-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;margin:20px 0;overflow-x:auto}
+.cf-row{display:flex;align-items:center;gap:0;min-width:380px}
+.cf-box{padding:10px 18px;border-radius:8px;text-align:center;font-size:13px;font-weight:700;white-space:nowrap;min-width:90px}
+.cf-box-pay{border:2px solid var(--red);color:var(--red)}
+.cf-box-recv{border:2px solid var(--green);color:var(--green)}
+.cf-box-neutral{border:2px solid var(--border);color:var(--muted)}
+.cf-box-market{border:2px solid var(--accent);color:var(--accent)}
+.cf-middle{flex:1;display:flex;flex-direction:column;gap:10px;padding:0 16px}
+.cf-arrow{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;white-space:nowrap}
+.cf-arrow-line{flex:1;height:2px;border-radius:1px}
+.cf-lbl{font-size:12px;font-weight:400;color:var(--muted);display:block;margin-top:1px}
+
+/* INFO GRID */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+@media(max-width:600px){.info-grid{grid-template-columns:1fr}}
+.info-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+
+/* PARAMS TABLE */
+.params-table{width:100%;border-collapse:collapse;font-size:13px;margin:16px 0}
+.params-table th{padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.params-table td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+.params-table td:first-child{color:var(--accent2);font-weight:600}
+.params-table tr:last-child td{border-bottom:none}
+
+/* CALLOUT */
+.callout{border-radius:var(--r);padding:16px 20px;margin:16px 0;font-size:14px}
+.callout-blue{background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.18)}
+.callout-green{background:rgba(34,211,160,.06);border:1px solid rgba(34,211,160,.18)}
+.callout-yellow{background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.18)}
+.callout-red{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.18)}
+.callout-purple{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.18)}
+.callout-title{font-weight:700;margin-bottom:6px}
+.callout-blue .callout-title{color:var(--accent2)}
+.callout-green .callout-title{color:var(--green)}
+.callout-yellow .callout-title{color:var(--yellow)}
+.callout-red .callout-title{color:var(--red)}
+.callout-purple .callout-title{color:var(--purple)}
+
+/* GREEK CHIPS */
+.greek-row{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.greek-chip{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px}
+.greek-name{font-weight:700;font-size:13px;margin-bottom:2px}
+.greek-val{color:var(--muted);line-height:1.4}
+.greek-chip.has-dv01 .greek-name{color:var(--accent2)}
+.greek-chip.has-gamma .greek-name{color:var(--green)}
+.greek-chip.has-vega .greek-name{color:var(--yellow)}
+.greek-chip.has-theta .greek-name{color:var(--red)}
+.greek-chip.has-none .greek-name{color:var(--muted)}
+
+/* COLLAPSIBLE */
+.coll{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin-top:14px;overflow:hidden}
+.coll-btn{width:100%;text-align:left;padding:11px 16px;background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.coll-btn:hover{color:var(--text)}
+.coll-arrow{transition:transform .25s;display:inline-block}
+.coll-btn.open .coll-arrow{transform:rotate(180deg)}
+.coll-body{display:none;padding:14px 16px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);line-height:1.65}
+.coll-body.open{display:block}
+.coll-body p{margin-bottom:8px}
+.coll-body p:last-child{margin:0}
+.formula-box{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:10px 0;overflow-x:auto;text-align:center}
+
+/* DIVIDER / SECTION LABEL */
+.divider{display:flex;align-items:center;gap:12px;margin:36px 0 24px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* GLOSSARY */
+.gloss-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.gt{position:relative;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;cursor:default;font-size:13px;transition:border-color .15s}
+.gt:hover{border-color:var(--accent)}
+.gt-word{color:var(--accent2);font-weight:600}
+.gt-tip{display:none;position:absolute;bottom:calc(100% + 8px);left:0;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:12px;color:var(--text);line-height:1.5;width:240px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.55)}
+.gt:hover .gt-tip{display:block}
+
+footer{text-align:center;padding:28px;font-size:12px;color:var(--muted);border-top:1px solid var(--border)}
+
+/* EXAMPLE BOX */
+.example-box{background:var(--surface3);border-left:3px solid var(--accent);border-radius:0 var(--r) var(--r) 0;padding:14px 18px;margin:16px 0;font-size:13px}
+.example-box strong{color:var(--accent2)}
+
+/* COMING SOON */
+.coming-soon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:16px}
+.coming-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;opacity:.55}
+.coming-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.coming-desc{font-size:12px;color:var(--muted);line-height:1.5}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">Rates Products</span>
+  <a href="#irs">IRS</a>
+  <a href="#ois">OIS</a>
+  <a href="#fra">FRA</a>
+  <a href="#futures">Futures</a>
+  <a href="#basis">Basis</a>
+  <a href="#cms">CMS</a>
+  <a href="#swaption">Swaption</a>
+  <a href="#capfloor">Cap/Floor</a>
+  <span class="nav-spacer"></span>
+  <a href="convexity.html" style="color:var(--accent)">Convexity →</a>
+</nav>
+
+<div class="page-wrap">
+
+<!-- ───── SIDEBAR ───── -->
+<aside class="sidebar">
+  <div class="sb-inner">
+    <div class="sb-section">Linear</div>
+    <a class="sb-link" href="#irs">Interest Rate Swap</a>
+    <a class="sb-link" href="#ois">OIS / SOFR Swap</a>
+    <a class="sb-link" href="#fra">FRA</a>
+    <a class="sb-link" href="#futures">SOFR Futures</a>
+    <a class="sb-link" href="#basis">Basis Swap</a>
+    <div class="sb-section">Curve Products</div>
+    <a class="sb-link" href="#cms">CMS Swap</a>
+    <div class="sb-section">Non-Linear</div>
+    <a class="sb-link" href="#swaption">Swaption</a>
+    <a class="sb-link" href="#capfloor">Cap / Floor</a>
+    <div class="sb-section">Coming Soon</div>
+    <span class="sb-dim">Cross-Currency Swap</span>
+    <span class="sb-dim">Inflation Swap</span>
+    <span class="sb-dim">Bermudan Swaption</span>
+  </div>
+</aside>
+
+<!-- ───── CONTENT ───── -->
+<main class="content">
+
+<!-- HERO -->
+<div class="hero" id="top">
+  <h1>Rates Products<br>Field Guide</h1>
+  <p class="lead">Every instrument on the rates desk explained from the cash flows up — what it is, why it exists, and what can surprise you.</p>
+  <div class="callout callout-blue">
+    <div class="callout-title">How to use this page</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)">Each product section covers: the cash flow diagram, why traders use it, key parameters, risk sensitivities (Greeks), and the most common misconception. The CMS section is the most detailed — it's the most misunderstood product on the desk. Use the sidebar to jump directly to any product. This page is designed to grow; if a product you need is missing, it's in "Coming Soon."</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     INTEREST RATE SWAP
+══════════════════════════════════════════ -->
+<div class="product" id="irs">
+  <div class="product-header">
+    <span class="badge badge-linear">Linear</span>
+    <h2>Interest Rate Swap</h2>
+    <p class="product-tagline">Exchange a fixed rate for a floating rate — or vice versa — without exchanging principal.</p>
+  </div>
+
+  <p class="lead">An IRS is the workhorse of the rates market. One party pays a fixed rate; the other pays a floating rate (historically LIBOR, now SOFR). Only the net difference changes hands on each payment date. No principal is exchanged.</p>
+
+  <div class="callout callout-blue">
+    <div class="callout-title">Why it exists</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)">A company that issues fixed-rate bonds but has floating-rate assets wants to convert its fixed liability into a floating one. A bank that lends at fixed rates but borrows in the overnight market wants to lock in a fixed income. The IRS separates the rate structure from the balance sheet — both sides get the exposure they want without refinancing.</p>
+  </div>
+
+  <div class="cf-wrap">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:12px">Cash flows (semi-annual, notional $100M, 5y swap at 3.50%)</div>
+    <div class="cf-row">
+      <div class="cf-box cf-box-pay">Fixed<br>Payer</div>
+      <div class="cf-middle">
+        <div class="cf-arrow" style="color:var(--red)">
+          <div class="cf-arrow-line" style="background:var(--red)"></div>
+          <span>Fixed 3.50% → $1.75M every 6M</span>
+        </div>
+        <div class="cf-arrow" style="color:var(--green)">
+          <span>← SOFR (resets daily, paid in arrears)</span>
+          <div class="cf-arrow-line" style="background:var(--green)"></div>
+        </div>
+      </div>
+      <div class="cf-box cf-box-recv">Fixed<br>Receiver</div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:12px;margin-bottom:0">On each payment date only the net is exchanged. If SOFR averaged 3.20%, fixed payer sends $150k (0.30% × $100M × 0.5). If SOFR averaged 3.80%, fixed receiver sends $150k. No principal moves.</p>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>Use cases</h4>
+      <ul>
+        <li>Corporate treasurer converting fixed bond liability to floating</li>
+        <li>Bank hedging fixed-rate loan book against rising SOFR</li>
+        <li>Rates trader taking a directional view on rate level</li>
+        <li>Asset manager matching liability duration</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>Key parameters</h4>
+      <table class="params-table">
+        <tr><td>Notional</td><td>Reference amount for payment calc; not exchanged</td></tr>
+        <tr><td>Tenor</td><td>Total life of the swap (e.g., 5y, 10y, 30y)</td></tr>
+        <tr><td>Fixed rate</td><td>Set at inception; the "par rate" makes value = 0</td></tr>
+        <tr><td>Floating ref</td><td>SOFR (US), SONIA (UK), €STR (EUR)</td></tr>
+        <tr><td>Day count</td><td>ACT/360 for floating (US); 30/360 for fixed</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="greek-row">
+    <div class="greek-chip has-dv01">
+      <div class="greek-name">DV01</div>
+      <div class="greek-val">Large. ~$900/bp per $1M for a 10y swap at 4%. Equals annuity × 0.0001 × notional.</div>
+    </div>
+    <div class="greek-chip has-gamma">
+      <div class="greek-name">Gamma (convexity)</div>
+      <div class="greek-val">Small but non-zero. DV01 shrinks as rates rise, grows as rates fall. See the <a href="convexity.html#swap" style="color:var(--accent)">Convexity page</a>.</div>
+    </div>
+    <div class="greek-chip has-none">
+      <div class="greek-name">Vega</div>
+      <div class="greek-val">Zero. Cash flows are deterministic once SOFR is observed. Vol doesn't matter.</div>
+    </div>
+    <div class="greek-chip has-none">
+      <div class="greek-name">Theta</div>
+      <div class="greek-val">Near zero for a par swap. The fixed and floating legs approximately offset each other in carry.</div>
+    </div>
+  </div>
+
+  <div class="callout callout-yellow">
+    <div class="callout-title">Common misconception</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)"><strong>Both legs don't pay at the same time.</strong> The fixed leg typically pays semi-annually on 30/360. The floating (SOFR) leg pays quarterly or semi-annually in arrears, compounded daily during the period. On payment dates you net the two, but the accrual calendars may differ — off-the-run swaps can have mismatched payment dates that create unexpected cash flows.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     OIS / SOFR SWAP
+══════════════════════════════════════════ -->
+<div class="product" id="ois">
+  <div class="product-header">
+    <span class="badge badge-linear">Linear</span>
+    <h2>OIS / SOFR Swap</h2>
+    <p class="product-tagline">A swap where the floating leg is the daily compounded overnight rate — now the standard for collateralised derivatives.</p>
+  </div>
+
+  <p class="lead">An Overnight Index Swap (OIS) is technically a specific type of IRS where the floating rate is an overnight rate compounded daily over each payment period. In the US this means SOFR; in the UK, SONIA; in the Eurozone, €STR. Post-LIBOR, most vanilla swaps are now OIS swaps.</p>
+
+  <div class="callout callout-blue">
+    <div class="callout-title">Why OIS became the standard</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)">LIBOR was a forward-looking rate (set at the start of each period) with a built-in bank credit risk premium — it reflected what banks would charge each other for 3-month unsecured lending. SOFR is backward-looking (the average is calculated after the period) and nearly credit-risk-free (it's based on overnight Treasury repo). Post-2023, SOFR is the standard floating reference for USD rates. The shift matters for pricing, discounting, and risk because SOFR ≠ LIBOR by the LIBOR-OIS spread (typically 10–30bp in normal markets).</p>
+  </div>
+
+  <div class="cf-wrap">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:12px">How SOFR compounding works on the floating leg</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.8">
+      Period: Jan 1 – Mar 31 (91 days). SOFR is observed each business day.<br>
+      Compounded SOFR = <span style="color:var(--accent2);font-weight:600">[∏(1 + SOFR_i × d_i/360) − 1] × 360/91</span><br>
+      where d_i = 1 (weekday) or 3 (Friday). Result is annualised and paid on Mar 31.
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>OIS vs IBOR swap — key differences</h4>
+      <ul>
+        <li><strong>Backward-looking:</strong> SOFR rate isn't known until the period ends (5-day lookback common)</li>
+        <li><strong>No term premium:</strong> SOFR has no bank credit risk, so OIS ≈ risk-free rate</li>
+        <li><strong>Discounting:</strong> Collateralised derivatives are discounted at OIS — this is now the default</li>
+        <li><strong>Convexity:</strong> SOFR-in-arrears vs SOFR-in-advance creates a small convexity difference</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>Common OIS tenors</h4>
+      <table class="params-table">
+        <tr><td>1W, 1M</td><td>Monetary policy and short-term liquidity</td></tr>
+        <tr><td>3M, 6M, 1Y</td><td>Front-end rates positioning</td></tr>
+        <tr><td>2Y–10Y</td><td>Duration hedging, asset/liability mgmt</td></tr>
+        <tr><td>20Y–50Y</td><td>Pension / insurance liability matching</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="callout callout-yellow">
+    <div class="callout-title">The publication lag trap</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)">SOFR is published the next business day. For a swap paying on date T, the last few days of SOFR are unknown at settlement. The market convention uses a "5-day lookback" — the SOFR from 5 days ago is used for the last 5 days of the period. This means you need to understand which lookback convention your swap uses before you can settle it accurately.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     FRA
+══════════════════════════════════════════ -->
+<div class="product" id="fra">
+  <div class="product-header">
+    <span class="badge badge-linear">Linear</span>
+    <h2>Forward Rate Agreement (FRA)</h2>
+    <p class="product-tagline">Lock in a single interest rate for a single future period — the simplest building block of the yield curve.</p>
+  </div>
+
+  <p class="lead">A FRA is a single-period agreement to exchange a fixed rate for the floating rate over a defined future period. Unlike an IRS which has many cash flows, a FRA has exactly one. It is essentially a one-period swap settled at the start of the reference period (with a present-value discount).</p>
+
+  <div class="cf-wrap">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:12px">3×6 FRA — locks in the 3-month rate starting in 3 months</div>
+    <div class="cf-row">
+      <div class="cf-box cf-box-pay" style="font-size:12px">FRA<br>Buyer</div>
+      <div class="cf-middle">
+        <div class="cf-arrow" style="color:var(--red)">
+          <div class="cf-arrow-line" style="background:var(--red)"></div>
+          <span>Fixed "FRA rate" (e.g. 4.80%)</span>
+        </div>
+        <div class="cf-arrow" style="color:var(--green)">
+          <span>← Actual SOFR rate for the period</span>
+          <div class="cf-arrow-line" style="background:var(--green)"></div>
+        </div>
+      </div>
+      <div class="cf-box cf-box-recv" style="font-size:12px">FRA<br>Seller</div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:12px;margin-bottom:0">Settlement is paid at the <em>start</em> of the reference period (not the end), so the cash flow is discounted at the actual floating rate: settlement = (SOFR − FRA_rate) × notional × days/360 / (1 + SOFR × days/360).</p>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>Notation: "3×6 FRA"</h4>
+      <p style="font-size:13px">Read as "3-by-6." Starts in 3 months, ends 6 months from today. The reference period is the 3 months between month 3 and month 6. A "6×12 FRA" starts in 6 months and ends in 12 months.</p>
+    </div>
+    <div class="info-card">
+      <h4>FRA vs SOFR futures</h4>
+      <ul style="font-size:13px">
+        <li>FRA is OTC (bilateral); futures are exchange-traded</li>
+        <li>Futures have daily margin (creates convexity bias)</li>
+        <li>FRA rate = futures rate + convexity adjustment</li>
+        <li>FRAs are increasingly replaced by OIS swaps</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="greek-row">
+    <div class="greek-chip has-dv01">
+      <div class="greek-name">DV01</div>
+      <div class="greek-val">notional × period_length × 0.0001. A $100M 3×6 FRA: $100M × 0.25 × 0.0001 = $2,500/bp.</div>
+    </div>
+    <div class="greek-chip has-none">
+      <div class="greek-name">Gamma / Vega</div>
+      <div class="greek-val">Effectively zero. Single payment, linear in the floating rate.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SOFR FUTURES
+══════════════════════════════════════════ -->
+<div class="product" id="futures">
+  <div class="product-header">
+    <span class="badge badge-linear">Linear</span>
+    <h2>SOFR Futures</h2>
+    <p class="product-tagline">Exchange-traded contract on the compounded SOFR rate — liquid, transparent, but with a systematic convexity bias vs OIS forwards.</p>
+  </div>
+
+  <p class="lead">CME 3-Month SOFR futures are priced as 100 minus the annualised compounded SOFR rate for the reference quarter. A price of 95.25 implies a rate of 4.75%. They are the most liquid short-rate instrument in the world and the primary tool for expressing near-term Fed policy views.</p>
+
+  <div class="callout callout-blue">
+    <div class="callout-title">Why futures trade at a discount to OIS (the convexity adjustment)</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)">Futures are marked to market daily. When rates rise, the short futures position gains immediately and can reinvest margin at the higher rate. When rates fall, the long position loses and must fund margin at the lower rate. This daily settlement asymmetry benefits short futures / hurts long futures — so a rational buyer of futures accepts a slightly lower rate (pays a slightly higher price). The futures rate is therefore systematically below the equivalent OIS forward rate. The gap = ½ × σ² × T₁ × T₂. At 100bp vol, a 2y contract is ~0.3bp cheap; a 5y contract is ~1.3bp cheap. See the <a href="convexity.html#futures" style="color:var(--accent)">Convexity page</a> for the full strip calculation.</p>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>Contract specs (3M SOFR)</h4>
+      <table class="params-table">
+        <tr><td>Notional</td><td>$1M × 25 = $25M per contract</td></tr>
+        <tr><td>DV01</td><td>$25/bp per contract</td></tr>
+        <tr><td>Tick size</td><td>0.005 = ½bp = $12.50/contract</td></tr>
+        <tr><td>Settlement</td><td>Cash, vs compounded SOFR for quarter</td></tr>
+        <tr><td>Listed</td><td>~40 quarterly contracts (10 years)</td></tr>
+      </table>
+    </div>
+    <div class="info-card">
+      <h4>Use cases</h4>
+      <ul>
+        <li>Expressing a view on Fed hikes/cuts</li>
+        <li>Hedging short-dated floating rate exposure</li>
+        <li>Stripping a forward rate curve (with convexity adjustment)</li>
+        <li>Spreading front contracts vs back contracts (curve steepener/flattener)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-yellow">
+    <div class="callout-title">The DV01 mismatch with swaps</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)">$25/bp per contract sounds small but adds up fast. To match a $10M 2y OIS swap (DV01 ~$2,000/bp), you need 80 contracts. The liquidity is deep enough near the front but thins out beyond the 2y point — at 5y and beyond, OIS swaps are typically more liquid than the equivalent futures strip.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     BASIS SWAP
+══════════════════════════════════════════ -->
+<div class="product" id="basis">
+  <div class="product-header">
+    <span class="badge badge-linear">Linear</span>
+    <h2>Basis Swap</h2>
+    <p class="product-tagline">Exchange one floating rate for another — capturing the spread between two market segments that should, in theory, be the same.</p>
+  </div>
+
+  <p class="lead">A basis swap exchanges two floating-rate streams — no fixed leg. The most common USD basis swaps are SOFR vs Fed Funds (the FF/SOFR basis), 1M SOFR vs 3M SOFR, and in cross-currency, USD SOFR vs EUR €STR. One side typically pays flat; the other pays with a spread (the "basis").</p>
+
+  <div class="cf-wrap">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:12px">Example: 5y SOFR vs 3M SOFR basis swap</div>
+    <div class="cf-row">
+      <div class="cf-box" style="border:2px solid var(--accent);color:var(--accent);font-size:12px">Bank A</div>
+      <div class="cf-middle">
+        <div class="cf-arrow" style="color:var(--accent)">
+          <div class="cf-arrow-line" style="background:var(--accent)"></div>
+          <span>Daily compounded SOFR flat</span>
+        </div>
+        <div class="cf-arrow" style="color:var(--purple)">
+          <span>← 3M SOFR term + 5bp spread</span>
+          <div class="cf-arrow-line" style="background:var(--purple)"></div>
+        </div>
+      </div>
+      <div class="cf-box" style="border:2px solid var(--purple);color:var(--purple);font-size:12px">Bank B</div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:12px;margin-bottom:0">The "basis" (5bp here) is the market price of the spread between these two rates. It fluctuates with funding conditions, credit perceptions, and supply/demand in each market.</p>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>Why basis ≠ zero</h4>
+      <p style="font-size:13px">In theory, compounded daily SOFR over 3 months equals the 3M SOFR term rate. In practice they differ because:
+      <ul style="margin-top:6px">
+        <li>Repo supply/demand fluctuates daily (SOFR is repo-based)</li>
+        <li>Quarter-end and year-end have large rate spikes</li>
+        <li>3M SOFR term has a forward-looking premium</li>
+        <li>Different counterparties access each market at different costs</li>
+      </ul></p>
+    </div>
+    <div class="info-card">
+      <h4>Common basis swaps</h4>
+      <table class="params-table">
+        <tr><td>FF/SOFR</td><td>Fed Funds vs SOFR; tightens on stress</td></tr>
+        <tr><td>1M/3M SOFR</td><td>Tenor basis; reflects term premium</td></tr>
+        <tr><td>USD/EUR xccy</td><td>SOFR vs €STR + spread; FX-implied</td></tr>
+        <tr><td>SOFR/T-Bill</td><td>Repo vs government bill; credit stress</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="callout callout-yellow">
+    <div class="callout-title">Basis swaps look boring until they're not</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)">The FF/SOFR basis trades in a tight 5bp range for months, then blows out 30bp in a liquidity event. Banks that had large basis positions thought they were nearly flat — until they weren't. Basis is carry that tends to look good until a credit or funding event reprices everything. In March 2020, some basis swaps moved 50bp in a week.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CMS SWAP  ← most detailed section
+══════════════════════════════════════════ -->
+<div class="product" id="cms">
+  <div class="product-header">
+    <span class="badge badge-curve">Curve Product</span>
+    <h2>CMS Swap (Constant Maturity Swap)</h2>
+    <p class="product-tagline">Receive the 10-year swap rate every quarter for 5 years — not a fixed rate, not SOFR, but the <em>current long-term rate</em> at each reset.</p>
+  </div>
+
+  <p class="lead">A CMS swap is like a regular swap with a twist: instead of one leg paying a fixed rate or overnight SOFR, one leg pays the <em>prevailing n-year swap rate</em> at each reset date. CMS stands for Constant Maturity Swap because the "maturity" of the underlying rate reference stays constant (always 10y, always 2y, etc.) even as time passes.</p>
+
+  <div class="callout callout-blue">
+    <div class="callout-title">Start here — the key insight</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)">In a vanilla 5y swap receiving fixed 4%, you lock in 4% for 5 years. In a 5y CMS10 swap receiving the 10y rate quarterly, you receive "whatever the 10y swap rate is" four times a year for 5 years. If 10y rates go to 6%, you receive 6%. If they go to 3%, you receive 3%. The CMS rate floats, but it floats with the <em>long end of the curve</em>, not with overnight rates.</p>
+  </div>
+
+  <div class="cf-wrap">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:12px">5-year CMS10 swap — receive CMS10, pay SOFR + spread</div>
+    <div class="cf-row">
+      <div class="cf-box" style="border:2px solid var(--purple);color:var(--purple);font-size:12px">CMS<br>Receiver</div>
+      <div class="cf-middle">
+        <div class="cf-arrow" style="color:var(--purple)">
+          <span>← 10y Swap Rate (observed quarterly, resets each period)</span>
+          <div class="cf-arrow-line" style="background:var(--purple)"></div>
+        </div>
+        <div class="cf-arrow" style="color:var(--accent)">
+          <div class="cf-arrow-line" style="background:var(--accent)"></div>
+          <span>SOFR + X bp (the CMS spread, set at inception)</span>
+        </div>
+      </div>
+      <div class="cf-box" style="border:2px solid var(--accent);color:var(--accent);font-size:12px">CMS<br>Payer</div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:12px;margin-bottom:0">The CMS spread X is set so the swap has zero value at inception. It is <em>not</em> zero — it embeds the convexity adjustment, the forward slope of the curve, and the vol premium. If the 10y rate is above SOFR + X, the CMS receiver profits.</p>
+  </div>
+
+  <div class="divider">Step by step — understanding the cash flows</div>
+
+  <div class="info-card" style="margin-bottom:14px">
+    <h4>Quarter 1: CMS10 resets to 4.30%</h4>
+    <p style="font-size:13px;margin-bottom:6px">On Jan 1, the market 10y swap rate is 4.30%. This rate is fixed for the quarter. On Mar 31:</p>
+    <ul style="font-size:13px">
+      <li>CMS receiver gets: 4.30% × $100M × 91/360 = <strong style="color:var(--green)">$1,085,556</strong></li>
+      <li>CMS payer gets: (SOFR avg + X) × $100M × 91/360 (e.g., if SOFR = 5.20%, X = −60bp → 4.60% → $1,161,111)</li>
+      <li>Net: CMS receiver pays $75,556 this quarter (10y is below funding)</li>
+    </ul>
+  </div>
+
+  <div class="info-card" style="margin-bottom:14px">
+    <h4>Quarter 3: CMS10 resets to 5.80% (curve steepens)</h4>
+    <p style="font-size:13px;margin-bottom:6px">Six months later, the curve has steepened dramatically:</p>
+    <ul style="font-size:13px">
+      <li>CMS receiver gets: 5.80% × $100M × 91/360 = <strong style="color:var(--green)">$1,463,889</strong></li>
+      <li>CMS payer gets: (5.20% avg SOFR − 60bp = 4.60%) × $100M × 91/360 = $1,161,111</li>
+      <li>Net: CMS receiver receives $302,778 this quarter (long end has risen sharply)</li>
+    </ul>
+  </div>
+
+  <p style="font-size:13px;color:var(--muted)">The CMS receiver profits when the 10y rate is above their breakeven (SOFR + X). The product is essentially a bet that the <strong style="color:var(--text)">long end of the curve will outperform SOFR</strong> — a steepener view expressed as a swap.</p>
+
+  <div class="divider">Who uses CMS and why</div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>Insurance companies</h4>
+      <p style="font-size:13px">Insurers have 20–30y liabilities. They want exposure to the 10y rate — high 10y rates mean more investment income. Receiving CMS10 for 10 years gives them floating exposure to the long end without committing to a 10y fixed rate. If rates rise, their CMS receipts rise too, matching their reinvestment opportunity.</p>
+    </div>
+    <div class="info-card">
+      <h4>Mortgage banks</h4>
+      <p style="font-size:13px">Mortgage prepayment speeds correlate strongly with the 10y rate (low rates → refinancing wave). A bank receiving CMS10 hedges prepayment: when 10y rates fall (more prepayments, less income from mortgages), the CMS receipt also falls, but the bank receives SOFR + spread which may rise in a Fed-cutting environment.</p>
+    </div>
+    <div class="info-card">
+      <h4>Relative value traders</h4>
+      <p style="font-size:13px">A CMS2 vs CMS10 spread swap receives the 10y rate and pays the 2y rate (or vice versa). This is a pure curve steepener/flattener with no outright duration — a clean bet on the 2s10s slope.</p>
+    </div>
+    <div class="info-card">
+      <h4>Structured product desks</h4>
+      <p style="font-size:13px">Retail structured notes often pay "CMS10 × 5" or "CMS10 − CMS2 + 150bp." The desk hedges these exposures using CMS swaps and CMS caps/floors. Understanding CMS is essential to understanding what's inside many retail rates products.</p>
+    </div>
+  </div>
+
+  <div class="divider">The convexity adjustment — why fair CMS ≠ forward swap rate</div>
+
+  <div class="callout callout-purple">
+    <div class="callout-title">This is the part most people get wrong</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Intuition says: <em>"The fair CMS10 rate for a payment in 2 years should equal the 2y forward 10y swap rate."</em> That is wrong. The fair rate is higher. The difference — the convexity adjustment — can run 5–15bp depending on volatility and payment timing.</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:0">If you price a CMS product ignoring this adjustment, you will systematically give away money to whoever you trade with.</p>
+  </div>
+
+  <h3 style="margin-top:20px;margin-bottom:10px">The Jensen's inequality argument</h3>
+  <p>To see why, think about what the CMS receiver actually receives. At time T, they get the market 10y rate S_T. But the <em>value</em> of receiving S_T at time T is not just S_T — it's S_T discounted at the T-maturity discount factor P(0,T). The trouble is that S_T and P(0,T) are correlated: when S_T is high (rates high), P(0,T) is low (high rates → smaller discount factors). The payment is "cheap" when the rate is high, and "expensive" when the rate is low.</p>
+
+  <div class="example-box">
+    <strong>Concrete example:</strong> Suppose S_T can be 3% or 7% with equal probability (E[S_T] = 5%). Under the forward measure, the OIS forward rate F = 5%.<br><br>
+    The CMS receiver receives S_T, discounted at the T-forward discount factor. The 10y annuity A(7%) ≈ 6.9y. The annuity A(3%) ≈ 8.5y. Under the T-forward measure, high-rate scenarios are <em>over-weighted</em> (because the annuity is smaller, the payment measure assigns more weight to that scenario). The result: E<sup>T</sup>[S_T] > 5%.<br><br>
+    The fair CMS rate might be 5.08% — the receiver must be offered 8bp more than the forward swap rate to compensate for this convexity bias.
+  </div>
+
+  <h3 style="margin-top:20px;margin-bottom:10px">What drives the size of the adjustment?</h3>
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>Larger adjustment when:</h4>
+      <ul style="font-size:13px">
+        <li><strong>Higher vol</strong> — more rate dispersion = more Jensen's effect. At 120bp vol vs 80bp vol, the adjustment roughly doubles.</li>
+        <li><strong>Longer payment time</strong> — the further in the future the payment, the more vol can accumulate. Adjustment grows roughly as σ²×T.</li>
+        <li><strong>Longer swap tenor</strong> — a longer underlying swap has a more curved annuity function. CMS30 has more adjustment than CMS5 for the same payment time.</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h4>Typical sizes</h4>
+      <table class="params-table">
+        <tr><th>Structure</th><th>Approx adj</th></tr>
+        <tr><td>CMS10, pay in 1y, 80bp vol</td><td>+3 bp</td></tr>
+        <tr><td>CMS10, pay in 5y, 80bp vol</td><td>+12 bp</td></tr>
+        <tr><td>CMS10, pay in 2y, 120bp vol</td><td>+10 bp</td></tr>
+        <tr><td>CMS30, pay in 2y, 80bp vol</td><td>+18 bp</td></tr>
+        <tr><td>CMS2, pay in 2y, 80bp vol</td><td>+2 bp</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="coll">
+    <button class="coll-btn" onclick="toggleColl(this)">Deep dive — the measure-change mathematics <span class="coll-arrow">▼</span></button>
+    <div class="coll-body">
+      <p>In the swap market, the natural measure for pricing is the <em>annuity measure</em> Q<sup>A</sup>, with numeraire A(S_T) (the present value of the swap annuity). Under Q<sup>A</sup>, the forward swap rate is a martingale: E<sup>A</sup>[S_T] = F.</p>
+      <p>A CMS payment at time T is priced under the <em>T-forward measure</em> Q<sup>T</sup>, with numeraire P(0,T). To compute E<sup>T</sup>[S_T], we change measure via the Radon-Nikodym derivative:</p>
+      <div class="formula-box">\[\mathbb{E}^T[S_T] = \frac{\mathbb{E}^A[S_T \cdot A(S_T)]}{\mathbb{E}^A[A(S_T)]}\]</div>
+      <p>Since A(S) is a decreasing function of S (when rates are high, the annuity is small), S and A(S) are negatively correlated. By Jensen's inequality applied to the covariance:</p>
+      <div class="formula-box">\[\mathbb{E}^A[S_T \cdot A(S_T)] > \mathbb{E}^A[S_T] \cdot \mathbb{E}^A[A(S_T)] = F \cdot \mathbb{E}^A[A(S_T)]\]</div>
+      <p>Therefore E<sup>T</sup>[S_T] > F. The adjustment in bp is computed numerically: assume S_T ~ N(F, σ_N²·T) under Q<sup>A</sup>, then integrate S × A(S) × φ(S) and divide by ∫ A(S) × φ(S)dS. This is what the <a href="convexity.html#cms" style="color:var(--accent)">CMS calculator on the Convexity page</a> computes.</p>
+      <p>A simple closed-form approximation (linear annuity model):</p>
+      <div class="formula-box">\[\text{CMS adj} \approx \sigma_N^2 \cdot T \cdot \frac{D_A}{1 + F \cdot D_A}\]</div>
+      <p>where D_A is the modified duration of the annuity (approximately the swap's modified duration) and σ_N is the normal vol in decimal (e.g., 0.008 for 80bp/√yr).</p>
+    </div>
+  </div>
+
+  <div class="callout callout-yellow" style="margin-top:20px">
+    <div class="callout-title">The CMS spread option — the most common CMS variant</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)">A <strong>CMS spread option</strong> pays max(0, CMS10 − CMS2 − K) at expiry — essentially a call option on the 2s10s slope. It's zero-cost when the slope equals the strike K, and pays off if the curve steepens beyond K. Pricing requires not just CMS convexity adjustments for each tenor, but also the <em>correlation</em> between CMS10 and CMS2 rates. The correlation is typically 90–95%, meaning the spread has much lower vol than either leg alone.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SWAPTION
+══════════════════════════════════════════ -->
+<div class="product" id="swaption">
+  <div class="product-header">
+    <span class="badge badge-nonlinear">Non-Linear</span>
+    <h2>Swaption</h2>
+    <p class="product-tagline">The right, but not the obligation, to enter an interest rate swap at a future date at a pre-agreed fixed rate.</p>
+  </div>
+
+  <p class="lead">A swaption gives you optionality on rates. A <em>payer swaption</em> is the right to pay fixed (enter a payer swap) — it profits if rates rise above the strike. A <em>receiver swaption</em> is the right to receive fixed — it profits if rates fall below the strike. Swaptions are the primary way to buy or sell interest rate volatility.</p>
+
+  <div class="callout callout-blue">
+    <div class="callout-title">Why it exists</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)">A corporate treasurer knows they will issue a 10y bond in 6 months. They don't know what rates will be then, but they want protection against a spike. They buy a 6M × 10Y payer swaption (6-month expiry, 10-year underlying swap). If rates rise, they exercise — they enter a receive-fixed swap that offsets the higher funding cost on the bond. If rates fall, they let it lapse and benefit from the lower bond yield. The cost is the premium.</p>
+  </div>
+
+  <div class="cf-wrap">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:12px">1Y × 10Y payer swaption — strike 4.50%, pay premium upfront</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.8">
+      <strong style="color:var(--text)">Today:</strong> Buyer pays ~120bp premium for the right to enter a 10y payer swap at 4.50% in 1 year.<br>
+      <strong style="color:var(--green)">In 1 year (rates at 5.20%):</strong> Buyer exercises. Enters 10y swap paying 4.50% vs receiving SOFR — immediately worth 70bp × 10y annuity ≈ 6.0% of notional.<br>
+      <strong style="color:var(--red)">In 1 year (rates at 3.80%):</strong> Buyer lets the swaption expire worthless. Net cost = 120bp premium.
+    </div>
+  </div>
+
+  <h3 style="margin-top:20px;margin-bottom:10px">Swaption matrix — how traders quote vol</h3>
+  <p style="font-size:13px">Swaptions are identified by two dimensions: expiry (time until exercise) × tenor (length of the underlying swap). A "1×10" is a 1-year expiry on a 10-year swap. A "5×5" is 5-year expiry on a 5-year swap. Vol is quoted on this 2D matrix and the surface has a rich smile structure.</p>
+
+  <div style="overflow-x:auto;margin:16px 0">
+    <table class="params-table">
+      <thead><tr><th>Expiry \ Tenor</th><th>2Y</th><th>5Y</th><th>10Y</th><th>30Y</th></tr></thead>
+      <tbody>
+        <tr><td>1M</td><td style="color:var(--muted)">~55bp</td><td style="color:var(--muted)">~65bp</td><td style="color:var(--muted)">~75bp</td><td style="color:var(--muted)">~70bp</td></tr>
+        <tr><td>3M</td><td style="color:var(--muted)">~65bp</td><td style="color:var(--muted)">~75bp</td><td style="color:var(--muted)">~82bp</td><td style="color:var(--muted)">~78bp</td></tr>
+        <tr><td>1Y</td><td style="color:var(--muted)">~80bp</td><td style="color:var(--muted)">~88bp</td><td style="color:var(--muted)">~90bp</td><td style="color:var(--muted)">~85bp</td></tr>
+        <tr><td>5Y</td><td style="color:var(--muted)">~95bp</td><td style="color:var(--muted)">~100bp</td><td style="color:var(--muted)">~98bp</td><td style="color:var(--muted)">~90bp</td></tr>
+        <tr><td>10Y</td><td style="color:var(--muted)">~90bp</td><td style="color:var(--muted)">~92bp</td><td style="color:var(--muted)">~88bp</td><td style="color:var(--muted)">~82bp</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px;color:var(--muted)">Approximate normal vol (bp/√yr) in a typical market. ATM vols. Actual values vary significantly with market conditions.</p>
+  </div>
+
+  <div class="greek-row">
+    <div class="greek-chip has-dv01">
+      <div class="greek-name">Delta (DV01)</div>
+      <div class="greek-val">= N(d₁) × underlying swap DV01. ATM swaption delta ≈ 50%. Grows toward 100% as it goes deep ITM.</div>
+    </div>
+    <div class="greek-chip has-gamma">
+      <div class="greek-name">Gamma</div>
+      <div class="greek-val">Highest at ATM, near expiry. This is the "gamma premium" — what the option seller needs to be compensated for continuous delta-hedging cost.</div>
+    </div>
+    <div class="greek-chip has-vega">
+      <div class="greek-name">Vega</div>
+      <div class="greek-val">Sensitivity to a 1bp rise in normal vol. A 1Y×10Y swaption on $100M: vega ≈ $5,000–10,000 per bp of vol.</div>
+    </div>
+    <div class="greek-chip has-theta">
+      <div class="greek-name">Theta</div>
+      <div class="greek-val">Daily time decay. For a long option position, theta is always negative — you bleed premium each day you hold. Theta vs gamma is the key P&L trade-off.</div>
+    </div>
+  </div>
+
+  <div class="coll">
+    <button class="coll-btn" onclick="toggleColl(this)">Pricing — Bachelier (normal) model <span class="coll-arrow">▼</span></button>
+    <div class="coll-body">
+      <p>The market standard for swaption pricing is the <strong>Bachelier model</strong> (normal model), where the forward swap rate follows arithmetic Brownian motion: dF = σ_N dW. This is preferred over Black's model (lognormal) because it allows negative rates and fits the observed vol smile better for rates.</p>
+      <div class="formula-box">\[V_{\text{payer}} = A \cdot \left[(F - K)\,\Phi(d) + \sigma_N\sqrt{T}\,\phi(d)\right], \quad d = \frac{F-K}{\sigma_N\sqrt{T}}\]</div>
+      <p>where A is the swap annuity, F is the forward swap rate, K is the strike, σ_N is the normal vol (in bp/√yr), T is expiry, and Φ, φ are the standard normal CDF and PDF. For a receiver swaption, swap F and K in the first term and flip the sign.</p>
+      <p>The "normal vol" σ_N is quoted in bp per square root of year. A vol of 80bp means the standard deviation of the rate move over 1 year is 80bp. For a 3-month option (T=0.25), the expected move is 80bp × √0.25 = 40bp. ATM swaption premium ≈ 40% × σ_N × √T × A.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-yellow" style="margin-top:14px">
+    <div class="callout-title">European vs Bermudan — the exercise style matters enormously</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)">A <strong>European swaption</strong> can only be exercised on one date. A <strong>Bermudan swaption</strong> can be exercised on any coupon date of the underlying swap — you can enter the swap early if rates move sharply. Bermudan swaptions are far more valuable (the optionality of early exercise is worth 20–40% of the European price for long-dated structures) but require a full interest rate model (Hull-White, LMM) to price, not just the Bachelier formula. Most corporate callable bonds embed a Bermudan receiver swaption.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CAP / FLOOR
+══════════════════════════════════════════ -->
+<div class="product" id="capfloor">
+  <div class="product-header">
+    <span class="badge badge-nonlinear">Non-Linear</span>
+    <h2>Interest Rate Cap &amp; Floor</h2>
+    <p class="product-tagline">A strip of call or put options on the floating rate — one option per payment period.</p>
+  </div>
+
+  <p class="lead">An interest rate cap is a series of <em>caplets</em>, each of which pays max(0, SOFR − K) × notional × period for its respective period. A floor is the same but with put options (pays when SOFR &lt; K). The cap buyer is protected against floating rates rising above K; the floor buyer is protected against rates falling below K.</p>
+
+  <div class="callout callout-blue">
+    <div class="callout-title">Classic use case — floating-rate borrower buys a cap</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)">A company borrows $100M at SOFR + 150bp. They're comfortable up to an all-in rate of 7%, so they buy a 5-year cap at K = 5.50% (which gets them to 7% all-in including their spread). Each quarter, if SOFR exceeds 5.50%, the cap pays the excess. The total premium is paid upfront (or can be amortised into a running premium via a swap overlay). The company has effectively bought a ceiling on their interest cost.</p>
+  </div>
+
+  <div class="cf-wrap">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:12px">5-year cap at 5.50% on $100M — quarterly caplets, pays max(0, SOFR_q − 5.50%)</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;min-width:420px">
+      <div style="background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;font-size:12px">
+        <div style="color:var(--muted);margin-bottom:4px">Q1 SOFR: 4.80%</div>
+        <div style="color:var(--muted);font-weight:700">Caplet expires worthless</div>
+      </div>
+      <div style="background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;font-size:12px">
+        <div style="color:var(--muted);margin-bottom:4px">Q2 SOFR: 5.20%</div>
+        <div style="color:var(--muted);font-weight:700">Expires worthless</div>
+      </div>
+      <div style="background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;font-size:12px">
+        <div style="color:var(--muted);margin-bottom:4px">Q3 SOFR: 6.10%</div>
+        <div style="color:var(--green);font-weight:700">Pays 60bp × 91/360 × $100M = $151k</div>
+      </div>
+      <div style="background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;font-size:12px">
+        <div style="color:var(--muted);margin-bottom:4px">Q4 SOFR: 6.80%</div>
+        <div style="color:var(--green);font-weight:700">Pays 130bp × 91/360 × $100M = $329k</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:center;text-align:center">…and so on for all 20 quarterly caplets</div>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h4>Cap vs Swaption — key difference</h4>
+      <p style="font-size:13px">A swaption gives you one exercise decision — enter the swap or don't. A cap gives you <em>20 independent exercise decisions</em> (one per quarter in a 5y cap). Each caplet exercises independently based on that period's SOFR. The cap therefore has <em>more optionality</em> than a swaption with the same strike and expiry — caps are more expensive than equivalent swaptions on a premium basis.</p>
+    </div>
+    <div class="info-card">
+      <h4>Put-call parity for rates</h4>
+      <p style="font-size:13px">Cap − Floor = Swap (pay fixed at K). Buying a cap and selling a floor at the same strike K is equivalent to entering a payer swap at K. This is put-call parity for rates. It means: if you know the IRS par rate, you know the cap-floor relationship. You can check for arbitrage: if cap − floor ≠ swap value at the same strike, something is mispriced.</p>
+    </div>
+  </div>
+
+  <div class="greek-row">
+    <div class="greek-chip has-dv01">
+      <div class="greek-name">Delta</div>
+      <div class="greek-val">Sum of individual caplet deltas. An ATM cap has delta ~50% of the equivalent swap DV01. Delta grows as cap goes ITM.</div>
+    </div>
+    <div class="greek-chip has-gamma">
+      <div class="greek-name">Gamma</div>
+      <div class="greek-val">Each caplet contributes gamma independently. The near-expiry caplets have the highest gamma per $ premium (gamma near expiry is high). The gamma profile is distributed across all payment dates.</div>
+    </div>
+    <div class="greek-chip has-vega">
+      <div class="greek-name">Vega</div>
+      <div class="greek-val">Sensitive to the short-end vol surface. Each caplet is priced using the caplet vol for that specific expiry — not the single swaption vol. The cap vega profile is a strip of individual vega terms.</div>
+    </div>
+    <div class="greek-chip has-theta">
+      <div class="greek-name">Theta</div>
+      <div class="greek-val">As each caplet approaches its expiry, its theta increases (more rapid time decay). The total cap theta is the sum across all caplets — heavier near-dated caplets dominate.</div>
+    </div>
+  </div>
+
+  <div class="callout callout-yellow">
+    <div class="callout-title">The vol surface matters — caps use "caplet vols" not swaption vols</div>
+    <p style="margin:0;font-size:13px;color:var(--muted)">A 5y cap at 5.50% is 20 caplets. Each is priced with the vol for its specific expiry (3M vol for the first caplet, 6M vol for the second, …, 5Y vol for the last). These "caplet vols" or "spot vols" come from the <em>cap vol surface</em>, which is different from the swaption vol matrix. Stripping caplet vols from quoted cap prices requires bootstrapping. The two vol surfaces are related but not identical — they encode different market expectations about the distribution of rates at different horizons.</p>
+  </div>
+</div>
+
+<!-- COMING SOON -->
+<div class="product" style="opacity:.55;border-bottom:none">
+  <div class="divider">More products — coming soon</div>
+  <div class="coming-soon-grid">
+    <div class="coming-card">
+      <div class="coming-title">Cross-Currency Swap</div>
+      <div class="coming-desc">Exchange interest and principal in two currencies. The FX and rates risk combination, basis mechanics, and how xccy swaps are used to hedge foreign bond issuance.</div>
+    </div>
+    <div class="coming-card">
+      <div class="coming-title">Inflation Swap</div>
+      <div class="coming-desc">Exchange a fixed rate for the CPI print. Zero-coupon inflation swaps, year-on-year variants, breakeven rates, and how pension funds use them to match real liabilities.</div>
+    </div>
+    <div class="coming-card">
+      <div class="coming-title">Bermudan Swaption</div>
+      <div class="coming-desc">Multi-exercise swaption — can enter the swap on any coupon date. Pricing via Hull-White, the callable bond connection, and how to think about the incremental optionality premium.</div>
+    </div>
+    <div class="coming-card">
+      <div class="coming-title">CMS Spread Option</div>
+      <div class="coming-desc">Option on the difference between two CMS rates (e.g., CMS10 − CMS2). Pure curve vol product. Requires correlation between swap rates and dual CMS convexity adjustments.</div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<footer>Rates Products Field Guide · part of <a href="index.html" style="color:var(--accent);text-decoration:none">FK Tools</a></footer>
+
+<script>
+function toggleColl(btn) {
+  btn.classList.toggle('open');
+  const body = btn.nextElementSibling;
+  body.classList.toggle('open');
+  const arrow = btn.querySelector('.coll-arrow');
+  if (arrow) arrow.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
+}
+
+// Sidebar active state on scroll
+const sections = ['irs','ois','fra','futures','basis','cms','swaption','capfloor'];
+const links = {};
+sections.forEach(id => {
+  links[id] = document.querySelector(`.sb-link[href="#${id}"]`);
+});
+
+function updateActive() {
+  const scrollY = window.scrollY + 90;
+  let current = sections[0];
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= scrollY) current = id;
+  });
+  sections.forEach(id => {
+    if (links[id]) links[id].classList.toggle('active', id === current);
+  });
+}
+
+window.addEventListener('scroll', updateActive, { passive: true });
+updateActive();
+</script>
+</body>
+</html>
