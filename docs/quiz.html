@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rates Trading Quiz</title>
+<style>
+:root {
+  --bg:#07090f; --surface:#0d1117; --surface2:#161b27; --surface3:#1e2637;
+  --border:#2a3347; --text:#e2e8f0; --muted:#7a8faa;
+  --accent:#4a9eff; --accent2:#7bc4ff; --green:#22d3a0; --red:#f87171;
+  --yellow:#fbbf24; --purple:#a78bfa; --orange:#fb923c; --r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* --- SCREENS --- */
+.screen{width:100%;max-width:700px;display:none}
+.screen.active{display:block}
+
+/* --- INTRO --- */
+#intro{text-align:center;padding-top:48px}
+#intro h1{font-size:2rem;font-weight:800;margin-bottom:12px}
+#intro .subtitle{color:var(--muted);font-size:1.05rem;line-height:1.6;max-width:540px;margin:0 auto 32px}
+.topic-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:36px}
+.chip{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600}
+.chip.rates{background:rgba(74,158,255,.15);color:var(--accent);border:1px solid rgba(74,158,255,.3)}
+.chip.ladders{background:rgba(34,211,160,.12);color:var(--green);border:1px solid rgba(34,211,160,.3)}
+.chip.pnl{background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.3)}
+.chip.sabr{background:rgba(251,191,36,.12);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}
+.meta-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:36px}
+.meta-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center}
+.meta-card .val{font-size:1.8rem;font-weight:800;color:var(--accent)}
+.meta-card .lbl{color:var(--muted);font-size:12px;margin-top:4px}
+.btn-primary{background:var(--accent);color:#fff;border:none;border-radius:var(--r);padding:14px 36px;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .15s}
+.btn-primary:hover{opacity:.85}
+
+/* --- QUIZ --- */
+#quiz{}
+.progress-wrap{margin-bottom:24px}
+.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.q-counter{color:var(--muted);font-size:13px}
+.score-live{color:var(--green);font-size:13px;font-weight:600}
+.progress-bar{height:4px;background:var(--surface3);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease}
+
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:16px}
+.q-category{display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.q-category.rates{background:rgba(74,158,255,.12);color:var(--accent)}
+.q-category.ladders{background:rgba(34,211,160,.1);color:var(--green)}
+.q-category.pnl{background:rgba(167,139,250,.1);color:var(--purple)}
+.q-category.sabr{background:rgba(251,191,36,.1);color:var(--yellow)}
+.q-text{font-size:1.1rem;line-height:1.6;font-weight:500;margin-bottom:24px}
+.q-text code{background:var(--surface3);border-radius:4px;padding:2px 6px;font-family:monospace;font-size:.95em;color:var(--accent2)}
+
+.options{display:flex;flex-direction:column;gap:10px}
+.option{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px 18px;cursor:pointer;font-size:.95rem;line-height:1.5;transition:border-color .15s,background .15s;text-align:left;color:var(--text)}
+.option:hover:not(.locked){background:var(--surface3);border-color:var(--accent)}
+.option.correct{background:rgba(34,211,160,.1);border-color:var(--green);color:var(--green)}
+.option.wrong{background:rgba(248,113,113,.08);border-color:var(--red);color:var(--red)}
+.option.reveal{background:rgba(34,211,160,.07);border-color:rgba(34,211,160,.4);color:var(--green)}
+.option.locked{cursor:default}
+
+.explanation{background:rgba(74,158,255,.06);border:1px solid rgba(74,158,255,.18);border-radius:10px;padding:18px 20px;margin-top:16px;font-size:.92rem;line-height:1.65;display:none}
+.explanation.show{display:block}
+.explanation strong{color:var(--text)}
+.explanation .formula{font-family:monospace;background:var(--surface3);border-radius:4px;padding:2px 6px;font-size:.9em;color:var(--accent2)}
+.explanation .result-line{margin-top:8px;color:var(--green);font-weight:600}
+
+.q-nav{display:flex;justify-content:flex-end;margin-top:16px}
+.btn-next{background:var(--accent);color:#fff;border:none;border-radius:var(--r);padding:11px 28px;font-size:.95rem;font-weight:700;cursor:pointer;display:none}
+.btn-next.show{display:block}
+.btn-next:hover{opacity:.85}
+
+/* --- RESULTS --- */
+#results{text-align:center;padding-top:32px}
+#results h2{font-size:1.8rem;font-weight:800;margin-bottom:8px}
+.score-big{font-size:4rem;font-weight:900;color:var(--green);line-height:1;margin:20px 0 6px}
+.score-sub{color:var(--muted);font-size:.95rem;margin-bottom:36px}
+
+.category-results{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:32px;text-align:left}
+.cat-result{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.cat-result .cat-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.cat-result.rates .cat-name{color:var(--accent)}
+.cat-result.ladders .cat-name{color:var(--green)}
+.cat-result.pnl .cat-name{color:var(--purple)}
+.cat-result.sabr .cat-name{color:var(--yellow)}
+.cat-bar-wrap{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.cat-bar{height:100%;border-radius:3px;transition:width .6s ease}
+.cat-result.rates .cat-bar{background:var(--accent)}
+.cat-result.ladders .cat-bar{background:var(--green)}
+.cat-result.pnl .cat-bar{background:var(--purple)}
+.cat-result.sabr .cat-bar{background:var(--yellow)}
+.cat-score-txt{font-size:13px;color:var(--muted)}
+.cat-score-txt span{color:var(--text);font-weight:600}
+
+.result-msg{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;margin-bottom:28px;font-size:.95rem;line-height:1.6;color:var(--muted)}
+.result-msg strong{color:var(--text);display:block;margin-bottom:4px;font-size:1rem}
+
+.result-links{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:32px}
+.result-link{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;color:var(--muted);text-decoration:none;transition:border-color .15s,color .15s}
+.result-link:hover{border-color:var(--accent);color:var(--accent)}
+
+.btn-retry{background:transparent;color:var(--accent);border:1.5px solid var(--accent);border-radius:var(--r);padding:12px 32px;font-size:.95rem;font-weight:700;cursor:pointer;margin-right:12px;transition:background .15s}
+.btn-retry:hover{background:rgba(74,158,255,.1)}
+.btn-retry+.btn-primary{display:inline-block}
+</style>
+</head>
+<body>
+
+<!-- INTRO SCREEN -->
+<div id="intro" class="screen active">
+  <h1>Rates Trading Quiz</h1>
+  <p class="subtitle">Test your understanding of the concepts from the Delta &amp; Gamma Ladders, PnL Explain, and SABR Volatility pages.</p>
+  <div class="topic-chips">
+    <span class="chip rates">Rates &amp; DV01</span>
+    <span class="chip ladders">Delta &amp; Gamma Ladders</span>
+    <span class="chip pnl">PnL Explain</span>
+    <span class="chip sabr">SABR Model</span>
+  </div>
+  <div class="meta-cards">
+    <div class="meta-card"><div class="val">20</div><div class="lbl">Questions</div></div>
+    <div class="meta-card"><div class="val">4</div><div class="lbl">Topics</div></div>
+    <div class="meta-card"><div class="val">~10 min</div><div class="lbl">Estimated time</div></div>
+  </div>
+  <button class="btn-primary" onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="quiz" class="screen">
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="q-counter" id="q-counter">Question 1 of 20</span>
+      <span class="score-live" id="score-live">Score: 0</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-category" id="q-category"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="options"></div>
+    <div class="explanation" id="explanation"></div>
+  </div>
+
+  <div class="q-nav">
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Next Question →</button>
+  </div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div id="results" class="screen">
+  <h2>Quiz Complete</h2>
+  <div class="score-big" id="final-score">0/20</div>
+  <div class="score-sub" id="final-pct"></div>
+
+  <div class="category-results">
+    <div class="cat-result rates">
+      <div class="cat-name">Rates &amp; DV01</div>
+      <div class="cat-bar-wrap"><div class="cat-bar" id="bar-rates" style="width:0%"></div></div>
+      <div class="cat-score-txt" id="txt-rates"></div>
+    </div>
+    <div class="cat-result ladders">
+      <div class="cat-name">Delta &amp; Gamma Ladders</div>
+      <div class="cat-bar-wrap"><div class="cat-bar" id="bar-ladders" style="width:0%"></div></div>
+      <div class="cat-score-txt" id="txt-ladders"></div>
+    </div>
+    <div class="cat-result pnl">
+      <div class="cat-name">PnL Explain</div>
+      <div class="cat-bar-wrap"><div class="cat-bar" id="bar-pnl" style="width:0%"></div></div>
+      <div class="cat-score-txt" id="txt-pnl"></div>
+    </div>
+    <div class="cat-result sabr">
+      <div class="cat-name">SABR Model</div>
+      <div class="cat-bar-wrap"><div class="cat-bar" id="bar-sabr" style="width:0%"></div></div>
+      <div class="cat-score-txt" id="txt-sabr"></div>
+    </div>
+  </div>
+
+  <div class="result-msg" id="result-msg"></div>
+
+  <div class="result-links">
+    <a class="result-link" href="ladders.html">Review: Delta &amp; Gamma Ladders →</a>
+    <a class="result-link" href="pnl-explainer.html">Review: PnL Explain →</a>
+    <a class="result-link" href="sabr.html">Review: SABR Volatility →</a>
+  </div>
+
+  <button class="btn-retry" onclick="retryQuiz()">Try Again</button>
+  <button class="btn-primary" onclick="window.location.href='ladders.html'">Back to Ladders</button>
+</div>
+
+<script>
+const QUESTIONS = [
+  // ─── RATES & DV01 (5) ───────────────────────────────────────────────────
+  {
+    cat: 'rates',
+    catLabel: 'Rates & DV01',
+    text: 'You hold a $100M bond with Modified Duration 4.5Y. Rates fall <strong>1bp</strong>. What is your approximate P&L?',
+    options: ['$450', '$4,500', '$45,000', '$450,000'],
+    correct: 2,
+    explanation: `<strong>DV01 = Notional × Modified Duration × 0.0001</strong><br>
+    = $100,000,000 × 4.5 × 0.0001 = <span class="formula">$45,000/bp</span><br><br>
+    Every 1bp fall in rates gains you $45,000. Modified Duration of 4.5Y means a 100bp move changes your portfolio value by ~4.5%. One basis point is 1/100th of that.`
+  },
+  {
+    cat: 'rates',
+    catLabel: 'Rates & DV01',
+    text: 'You own a bond paying 4% fixed coupon. Market yields rise from 4% to 4.5%. What happens to the bond\'s price, and why?',
+    options: [
+      'Price rises — higher rates mean higher returns for the holder',
+      'Price is unchanged — the coupon stays 4%',
+      'Price falls — future cash flows are discounted more heavily, reducing their present value',
+      'Price falls — the coupon payment is automatically reduced'
+    ],
+    correct: 2,
+    explanation: `<strong>Bond prices and yields move in opposite directions — always.</strong><br><br>
+    Your coupon is locked at 4%. When new bonds now yield 4.5%, nobody will pay par for your bond — they'd rather buy the new ones. Your bond only sells if the price drops enough that the fixed 4% coupon represents a 4.5% yield on the discounted price.<br><br>
+    Mathematically: higher yield → heavier discounting of every future cash flow → lower present values → lower bond price.`
+  },
+  {
+    cat: 'rates',
+    catLabel: 'Rates & DV01',
+    text: 'A bond has Modified Duration of 6.2Y. What does this mean in practical terms?',
+    options: [
+      'The bond matures in 6.2 years',
+      'The bond\'s price changes by approximately 6.2% for a 100bp change in yield',
+      'The average coupon payment arrives in 6.2 years',
+      'The bond pays coupons every 6.2 months'
+    ],
+    correct: 1,
+    explanation: `<strong>Modified Duration is the percentage price-sensitivity to a 100bp yield move.</strong><br><br>
+    Modified Duration = 6.2Y means: if yields rise 100bp, the bond price falls approximately 6.2%. If yields rise 1bp (0.01%), price falls approximately 0.062%.<br><br>
+    For a $100M position: DV01 = $100M × 6.2 × 0.0001 = $62,000/bp.`
+  },
+  {
+    cat: 'rates',
+    catLabel: 'Rates & DV01',
+    text: 'A 5Y tenor bucket shows Net DV01 = +$5,000 but Gross DV01 = $400,000 (80× ratio). What is the main concern?',
+    options: [
+      'The position is too large in notional terms',
+      'The DV01 calculation must contain an error',
+      'Large offsetting positions are hidden — a curve move (not parallel shift) could cause massive P&L swings',
+      'The net DV01 is too small to be worth hedging'
+    ],
+    correct: 2,
+    explanation: `<strong>Gross/net ratio > 5× is a warning sign. 80× is a red flag.</strong><br><br>
+    The $400k gross means you have, say, $200k long and $195k short — almost perfectly offsetting. The $5k net looks harmless. But if the curve moves non-parallel (e.g., a 5Y–10Y flattening of 15bp), each leg moves differently and you could lose $3M+ on a book that appears flat.<br><br>
+    Net DV01 only protects you against parallel shifts. Real yield curves never move perfectly in parallel.`
+  },
+  {
+    cat: 'rates',
+    catLabel: 'Rates & DV01',
+    text: 'Why does a receive-fixed swap\'s DV01 come almost entirely from the fixed leg?',
+    options: [
+      'Because the floating payments are larger and offset more risk',
+      'Because floating-rate payments reset to market rates at each reset date, so the floating leg\'s duration is nearly zero',
+      'Because swaps are always quoted in fixed-rate terms',
+      'Because the floating leg has no credit risk'
+    ],
+    correct: 1,
+    explanation: `<strong>The floating leg reprices to par at every reset — its duration is approximately the time to the next reset date (e.g., 3 months).</strong><br><br>
+    On a 10Y swap paying floating 3M Libor/SOFR: the floating leg behaves like a bond maturing in 3 months (very low duration ≈ 0.25Y). The fixed leg behaves like a 10Y bond.<br><br>
+    Result: the swap's total DV01 ≈ fixed-leg DV01 − floating-leg DV01 ≈ fixed-leg DV01. Traders treat swaps and equivalent bonds interchangeably in the delta ladder.`
+  },
+
+  // ─── DELTA & GAMMA LADDERS (6) ──────────────────────────────────────────
+  {
+    cat: 'ladders',
+    catLabel: 'Delta & Gamma Ladders',
+    text: 'Original DV01 = $44k/bp, Gamma = <code>+$2,000/bp²</code>. Rates fall 20bp. What is the new DV01?',
+    options: ['$4,000', '$44,000', '$84,000', '$124,000'],
+    correct: 2,
+    explanation: `<strong>New DV01 = Original DV01 + (Gamma × ΔR)</strong><br>
+    = $44k + ($2,000 × 20bp) = $44k + $40k = <span class="formula">$84k</span><br><br>
+    Gamma ($2,000/bp²) means your DV01 grows by $2,000 for every basis point rates move. After a 20bp rally, your position is now much more long than when you started — each additional bp from here earns $84k instead of $44k.`
+  },
+  {
+    cat: 'ladders',
+    catLabel: 'Delta & Gamma Ladders',
+    text: 'Gamma = <code>+$2,000/bp²</code>. Rates move <strong>30bp</strong> (either direction). What is the gamma P&L?',
+    options: ['$60,000', '$180,000', '$600,000', '$900,000'],
+    correct: 3,
+    explanation: `<strong>Gamma P&L = ½ × Γ × (ΔR)²</strong><br>
+    = ½ × $2,000 × 30² = ½ × $2,000 × 900 = <span class="formula">$900,000</span><br><br>
+    Key insight: ΔR is <em>squared</em>, so direction doesn't matter. Whether rates rise or fall 30bp, a long-gamma position earns $900k from the convexity alone. The ½ factor appears because your DV01 grows <em>gradually</em> during the move — you earn more on each successive bp than the last, and ½ is the average.`
+  },
+  {
+    cat: 'ladders',
+    catLabel: 'Delta & Gamma Ladders',
+    text: 'Theta = $50,000/day, Gamma = $2,000/bp². What daily rate move is needed to break even on a long-gamma position?',
+    options: ['4.2 bp/day', '5.0 bp/day', '7.1 bp/day', '10.0 bp/day'],
+    correct: 2,
+    explanation: `<strong>Break-even vol = √(2 × Theta / Gamma)</strong><br>
+    = √(2 × $50,000 / $2,000) = √50 ≈ <span class="formula">7.1 bp/day</span><br><br>
+    This is the average daily move you need rates to make to cover your daily theta cost. If realized vol exceeds 7.1bp/day, long gamma is profitable. If markets are quieter (say 4bp/day), you're losing roughly $18k/day net of theta.`
+  },
+  {
+    cat: 'ladders',
+    catLabel: 'Delta & Gamma Ladders',
+    text: 'You are <strong>Long Delta + Short Gamma</strong>. Rates rally 20bp (in your favour). Which best describes your outcome?',
+    options: [
+      'You profit from both delta AND gamma — the ideal outcome',
+      'You profit from delta, but gamma bleeds your DV01 away as the rally continues — limiting your gains',
+      'You lose on delta but gamma saves you',
+      'Both work against you simultaneously'
+    ],
+    correct: 1,
+    explanation: `<strong>Short gamma eats your delta as rates move in your favour.</strong><br><br>
+    You start with, say, +$44k DV01. Good — a 20bp rally earns you $880k. But short gamma ($−2,000/bp²) means your DV01 shrinks by $2,000/bp as rates fall. After 20bp: New DV01 = $44k − $40k = only $4k.<br><br>
+    The gamma P&L is −$400k, so your net is only +$480k instead of +$880k — and going forward, you're nearly flat. The rally you wanted has eroded your own exposure.`
+  },
+  {
+    cat: 'ladders',
+    catLabel: 'Delta & Gamma Ladders',
+    text: 'You are <strong>Long Delta + Long Gamma</strong>. Rates unexpectedly RISE 20bp (the wrong way). What happens?',
+    options: [
+      'You lose on delta AND gamma — double loss',
+      'You lose on delta, but positive gamma cushions the loss by reducing your DV01 as rates rise',
+      'Gamma flips sign so you profit from the rise',
+      'You break even due to convexity'
+    ],
+    correct: 1,
+    explanation: `<strong>Positive gamma always helps — in both directions.</strong><br><br>
+    When rates rise, your long delta loses (you're on the wrong side). But positive gamma means your DV01 is <em>shrinking</em> as rates rise — you become less long as the move goes against you. This is the cushion.<br><br>
+    Compare: with flat delta and no gamma, a 20bp rise costs $880k. With positive gamma, as you go wrong the position shrinks, so total loss is less than $880k. You still lose, but gamma partially absorbs it.`
+  },
+  {
+    cat: 'ladders',
+    catLabel: 'Delta & Gamma Ladders',
+    text: 'Original DV01 = $44k/bp, Gamma = <code>−$2,000/bp²</code> (short gamma). Rates fall 20bp. What is the new DV01?',
+    options: ['$84,000 (grown)', '$44,000 (unchanged)', '$4,000 (shrunk by gamma)', '−$4,000 (now short delta)'],
+    correct: 2,
+    explanation: `<strong>New DV01 = Original DV01 + (Gamma × ΔR)</strong><br>
+    = $44k + (−$2,000 × 20) = $44k − $40k = <span class="formula">$4k</span><br><br>
+    Short gamma destroys your delta precisely as rates move in your favour. You started expecting to earn $44k/bp on each basis point, but the 20bp rally has shredded your exposure down to $4k/bp. This is the Long Delta + Short Gamma dynamic: a moderate rally is fine, but a large move bleeds away almost all of your upside.`
+  },
+
+  // ─── PNL EXPLAIN (5) ────────────────────────────────────────────────────
+  {
+    cat: 'pnl',
+    catLabel: 'PnL Explain',
+    text: 'At end of day: Actual P&L = +$2.4M. Predicted P&L (from Greeks × moves) = +$900k. Unexplained = +$1.5M. What does this large unexplained P&L indicate?',
+    options: [
+      'The trader had exceptional skill — unexplained P&L is always good',
+      'Higher-order risks not captured by the Taylor expansion, a model error, or a data issue',
+      'The Greeks were too conservative',
+      'The position was too small to be accurately modelled'
+    ],
+    correct: 1,
+    explanation: `<strong>Unexplained = Actual − Predicted. It should be small.</strong><br><br>
+    The Taylor expansion truncates at first and second-order terms. If higher-order terms (third-order convexity, cross-gammas across more than two tenors, model approximations) are significant, unexplained grows.<br><br>
+    A large positive unexplained can feel good but is a warning: your risk model underestimated the real sensitivity. Under FRTB, regulators require unexplained to stay below a threshold — otherwise you must hold more capital or lose internal model approval.`
+  },
+  {
+    cat: 'pnl',
+    catLabel: 'PnL Explain',
+    text: 'Vanna measures the cross-sensitivity ∂²P/∂F∂σ. In plain terms, what does Vanna tell you?',
+    options: [
+      'How much the option price changes for a 1bp move in the underlying rate',
+      'How DV01 changes when vol moves (equivalently: how vega changes when rates move)',
+      'The daily time decay of an option position',
+      'The convexity of the option price with respect to vol'
+    ],
+    correct: 1,
+    explanation: `<strong>Vanna = ∂(DV01)/∂σ = ∂(Vega)/∂F</strong><br><br>
+    These are two ways of saying the same thing: Vanna is the cross-term between rates and vol. It matters most when rates and vol move <em>together</em> — common in crises (rates spike + vol spikes simultaneously).<br><br>
+    For a payer swaption in a rate crisis: rates rise (good for payer) but vol also spikes. If Vanna is negative, the vol spike partially offsets the rate-move gain. Ignoring Vanna in a crisis scenario gives you a false sense of security.`
+  },
+  {
+    cat: 'pnl',
+    catLabel: 'PnL Explain',
+    text: 'Volga (vol convexity) is the second derivative of option price with respect to vol. For which options is Volga highest?',
+    options: [
+      'Deep in-the-money options',
+      'At-the-money options',
+      'Out-of-the-money options',
+      'All options have roughly equal Volga'
+    ],
+    correct: 2,
+    explanation: `<strong>OTM options have the highest Volga.</strong><br><br>
+    ATM options: their vega barely changes as vol rises (already fairly priced). A 10bp vol move changes their value roughly linearly — low convexity in vol space.<br><br>
+    OTM options: they sit in the tail. A vol spike dramatically increases the probability they expire in-the-money. Their vega accelerates as vol rises — high Volga. This is why OTM swaptions benefit super-linearly from vol explosions, and why ½Volga·(Δσ)² is material in a stress scenario.`
+  },
+  {
+    cat: 'pnl',
+    catLabel: 'PnL Explain',
+    text: 'You hold a 2Y/10Y flattener with positive gamma at both tenor nodes. A 20bp flattening occurs (2Y rates up 10bp, 10Y rates down 10bp). Could your total gamma P&L be zero or even negative?',
+    options: [
+      'No — gamma is always positive for long-gamma positions regardless of curve shape',
+      'Yes — the off-diagonal cross-gamma terms in the Hessian can cancel or exceed the diagonal terms',
+      'No — each tenor just contributes its own ½Γ(ΔR)² independently',
+      'Yes, but only if the position is perfectly hedged'
+    ],
+    correct: 1,
+    explanation: `<strong>Curve trades require a Hessian, not a single gamma number.</strong><br><br>
+    The full gamma P&L is <span class="formula">½ ΔRᵀ H ΔR</span> where H is the 5×5 matrix of cross-gammas between tenor nodes. For a flattener, the off-diagonal term Γ₂ᵧ,₁₀ᵧ is negative — it offsets when one tenor rises and the other falls simultaneously.<br><br>
+    This is why a 2Y/10Y flattener can lose money on gamma even with a positive gamma swaption at each tenor: the cross-gamma term dominates, and the opposing moves cancel rather than add. Single-number gamma completely misses this.`
+  },
+  {
+    cat: 'pnl',
+    catLabel: 'PnL Explain',
+    text: 'The Bachelier (Normal) model is the standard for EUR and GBP swaptions. What is its key characteristic compared to Black-Scholes?',
+    options: [
+      'It uses log-normal dynamics — rates can never be negative',
+      'It treats rates as arithmetic Brownian motion — rates can go negative, and vol is quoted in basis points',
+      'It assumes mean-reversion in interest rates',
+      'It models vol as a random process (stochastic vol)'
+    ],
+    correct: 1,
+    explanation: `<strong>Bachelier (Normal) model: dF = σ_N × dW</strong><br><br>
+    Arithmetic Brownian motion means rates can go negative — which matters enormously when rates are near zero (as in EUR for most of the 2010s and 2020s). Black-Scholes log-normal dynamics would produce nonsensical results at negative rates.<br><br>
+    Normal vol is quoted in basis points (e.g., 80bp) rather than percentages. The Bachelier price formula is: <span class="formula">V = A·[(F−K)·N(d) + σ_N√T·n(d)]</span>. Greeks like gamma scale differently vs Black-Scholes because the vol is absolute, not relative.`
+  },
+
+  // ─── SABR (4) ───────────────────────────────────────────────────────────
+  {
+    cat: 'sabr',
+    catLabel: 'SABR Model',
+    text: 'In the SABR model, ρ (rho) is the correlation between the forward rate and vol. Setting ρ = −0.70 produces:',
+    options: [
+      'A symmetric smile — equal vol for equidistant OTM puts and calls',
+      'A right-tilted smile — OTM calls are more expensive than equidistant puts',
+      'A left-tilted smile — OTM puts are more expensive than equidistant calls',
+      'A flat vol surface — no smile at all'
+    ],
+    correct: 2,
+    explanation: `<strong>Negative ρ tilts the smile left — puts become more expensive than calls of equal moneyness.</strong><br><br>
+    When ρ < 0: rate falls often coincide with vol spikes (and rate rises with vol falls). This makes downside options worth more: a 90-strike put is more likely to be exercised when vol is high, amplifying its value. Classic equity market structure — crash fear drives demand for OTM puts.<br><br>
+    Positive ρ tilts the smile right (some commodity markets — supply squeeze = rates up + vol up).`
+  },
+  {
+    cat: 'sabr',
+    catLabel: 'SABR Model',
+    text: 'You\'re pricing EUR swaptions where rates trade near zero (and sometimes go negative). Which SABR β parameter is most appropriate?',
+    options: [
+      'β = 1.0 — log-normal backbone, like equities',
+      'β = 0.5 — hybrid backbone',
+      'β = 0.0 — normal backbone, ATM vol can rise as rate level falls',
+      'β doesn\'t affect the choice — it only matters for skew'
+    ],
+    correct: 2,
+    explanation: `<strong>β = 0 (Normal backbone) for rate markets.</strong><br><br>
+    β controls the CEV exponent: with β=0, vol dynamics are normal (arithmetic). This means ATM vol rises as the rate level falls — consistent with how swaption markets behave near zero rates.<br><br>
+    β=1 (log-normal) would be wrong: it implies rates can't go negative and vol stays constant as rates fall. EUR swaptions with β=1 would severely misprice the smile at low strikes. The rates desk standard is β=0 (or sometimes 0.3–0.5 for certain markets).`
+  },
+  {
+    cat: 'sabr',
+    catLabel: 'SABR Model',
+    text: 'You increase ν (vol of vol) in SABR from 25% to 65% while keeping all other parameters fixed. What happens to the vol surface?',
+    options: [
+      'ATM vol rises while OTM vol stays the same',
+      'The entire surface shifts up in parallel',
+      'Both wings bow upward — OTM puts and calls become relatively more expensive',
+      'The left skew steepens but the right wing flattens'
+    ],
+    correct: 2,
+    explanation: `<strong>High vol of vol bows both wings upward.</strong><br><br>
+    ν (alpha in some SABR formulations) controls how dramatically vol itself can jump. High ν means fat tails — extreme rate moves (both up and down) become more probable.<br><br>
+    This lifts both wings of the smile symmetrically. OTM puts AND OTM calls become more expensive relative to ATM. The <em>asymmetry</em> of the smile comes from ρ. The <em>curvature/fatness</em> of both wings comes from ν. Think post-crisis VIX spikes — the entire smile surface inflates.`
+  },
+  {
+    cat: 'sabr',
+    catLabel: 'SABR Model',
+    text: 'You compare the vol smile for a 1-month swaption vs a 1-year swaption on the same underlying. Which has a sharper, more pronounced smile?',
+    options: [
+      'The 1-year swaption — more time for the smile to develop and deepen',
+      'The 1-month swaption — shorter maturity smiles are sharper; longer maturities flatten as vol uncertainty mean-reverts',
+      'They are identical by no-arbitrage',
+      'It depends solely on the skew parameter ρ'
+    ],
+    correct: 1,
+    explanation: `<strong>Shorter maturities produce sharper, more dramatic smiles.</strong><br><br>
+    For a 1-month option, there's very little time for vol to mean-revert. If vol is currently elevated, there's almost no time for it to normalise before expiry — OTM options price in extreme scenarios aggressively.<br><br>
+    For a 1-year option, vol has 12 months to mean-revert toward its long-run average. The distribution of outcomes is smoother. This flattens the smile across strikes. You see this empirically: the 1-week S&P smile is dramatically steeper than the 2-year smile.`
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+let catScores = { rates: [0,0], ladders: [0,0], pnl: [0,0], sabr: [0,0] };
+
+function startQuiz() {
+  current = 0; score = 0; answered = false;
+  catScores = { rates: [0,0], ladders: [0,0], pnl: [0,0], sabr: [0,0] };
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = QUESTIONS[current];
+  const total = QUESTIONS.length;
+
+  document.getElementById('q-counter').textContent = `Question ${current+1} of ${total}`;
+  document.getElementById('score-live').textContent = `Score: ${score}`;
+  document.getElementById('progress-fill').style.width = `${(current / total) * 100}%`;
+
+  const catEl = document.getElementById('q-category');
+  catEl.className = `q-category ${q.cat}`;
+  catEl.textContent = q.catLabel;
+
+  document.getElementById('q-text').innerHTML = q.text;
+
+  const optContainer = document.getElementById('options');
+  optContainer.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const el = document.createElement('button');
+    el.className = 'option';
+    el.innerHTML = opt;
+    el.onclick = () => selectOption(i);
+    optContainer.appendChild(el);
+  });
+
+  document.getElementById('explanation').className = 'explanation';
+  document.getElementById('explanation').innerHTML = '';
+  document.getElementById('btn-next').className = 'btn-next';
+  document.getElementById('btn-next').textContent = current === QUESTIONS.length - 1 ? 'See Results →' : 'Next Question →';
+}
+
+function selectOption(selected) {
+  if (answered) return;
+  answered = true;
+  const q = QUESTIONS[current];
+  const opts = document.querySelectorAll('.option');
+
+  opts.forEach(o => o.classList.add('locked'));
+  opts[selected].classList.add(selected === q.correct ? 'correct' : 'wrong');
+  if (selected !== q.correct) opts[q.correct].classList.add('reveal');
+
+  if (selected === q.correct) {
+    score++;
+    catScores[q.cat][0]++;
+  }
+  catScores[q.cat][1]++;
+
+  const expEl = document.getElementById('explanation');
+  expEl.innerHTML = q.explanation;
+  expEl.classList.add('show');
+
+  document.getElementById('btn-next').classList.add('show');
+  document.getElementById('score-live').textContent = `Score: ${score}`;
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= QUESTIONS.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  showScreen('results');
+  const total = QUESTIONS.length;
+  const pct = Math.round((score / total) * 100);
+
+  document.getElementById('final-score').textContent = `${score}/${total}`;
+  document.getElementById('final-pct').textContent = `${pct}% correct`;
+
+  const cats = [
+    { key: 'rates', label: 'Rates & DV01' },
+    { key: 'ladders', label: 'Delta & Gamma Ladders' },
+    { key: 'pnl', label: 'PnL Explain' },
+    { key: 'sabr', label: 'SABR Model' }
+  ];
+
+  setTimeout(() => {
+    cats.forEach(c => {
+      const [got, tot] = catScores[c.key];
+      const p = tot > 0 ? Math.round((got / tot) * 100) : 0;
+      document.getElementById(`bar-${c.key}`).style.width = `${p}%`;
+      document.getElementById(`txt-${c.key}`).innerHTML = `<span>${got}/${tot}</span> correct (${p}%)`;
+    });
+  }, 100);
+
+  const msgEl = document.getElementById('result-msg');
+  if (pct >= 90) {
+    msgEl.innerHTML = '<strong>Excellent work.</strong> You have a strong grasp of the mechanics — DV01, gamma convexity, PnL attribution, and the SABR vol surface. The concepts are clearly sitting together as a coherent framework rather than isolated facts.';
+  } else if (pct >= 70) {
+    msgEl.innerHTML = '<strong>Good foundation.</strong> The core ideas are landing well. Focus on the areas where you lost marks — the cross-gamma subtleties and the ½ in the gamma P&L formula tend to trip people up. Review the deep-dive sections in the explainer pages.';
+  } else if (pct >= 50) {
+    msgEl.innerHTML = '<strong>Decent start.</strong> Some concepts are clear, but there are gaps — particularly in how gamma interacts with delta over time, and how SABR parameters shape the smile independently. Re-read the quadrant section in Ladders and the parameter walkthrough in SABR.';
+  } else {
+    msgEl.innerHTML = '<strong>More review needed.</strong> The mechanics are subtle — go back to the pages and spend time with the interactive sliders. The DV01 calculator in Ladders and the SABR parameter explorer are the best places to build intuition before re-taking this quiz.';
+  }
+
+  // flag weakest category
+  let weakest = null, weakestPct = 101;
+  cats.forEach(c => {
+    const [got, tot] = catScores[c.key];
+    const p = tot > 0 ? (got / tot) * 100 : 0;
+    if (p < weakestPct) { weakestPct = p; weakest = c; }
+  });
+}
+
+function retryQuiz() {
+  startQuiz();
+}
+</script>
+</body>
+</html>
